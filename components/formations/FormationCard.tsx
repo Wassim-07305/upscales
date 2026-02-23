@@ -26,9 +26,9 @@ export function FormationCard({
 }: FormationCardProps) {
   return (
     <Link href={`/formations/${formation.id}`}>
-      <Card className="group overflow-hidden hover:border-primary/50 transition-all duration-200 h-full">
+      <Card className="group overflow-hidden hover:border-primary/30 transition-all duration-300 h-full">
         {/* Thumbnail */}
-        <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+        <div className="relative h-40 bg-gradient-to-br from-primary/15 via-turquoise/5 to-transparent overflow-hidden">
           {formation.thumbnail_url ? (
             <img
               src={formation.thumbnail_url}

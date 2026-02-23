@@ -57,16 +57,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center mesh-gradient bg-grid p-4">
+      <div className="w-full max-w-md animate-fade-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-14 h-14 rounded-2xl mx-auto mb-4" />
-          <h1 className="text-2xl font-bold">UPSCALE</h1>
-          <p className="text-muted-foreground mt-1">Connectez-vous à votre espace</p>
+          <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-16 h-16 rounded-2xl mx-auto mb-4 animate-float" />
+          <h1 className="text-3xl font-bold text-gradient">UPSCALE</h1>
+          <p className="text-muted-foreground mt-2">Connectez-vous à votre espace</p>
         </div>
 
-        <Card className="border-border/50">
+        <Card className="gradient-border bg-card/80 backdrop-blur-sm">
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardHeader className="pb-4">
               <h2 className="text-lg font-semibold text-center">Connexion</h2>

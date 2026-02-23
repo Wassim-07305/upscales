@@ -49,17 +49,17 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center mesh-gradient bg-grid p-4">
+      <div className="w-full max-w-md animate-fade-up">
         <div className="text-center mb-8">
-          <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-14 h-14 rounded-2xl mx-auto mb-4" />
-          <h1 className="text-2xl font-bold">UPSCALE</h1>
+          <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-16 h-16 rounded-2xl mx-auto mb-4 animate-float" />
+          <h1 className="text-3xl font-bold text-gradient">UPSCALE</h1>
         </div>
 
-        <Card className="border-border/50">
+        <Card className="gradient-border bg-card/80 backdrop-blur-sm">
           {sent ? (
             <div className="p-6 text-center">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <CheckCircle className="h-12 w-12 text-neon mx-auto mb-4" />
               <h2 className="text-lg font-semibold mb-2">Email envoyé !</h2>
               <p className="text-sm text-muted-foreground mb-4">
                 Vérifiez votre boîte de réception pour réinitialiser votre mot de passe.

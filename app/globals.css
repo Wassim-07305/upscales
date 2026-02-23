@@ -7,7 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-syne);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -55,6 +56,9 @@
   --color-surface: #141414;
   --color-surface-hover: #1C1C1C;
   --color-surface-elevated: #222222;
+  /* Animation timing */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
@@ -128,6 +132,9 @@
   --sidebar-ring: #C6FF00;
 }
 
+/* ============================================
+   BASE LAYER — Typography & Defaults
+   ============================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -137,9 +144,22 @@
     background-color: #0D0D0D;
     color: #EDEDED;
   }
+  /* Display font for headings */
+  h1 {
+    font-family: var(--font-syne), var(--font-outfit), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  h2 {
+    font-family: var(--font-syne), var(--font-outfit), system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
 }
 
-/* Scrollbar */
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -158,7 +178,9 @@
   background: #C6FF00;
 }
 
-/* Glow utilities */
+/* ============================================
+   GLOW UTILITIES
+   ============================================ */
 .glow-neon {
   box-shadow: 0 0 20px rgba(198, 255, 0, 0.3);
 }
@@ -171,9 +193,241 @@
   background: linear-gradient(135deg, #C6FF00, #7FFFD4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Tiptap editor styles */
+/* ============================================
+   ATMOSPHERIC BACKGROUNDS
+   ============================================ */
+
+/* Subtle dot grid pattern */
+.bg-grid {
+  background-image: radial-gradient(circle at center, rgba(42, 42, 42, 0.6) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Mesh gradient for auth pages */
+.mesh-gradient {
+  position: relative;
+  background: #0D0D0D;
+}
+
+.mesh-gradient::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 15% 30%, rgba(198, 255, 0, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 500px at 85% 15%, rgba(127, 255, 212, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 85%, rgba(198, 255, 0, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mesh-gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Noise texture overlay (very subtle) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* ============================================
+   CARD ENHANCEMENTS
+   ============================================ */
+
+/* All cards get smooth hover transition */
+[data-slot="card"] {
+  transition: transform 0.3s var(--ease-out-expo),
+              box-shadow 0.3s var(--ease-out-expo),
+              border-color 0.3s ease;
+}
+
+[data-slot="card"]:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(198, 255, 0, 0.06);
+  border-color: rgba(198, 255, 0, 0.12);
+}
+
+/* Glass card variant */
+.glass-card {
+  background: rgba(20, 20, 20, 0.6) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ============================================
+   PROGRESS BAR GLOW
+   ============================================ */
+[data-slot="progress-indicator"] {
+  background: linear-gradient(90deg, #C6FF00, #7FFFD4) !important;
+  box-shadow: 0 0 10px rgba(198, 255, 0, 0.4), 0 0 20px rgba(198, 255, 0, 0.15);
+  border-radius: 9999px;
+}
+
+/* ============================================
+   BUTTON ENHANCEMENTS
+   ============================================ */
+[data-slot="button"][data-variant="default"] {
+  transition: all 0.2s ease;
+}
+
+[data-slot="button"][data-variant="default"]:hover {
+  box-shadow: 0 0 20px rgba(198, 255, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   SIDEBAR ENHANCEMENTS
+   ============================================ */
+
+/* Active sidebar link glow indicator */
+.sidebar-glow-active {
+  position: relative;
+}
+
+.sidebar-glow-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 55%;
+  background: #C6FF00;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px rgba(198, 255, 0, 0.6), 0 0 20px rgba(198, 255, 0, 0.2);
+}
+
+/* ============================================
+   ANIMATIONS & KEYFRAMES
+   ============================================ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(198, 255, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(198, 255, 0, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s var(--ease-out-expo) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease both;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Stagger delay utilities */
+.delay-1 { animation-delay: 50ms; }
+.delay-2 { animation-delay: 100ms; }
+.delay-3 { animation-delay: 150ms; }
+.delay-4 { animation-delay: 200ms; }
+.delay-5 { animation-delay: 250ms; }
+.delay-6 { animation-delay: 300ms; }
+.delay-7 { animation-delay: 350ms; }
+.delay-8 { animation-delay: 400ms; }
+
+/* ============================================
+   SPECIAL EFFECTS
+   ============================================ */
+
+/* Gradient border (used on featured cards or auth) */
+.gradient-border {
+  position: relative;
+  border: none !important;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(198, 255, 0, 0.2), rgba(127, 255, 212, 0.1), rgba(198, 255, 0, 0.05));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Icon halo glow */
+.icon-halo {
+  position: relative;
+}
+
+.icon-halo::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(198, 255, 0, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Stat card number emphasis */
+.stat-value {
+  font-family: var(--font-syne), var(--font-outfit), system-ui, sans-serif;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   TIPTAP EDITOR
+   ============================================ */
 .tiptap {
   outline: none;
   min-height: 100px;

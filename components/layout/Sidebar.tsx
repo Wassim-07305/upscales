@@ -58,7 +58,7 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col h-screen bg-card border-r border-border transition-all duration-200 sticky top-0",
+        "hidden md:flex flex-col h-screen bg-card/80 backdrop-blur-xl border-r border-border/50 transition-all duration-300 sticky top-0",
         collapsed ? "w-[72px]" : "w-[260px]"
       )}
     >
@@ -66,7 +66,7 @@ export function Sidebar({ user }: SidebarProps) {
       <div className="flex items-center justify-between px-4 h-16 border-b border-border">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Image src="/icons/icon-48x48.png" alt="UPSCALE" width={32} height={32} className="rounded-lg" />
-          {!collapsed && <span className="font-bold text-lg">UPSCALE</span>}
+          {!collapsed && <span className="font-display font-bold text-lg tracking-tight">UPSCALE</span>}
         </Link>
         <Button
           variant="ghost"
@@ -93,10 +93,10 @@ export function Sidebar({ user }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "bg-primary/10 text-primary sidebar-glow-active"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               )}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />

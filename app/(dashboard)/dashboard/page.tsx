@@ -88,23 +88,23 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Bonjour, {firstName} !</h1>
-        <p className="text-muted-foreground">
+      <div className="animate-fade-up">
+        <h1 className="text-3xl font-bold">Bonjour, {firstName} !</h1>
+        <p className="text-muted-foreground mt-1">
           Voici un résumé de votre activité
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="animate-fade-up delay-1">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2.5 rounded-xl bg-primary/10 icon-halo">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold stat-value">
                   {enrollments?.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Formations</p>
@@ -112,27 +112,27 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-fade-up delay-2">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-neon/10">
+              <div className="p-2.5 rounded-xl bg-neon/10 icon-halo">
                 <Award className="h-5 w-5 text-neon" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{certCount || 0}</p>
+                <p className="text-2xl font-bold stat-value">{certCount || 0}</p>
                 <p className="text-xs text-muted-foreground">Certificats</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-fade-up delay-3">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-turquoise/10">
+              <div className="p-2.5 rounded-xl bg-turquoise/10 icon-halo">
                 <CalendarDays className="h-5 w-5 text-turquoise" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold stat-value">
                   {upcomingSessions?.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -142,14 +142,14 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-fade-up delay-4">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#FFB800]/10">
+              <div className="p-2.5 rounded-xl bg-[#FFB800]/10 icon-halo">
                 <MessageCircle className="h-5 w-5 text-[#FFB800]" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold stat-value">
                   {recentNotifs?.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Formations en cours */}
-        <Card>
+        <Card className="animate-fade-up delay-5">
           <CardHeader>
             <CardTitle className="text-base">
               Mes formations en cours
@@ -206,7 +206,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Prochaines sessions */}
-        <Card>
+        <Card className="animate-fade-up delay-6">
           <CardHeader>
             <CardTitle className="text-base">Prochaines sessions</CardTitle>
           </CardHeader>
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
                 <Link
                   key={session.id}
                   href="/calendar"
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors"
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-all duration-200"
                 >
                   <div
                     className="w-1 h-12 rounded-full flex-shrink-0"

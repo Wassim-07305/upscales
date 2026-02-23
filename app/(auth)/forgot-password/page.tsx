@@ -52,9 +52,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">U</span>
-          </div>
+          <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-14 h-14 rounded-2xl mx-auto mb-4" />
           <h1 className="text-2xl font-bold">UPSCALE</h1>
         </div>
 

@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Profile } from "@/lib/types/database";
 import { isModerator, isAdmin, getRoleBadgeColor, getRoleLabel } from "@/lib/utils/roles";
@@ -63,14 +64,10 @@ export function Sidebar({ user }: SidebarProps) {
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-border">
-        {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">U</span>
-            </div>
-            <span className="font-bold text-lg">UPSCALE</span>
-          </Link>
-        )}
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Image src="/icons/icon-48x48.png" alt="UPSCALE" width={32} height={32} className="rounded-lg" />
+          {!collapsed && <span className="font-bold text-lg">UPSCALE</span>}
+        </Link>
         <Button
           variant="ghost"
           size="icon"

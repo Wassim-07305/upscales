@@ -68,7 +68,7 @@ export function Sidebar({ user }: SidebarProps) {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">U</span>
             </div>
-            <span className="font-bold text-lg">UPSCALES</span>
+            <span className="font-bold text-lg">UPSCALE</span>
           </Link>
         )}
         <Button

@@ -12,7 +12,7 @@ import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
-  const [platformName, setPlatformName] = useState("UPSCALES");
+  const [platformName, setPlatformName] = useState("UPSCALE");
   const [allowRegistration, setAllowRegistration] = useState(true);
   const [defaultRole, setDefaultRole] = useState("prospect");
   const [saving, setSaving] = useState(false);

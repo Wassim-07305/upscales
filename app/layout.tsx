@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UPSCALES — Plateforme de Formation",
-  description: "Montez en compétences avec UPSCALES",
+  title: "UPSCALE — Plateforme de Formation",
+  description: "Montez en compétences avec UPSCALE",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "UPSCALES",
+    title: "UPSCALE",
     startupImage: [
       {
         url: "/icons/icon-512x512.png",
@@ -34,9 +34,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "UPSCALES",
-    title: "UPSCALES — Plateforme de Formation",
-    description: "Montez en compétences avec UPSCALES",
+    siteName: "UPSCALE",
+    title: "UPSCALE — Plateforme de Formation",
+    description: "Montez en compétences avec UPSCALE",
   },
   icons: {
     icon: [

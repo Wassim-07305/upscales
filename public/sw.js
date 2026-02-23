@@ -1,4 +1,4 @@
-const CACHE_NAME = "upscales-v1";
+const CACHE_NAME = "upscale-v1";
 
 const PRECACHE_URLS = [
   "/dashboard",
@@ -95,7 +95,7 @@ self.addEventListener("push", (event) => {
     actions: [{ action: "open", title: "Ouvrir" }],
   };
 
-  event.waitUntil(self.registration.showNotification(data.title || "UPSCALES", options));
+  event.waitUntil(self.registration.showNotification(data.title || "UPSCALE", options));
 });
 
 self.addEventListener("notificationclick", (event) => {

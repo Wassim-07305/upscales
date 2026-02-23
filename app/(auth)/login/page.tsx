@@ -64,7 +64,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">
             <span className="text-primary-foreground font-bold text-2xl">U</span>
           </div>
-          <h1 className="text-2xl font-bold">UPSCALES</h1>
+          <h1 className="text-2xl font-bold">UPSCALE</h1>
           <p className="text-muted-foreground mt-1">Connectez-vous à votre espace</p>
         </div>
 

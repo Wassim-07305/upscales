@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">
             <span className="text-primary-foreground font-bold text-2xl">U</span>
           </div>
-          <h1 className="text-2xl font-bold">UPSCALES</h1>
+          <h1 className="text-2xl font-bold">UPSCALE</h1>
         </div>
 
         <Card className="border-border/50">

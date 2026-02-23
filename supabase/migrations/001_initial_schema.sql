@@ -1,5 +1,5 @@
 -- ============================================
--- UPSCALES — Schema complet
+-- UPSCALE — Schema complet
 -- ============================================
 
 -- EXTENSIONS

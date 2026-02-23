@@ -129,7 +129,7 @@ export async function GET(
     </head>
     <body>
       <div class="certificate">
-        <div class="logo">UPSCALES</div>
+        <div class="logo">UPSCALE</div>
         <div class="subtitle">Plateforme de Formation</div>
         <div class="heading">Certificat de complétion délivré à</div>
         <div class="name">${(certificate as any).user?.full_name || "Participant"}</div>

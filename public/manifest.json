@@ -1,7 +1,7 @@
 {
-  "name": "UPSCALES",
-  "short_name": "Upscales",
-  "description": "Plateforme de formation et communauté UPSCALES",
+  "name": "UPSCALE",
+  "short_name": "Upscale",
+  "description": "Plateforme de formation et communauté UPSCALE",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0F0F12",

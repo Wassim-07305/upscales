@@ -77,12 +77,12 @@ export default async function AdminDashboardPage() {
   }
 
   const stats = [
-    { label: "Total élèves", value: totalUsers || 0, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Élèves actifs", value: activeUsers || 0, icon: Activity, color: "text-green-500", bg: "bg-green-500/10" },
-    { label: "Formations", value: totalFormations || 0, icon: BookOpen, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { label: "Sessions", value: totalSessions || 0, icon: CalendarDays, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Total élèves", value: totalUsers || 0, icon: Users, color: "text-turquoise", bg: "bg-turquoise/10" },
+    { label: "Élèves actifs", value: activeUsers || 0, icon: Activity, color: "text-neon", bg: "bg-neon/10" },
+    { label: "Formations", value: totalFormations || 0, icon: BookOpen, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Sessions", value: totalSessions || 0, icon: CalendarDays, color: "text-[#FFB800]", bg: "bg-[#FFB800]/10" },
     { label: "Taux de complétion", value: `${completionRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Messages", value: totalMessages || 0, icon: MessageCircle, color: "text-pink-500", bg: "bg-pink-500/10" },
+    { label: "Messages", value: totalMessages || 0, icon: MessageCircle, color: "text-turquoise", bg: "bg-turquoise/10" },
   ];
 
   return (

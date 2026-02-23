@@ -55,8 +55,8 @@ interface FormationWithCount extends Formation {
 }
 
 const statusColors: Record<FormationStatus, string> = {
-  draft: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  published: "bg-green-500/20 text-green-400 border-green-500/30",
+  draft: "bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30",
+  published: "bg-neon/20 text-neon border-neon/30",
   archived: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
 };
 
@@ -254,14 +254,14 @@ export function AdminFormationsClient({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Titre</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-secondary/50" />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-secondary/50 min-h-[80px]"
+                className="bg-[#141414] min-h-[80px]"
               />
             </div>
             <div className="space-y-2">
@@ -288,7 +288,7 @@ export function AdminFormationsClient({
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="bg-secondary/50"
+                  className="bg-[#141414]"
                 />
               </div>
             )}

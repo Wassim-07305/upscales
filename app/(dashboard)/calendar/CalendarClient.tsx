@@ -222,7 +222,7 @@ export function CalendarClient({ sessions, userId, userRole }: CalendarClientPro
                   </div>
                 </div>
                 {session.is_registered && (
-                  <Badge variant="outline" className="bg-green-500/20 text-green-400 text-[10px]">
+                  <Badge variant="outline" className="bg-neon/20 text-neon text-[10px]">
                     Inscrit
                   </Badge>
                 )}

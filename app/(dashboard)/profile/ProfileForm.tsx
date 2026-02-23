@@ -144,7 +144,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label>Nom complet</Label>
-              <Input {...register("full_name")} className="bg-secondary/50" />
+              <Input {...register("full_name")} className="bg-[#141414]" />
               {errors.full_name && (
                 <p className="text-xs text-destructive">{errors.full_name.message}</p>
               )}
@@ -152,7 +152,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
 
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value={profile.email} disabled className="bg-secondary/30 opacity-60" />
+              <Input value={profile.email} disabled className="bg-[#1C1C1C] opacity-60" />
               <p className="text-xs text-muted-foreground">L&apos;email ne peut pas être modifié</p>
             </div>
 
@@ -161,7 +161,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               <Textarea
                 {...register("bio")}
                 placeholder="Parlez-nous de vous..."
-                className="min-h-[80px] bg-secondary/50"
+                className="min-h-[80px] bg-[#141414]"
               />
             </div>
 
@@ -170,7 +170,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               <Input
                 {...register("phone")}
                 placeholder="+33 6 00 00 00 00"
-                className="bg-secondary/50"
+                className="bg-[#141414]"
               />
             </div>
 
@@ -231,7 +231,7 @@ function ChangePassword() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="bg-secondary/50"
+          className="bg-[#141414]"
         />
       </div>
       <div className="space-y-2">
@@ -240,7 +240,7 @@ function ChangePassword() {
           type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="bg-secondary/50"
+          className="bg-[#141414]"
         />
       </div>
       <Button onClick={handleChangePassword} disabled={loading} variant="outline">

@@ -73,7 +73,7 @@ export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClie
             placeholder="Rechercher par nom ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-secondary/50 border-0"
+            className="pl-9 bg-[#141414] border-0"
           />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
@@ -135,7 +135,7 @@ export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClie
                             </AvatarFallback>
                           </Avatar>
                           {student.is_online && (
-                            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-card" />
+                            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-neon border border-card" />
                           )}
                         </div>
                         <div>

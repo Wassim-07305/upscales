@@ -71,11 +71,11 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
       </div>
 
       {submitted && (
-        <Card className={cn("border-2", passed ? "border-green-500/50 bg-green-500/5" : "border-destructive/50 bg-destructive/5")}>
+        <Card className={cn("border-2", passed ? "border-neon/50 bg-neon/5" : "border-destructive/50 bg-destructive/5")}>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               {passed ? (
-                <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-neon" />
               ) : (
                 <XCircle className="h-8 w-8 text-destructive" />
               )}
@@ -114,7 +114,7 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
                     className={cn(
                       "w-full flex items-center gap-3 p-3 rounded-lg border text-left text-sm transition-colors",
                       isSelected && !submitted && "border-primary bg-primary/5",
-                      showCorrect && "border-green-500 bg-green-500/10",
+                      showCorrect && "border-neon bg-neon/10",
                       showWrong && "border-destructive bg-destructive/10",
                       !isSelected && !submitted && "border-border hover:border-primary/50 hover:bg-accent/50",
                       submitted && !showCorrect && !showWrong && "opacity-50"
@@ -129,7 +129,7 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
                       {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                     </div>
                     <span>{option.option_text}</span>
-                    {showCorrect && <CheckCircle className="h-4 w-4 text-green-500 ml-auto" />}
+                    {showCorrect && <CheckCircle className="h-4 w-4 text-neon ml-auto" />}
                     {showWrong && <XCircle className="h-4 w-4 text-destructive ml-auto" />}
                   </button>
                 );

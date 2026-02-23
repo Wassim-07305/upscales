@@ -26,13 +26,13 @@ export function isMember(role: UserRole): boolean {
 export function getRoleBadgeColor(role: UserRole): string {
   switch (role) {
     case "admin":
-      return "bg-red-500/20 text-red-400 border-red-500/30";
+      return "bg-neon/20 text-neon border-neon/30";
     case "moderator":
-      return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      return "bg-turquoise/20 text-turquoise border-turquoise/30";
     case "member":
-      return "bg-green-500/20 text-green-400 border-green-500/30";
+      return "bg-neon/10 text-neon border-neon/20";
     case "prospect":
-      return "bg-zinc-500/20 text-zinc-400 border-zinc-500/30";
+      return "bg-[#222222] text-[#999999] border-[#2A2A2A]";
   }
 }
 

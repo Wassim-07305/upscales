@@ -250,7 +250,7 @@ export function ChatLayout({
                         </AvatarFallback>
                       </Avatar>
                       {u.is_online && (
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-card" />
+                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-neon border-2 border-card" />
                       )}
                     </div>
                     <span className="text-sm">{u.full_name}</span>
@@ -415,7 +415,7 @@ export function ChatLayout({
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Écrire un message..."
-                  className="bg-secondary/50 border-0"
+                  className="bg-[#141414] border-0"
                 />
                 <Button
                   size="icon"

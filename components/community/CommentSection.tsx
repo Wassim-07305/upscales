@@ -104,7 +104,7 @@ export function CommentSection({
             onClick={() => handleLike(comment.id)}
             className={cn(
               "flex items-center gap-1 text-xs transition-colors",
-              likedComments.has(comment.id) ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+              likedComments.has(comment.id) ? "text-destructive" : "text-muted-foreground hover:text-destructive"
             )}
           >
             <Heart className={cn("h-3 w-3", likedComments.has(comment.id) && "fill-current")} />

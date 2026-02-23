@@ -189,7 +189,7 @@ export function FormationEditor({
                 return (
                   <div
                     key={mod.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-[#1C1C1C] hover:bg-[#141414] transition-colors"
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                     <div className="flex items-center justify-center w-7 h-7 rounded bg-secondary text-xs font-medium">
@@ -251,14 +251,14 @@ export function FormationEditor({
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
               <Label>Titre</Label>
-              <Input value={moduleTitle} onChange={(e) => setModuleTitle(e.target.value)} className="bg-secondary/50" />
+              <Input value={moduleTitle} onChange={(e) => setModuleTitle(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea
                 value={moduleDescription}
                 onChange={(e) => setModuleDescription(e.target.value)}
-                className="bg-secondary/50 min-h-[60px]"
+                className="bg-[#141414] min-h-[60px]"
               />
             </div>
             <div className="space-y-2">
@@ -283,7 +283,7 @@ export function FormationEditor({
                   value={moduleVideoUrl}
                   onChange={(e) => setModuleVideoUrl(e.target.value)}
                   placeholder={moduleType === "video_upload" ? "https://..." : "https://www.youtube.com/embed/..."}
-                  className="bg-secondary/50"
+                  className="bg-[#141414]"
                 />
               </div>
             )}
@@ -294,7 +294,7 @@ export function FormationEditor({
                 <Textarea
                   value={moduleContent}
                   onChange={(e) => setModuleContent(e.target.value)}
-                  className="bg-secondary/50 min-h-[120px]"
+                  className="bg-[#141414] min-h-[120px]"
                   placeholder="Contenu du module (supporte le HTML)"
                 />
               </div>
@@ -306,7 +306,7 @@ export function FormationEditor({
                 type="number"
                 value={moduleDuration}
                 onChange={(e) => setModuleDuration(e.target.value)}
-                className="bg-secondary/50"
+                className="bg-[#141414]"
               />
             </div>
 

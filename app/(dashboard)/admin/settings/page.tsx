@@ -55,7 +55,7 @@ export default function SettingsPage() {
             <Input
               value={platformName}
               onChange={(e) => setPlatformName(e.target.value)}
-              className="bg-secondary/50"
+              className="bg-[#141414]"
             />
           </div>
         </CardContent>
@@ -83,7 +83,7 @@ export default function SettingsPage() {
             <select
               value={defaultRole}
               onChange={(e) => setDefaultRole(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-[#141414] px-3 py-2 text-sm"
             >
               <option value="prospect">Prospect</option>
               <option value="member">Membre</option>

@@ -75,7 +75,7 @@ export default async function FormationDetailPage({
               {formation.is_free ? "Gratuit" : formation.price ? formatPrice(formation.price) : "Premium"}
             </Badge>
             {enrollment && (
-              <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
+              <Badge variant="outline" className="bg-neon/20 text-neon border-neon/30">
                 Inscrit
               </Badge>
             )}

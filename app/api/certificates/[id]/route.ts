@@ -50,16 +50,16 @@ export async function GET(
           font-family: 'Inter', sans-serif;
           margin: 0;
           padding: 40px;
-          background: #0f0f12;
-          color: #f4f4f5;
+          background: #0D0D0D;
+          color: #EDEDED;
           display: flex;
           justify-content: center;
           align-items: center;
           min-height: 100vh;
         }
         .certificate {
-          background: linear-gradient(135deg, #1a1a23, #252530);
-          border: 2px solid #6366f1;
+          background: linear-gradient(135deg, #141414, #1C1C1C);
+          border: 2px solid #C6FF00;
           border-radius: 24px;
           padding: 60px;
           max-width: 800px;
@@ -75,55 +75,55 @@ export async function GET(
           left: 0;
           right: 0;
           height: 4px;
-          background: linear-gradient(90deg, #6366f1, #8b5cf6, #6366f1);
+          background: linear-gradient(90deg, #C6FF00, #7FFFD4, #C6FF00);
         }
         .logo {
           font-size: 32px;
           font-weight: 700;
-          color: #6366f1;
+          color: #C6FF00;
           margin-bottom: 8px;
           letter-spacing: 4px;
         }
         .subtitle {
-          color: #a1a1aa;
+          color: #999999;
           font-size: 14px;
           margin-bottom: 40px;
         }
         .heading {
           font-size: 18px;
-          color: #a1a1aa;
+          color: #999999;
           margin-bottom: 12px;
         }
         .name {
           font-size: 36px;
           font-weight: 700;
           margin-bottom: 32px;
-          background: linear-gradient(135deg, #f4f4f5, #a1a1aa);
+          background: linear-gradient(135deg, #EDEDED, #999999);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
         .formation {
           font-size: 24px;
           font-weight: 600;
-          color: #6366f1;
+          color: #C6FF00;
           margin-bottom: 40px;
         }
         .meta {
           display: flex;
           justify-content: center;
           gap: 40px;
-          color: #a1a1aa;
+          color: #999999;
           font-size: 12px;
         }
         .meta-item strong {
           display: block;
-          color: #f4f4f5;
+          color: #EDEDED;
           font-size: 14px;
           margin-top: 4px;
         }
         @media print {
           body { background: white; color: black; }
-          .certificate { border-color: #6366f1; background: white; }
+          .certificate { border-color: #C6FF00; background: white; }
         }
       </style>
     </head>

@@ -41,7 +41,7 @@ export function ModuleList({ modules, progress, formationId, enrolled }: ModuleL
               >
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary flex-shrink-0 text-sm font-medium">
                   {isCompleted ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-neon" />
                   ) : (
                     <span className="text-muted-foreground">{index + 1}</span>
                   )}

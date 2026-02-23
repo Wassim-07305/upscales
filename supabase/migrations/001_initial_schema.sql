@@ -238,7 +238,7 @@ CREATE TABLE sessions (
     location TEXT,
     max_participants INTEGER,
     status session_status NOT NULL DEFAULT 'scheduled',
-    color TEXT DEFAULT '#6366f1',
+    color TEXT DEFAULT '#C6FF00',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -267,7 +267,7 @@ CREATE TABLE crm_notes (
 CREATE TABLE tags (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL UNIQUE,
-    color TEXT DEFAULT '#6366f1',
+    color TEXT DEFAULT '#C6FF00',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -677,4 +677,4 @@ INSERT INTO tags (name, color) VALUES
     ('Inactif', '#F59E0B'),
     ('Nouveau', '#3B82F6'),
     ('À risque', '#F97316'),
-    ('Ambassadeur', '#8B5CF6');
+    ('Ambassadeur', '#7FFFD4');

@@ -193,11 +193,11 @@ export default function AdminChannelsPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nom</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-secondary/50" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="bg-secondary/50" />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="space-y-2">
               <Label>Type</Label>
@@ -211,7 +211,7 @@ export default function AdminChannelsPage() {
             </div>
             <div className="space-y-2">
               <Label>Icône (emoji)</Label>
-              <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="💬" className="bg-secondary/50" />
+              <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="💬" className="bg-[#141414]" />
             </div>
             <Button onClick={handleSave} disabled={!name.trim() || saving} className="w-full">
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

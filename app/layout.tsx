@@ -47,13 +47,13 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
-      { rel: "mask-icon", url: "/icons/icon-512x512.png", color: "#6366F1" },
+      { rel: "mask-icon", url: "/icons/icon-512x512.png", color: "#C6FF00" },
     ],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F0F12",
+  themeColor: "#0D0D0D",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

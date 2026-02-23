@@ -269,7 +269,7 @@ export function StudentDetail({
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               placeholder="Ajouter une note..."
-              className="min-h-[60px] resize-none bg-secondary/50 border-0"
+              className="min-h-[60px] resize-none bg-[#141414] border-0"
             />
             <Button
               size="icon"
@@ -283,7 +283,7 @@ export function StudentDetail({
 
           <div className="space-y-3">
             {notes.map((note) => (
-              <div key={note.id} className="p-3 bg-secondary/30 rounded-lg">
+              <div key={note.id} className="p-3 bg-[#1C1C1C] rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-medium">{(note as any).author?.full_name}</span>
                   <span className="text-xs text-muted-foreground">{timeAgo(note.created_at)}</span>

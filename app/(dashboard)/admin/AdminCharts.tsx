@@ -33,13 +33,13 @@ export function AdminCharts({ monthlyData, topFormations, recentPosts }: AdminCh
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
                 <XAxis dataKey="month" stroke="#a1a1aa" fontSize={12} />
                 <YAxis stroke="#a1a1aa" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1a1a23",
-                    border: "1px solid #2a2a35",
+                    backgroundColor: "#222222",
+                    border: "1px solid #2A2A2A",
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
@@ -47,9 +47,9 @@ export function AdminCharts({ monthlyData, topFormations, recentPosts }: AdminCh
                 <Line
                   type="monotone"
                   dataKey="inscriptions"
-                  stroke="#6366f1"
+                  stroke="#C6FF00"
                   strokeWidth={2}
-                  dot={{ fill: "#6366f1" }}
+                  dot={{ fill: "#C6FF00" }}
                 />
               </LineChart>
             </ResponsiveContainer>

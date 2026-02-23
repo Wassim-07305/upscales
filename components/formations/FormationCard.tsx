@@ -43,7 +43,7 @@ export function FormationCard({
           <div className="absolute top-3 right-3">
             <Badge
               variant={formation.is_free ? "secondary" : "default"}
-              className={formation.is_free ? "bg-green-500/20 text-green-400 border-green-500/30" : ""}
+              className={formation.is_free ? "bg-neon/20 text-neon border-neon/30" : ""}
             >
               {formation.is_free ? "Gratuit" : formation.price ? formatPrice(formation.price) : "Premium"}
             </Badge>

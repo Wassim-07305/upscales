@@ -137,7 +137,7 @@ export function PostCard({
             onClick={handleLike}
             className={cn(
               "flex items-center gap-1.5 text-sm transition-colors",
-              liked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
+              liked ? "text-destructive" : "text-muted-foreground hover:text-destructive"
             )}
           >
             <Heart className={cn("h-4 w-4", liked && "fill-current")} />

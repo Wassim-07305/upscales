@@ -37,7 +37,7 @@ export default function AdminCalendarPage() {
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const [maxParts, setMaxParts] = useState("");
-  const [color, setColor] = useState("#6366f1");
+  const [color, setColor] = useState("#C6FF00");
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
 
@@ -75,7 +75,7 @@ export default function AdminCalendarPage() {
     setEndTime("");
     setLocation("");
     setMaxParts("");
-    setColor("#6366f1");
+    setColor("#C6FF00");
     setDialogOpen(true);
   };
 
@@ -151,9 +151,9 @@ export default function AdminCalendarPage() {
   };
 
   const statusColors: Record<SessionStatus, string> = {
-    scheduled: "bg-blue-500/20 text-blue-400",
-    completed: "bg-green-500/20 text-green-400",
-    cancelled: "bg-red-500/20 text-red-400",
+    scheduled: "bg-turquoise/20 text-turquoise",
+    completed: "bg-neon/20 text-neon",
+    cancelled: "bg-destructive/20 text-destructive",
   };
 
   return (
@@ -236,30 +236,30 @@ export default function AdminCalendarPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Titre</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-secondary/50" />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="bg-secondary/50" />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="bg-[#141414]" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Début</Label>
-                <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-secondary/50" />
+                <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-[#141414]" />
               </div>
               <div className="space-y-2">
                 <Label>Fin</Label>
-                <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-secondary/50" />
+                <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-[#141414]" />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Lieu / Lien</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="URL Zoom ou lieu physique" className="bg-secondary/50" />
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="URL Zoom ou lieu physique" className="bg-[#141414]" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Max participants</Label>
-                <Input type="number" value={maxParts} onChange={(e) => setMaxParts(e.target.value)} className="bg-secondary/50" />
+                <Input type="number" value={maxParts} onChange={(e) => setMaxParts(e.target.value)} className="bg-[#141414]" />
               </div>
               <div className="space-y-2">
                 <Label>Couleur</Label>

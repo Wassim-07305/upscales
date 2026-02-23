@@ -115,8 +115,8 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Award className="h-5 w-5 text-green-500" />
+              <div className="p-2 rounded-lg bg-neon/10">
+                <Award className="h-5 w-5 text-neon" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{certCount || 0}</p>
@@ -128,8 +128,8 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <CalendarDays className="h-5 w-5 text-blue-500" />
+              <div className="p-2 rounded-lg bg-turquoise/10">
+                <CalendarDays className="h-5 w-5 text-turquoise" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
@@ -145,8 +145,8 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/10">
-                <MessageCircle className="h-5 w-5 text-orange-500" />
+              <div className="p-2 rounded-lg bg-[#FFB800]/10">
+                <MessageCircle className="h-5 w-5 text-[#FFB800]" />
               </div>
               <div>
                 <p className="text-2xl font-bold">

@@ -16,12 +16,12 @@ const iconMap: Record<NotificationType, typeof MessageCircle> = {
 };
 
 const colorMap: Record<NotificationType, string> = {
-  message: "text-blue-400",
-  post: "text-green-400",
-  formation: "text-purple-400",
-  session: "text-orange-400",
-  certificate: "text-yellow-400",
-  system: "text-zinc-400",
+  message: "text-turquoise",
+  post: "text-neon",
+  formation: "text-primary",
+  session: "text-[#FFB800]",
+  certificate: "text-neon",
+  system: "text-[#999999]",
 };
 
 interface NotificationItemProps {

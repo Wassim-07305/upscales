@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     placeholder="votre@email.com"
                     {...register("email")}
-                    className="bg-secondary/50"
+                    className="bg-muted/50"
                   />
                   {errors.email && (
                     <p className="text-xs text-destructive">{errors.email.message}</p>

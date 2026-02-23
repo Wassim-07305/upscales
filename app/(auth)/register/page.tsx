@@ -89,7 +89,7 @@ export default function RegisterPage() {
                   id="full_name"
                   placeholder="John Doe"
                   {...register("full_name")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.full_name && (
                   <p className="text-xs text-destructive">{errors.full_name.message}</p>
@@ -102,7 +102,7 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="votre@email.com"
                   {...register("email")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.email && (
                   <p className="text-xs text-destructive">{errors.email.message}</p>
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="••••••••"
                   {...register("password")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.password && (
                   <p className="text-xs text-destructive">{errors.password.message}</p>
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="••••••••"
                   {...register("confirmPassword")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.confirmPassword && (
                   <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>

@@ -394,7 +394,7 @@ export function ChatLayout({
                             "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
                             isOwn
                               ? "bg-primary text-primary-foreground rounded-br-sm"
-                              : "bg-secondary rounded-bl-sm"
+                              : "bg-muted rounded-bl-sm"
                           )}
                         >
                           {msg.content}

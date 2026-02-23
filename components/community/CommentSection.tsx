@@ -92,7 +92,7 @@ export function CommentSection({
         </AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <div className="bg-secondary/50 rounded-lg px-3 py-2">
+        <div className="bg-muted/50 rounded-lg px-3 py-2">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-medium">{comment.author?.full_name}</span>
             <span className="text-xs text-muted-foreground">{timeAgo(comment.created_at)}</span>
@@ -136,7 +136,7 @@ export function CommentSection({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Votre réponse..."
-              className="min-h-[60px] resize-none text-sm bg-secondary/50 border-0"
+              className="min-h-[60px] resize-none text-sm bg-muted/50 border-0"
             />
             <Button
               size="icon"
@@ -160,7 +160,7 @@ export function CommentSection({
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Écrire un commentaire..."
-          className="min-h-[60px] resize-none text-sm bg-secondary/50 border-0"
+          className="min-h-[60px] resize-none text-sm bg-muted/50 border-0"
         />
         <Button
           size="icon"

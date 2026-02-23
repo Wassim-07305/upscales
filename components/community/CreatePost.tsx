@@ -58,7 +58,7 @@ export function CreatePost({ user }: CreatePostProps) {
               placeholder="Partagez quelque chose avec la communauté..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[80px] resize-none bg-secondary/50 border-0"
+              className="min-h-[80px] resize-none bg-muted/50 border-0"
             />
             <div className="flex items-center justify-between mt-3">
               <div className="flex gap-2">

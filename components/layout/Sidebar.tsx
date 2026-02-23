@@ -63,19 +63,33 @@ export function Sidebar({ user }: SidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-16 border-b border-border">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Image src="/icons/icon-48x48.png" alt="UPSCALE" width={32} height={32} className="rounded-lg" />
-          {!collapsed && <span className="font-display font-bold text-lg tracking-tight">UPSCALE</span>}
-        </Link>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
+      <div className={cn(
+        "flex items-center h-16 border-b border-border/50",
+        collapsed ? "justify-center px-2" : "justify-between px-4"
+      )}>
+        {collapsed ? (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <Image src="/icons/icon-48x48.png" alt="UPSCALE" width={28} height={28} className="rounded-lg" />
+          </button>
+        ) : (
+          <>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <Image src="/icons/icon-48x48.png" alt="UPSCALE" width={32} height={32} className="rounded-lg flex-shrink-0" />
+              <span className="font-display font-bold text-lg tracking-tight">UPSCALE</span>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={() => setCollapsed(true)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Nav Items */}
@@ -126,10 +140,10 @@ export function Sidebar({ user }: SidebarProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      ? "bg-primary/10 text-primary sidebar-glow-active"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />

@@ -79,7 +79,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="votre@email.com"
                   {...register("email")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.email && (
                   <p className="text-xs text-destructive">{errors.email.message}</p>
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   {...register("password")}
-                  className="bg-secondary/50"
+                  className="bg-muted/50"
                 />
                 {errors.password && (
                   <p className="text-xs text-destructive">{errors.password.message}</p>

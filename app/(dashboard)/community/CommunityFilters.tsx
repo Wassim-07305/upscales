@@ -21,7 +21,7 @@ export function CommunityFilters({ currentFilter }: { currentFilter: string }) {
             "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
             currentFilter === f.value
               ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-muted-foreground hover:text-foreground"
+              : "bg-muted text-muted-foreground hover:text-foreground"
           )}
         >
           {f.label}

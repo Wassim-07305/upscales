@@ -20,36 +20,20 @@ export default async function FormationsPage({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // Parallelize independent queries
+  const [{ data: profile }, { data: formations }, { data: enrollments }, { data: progress }] =
+    await Promise.all([
+      supabase.from("profiles").select("role").eq("id", user.id).single(),
+      supabase.from("formations").select("*").eq("status", "published").order("order"),
+      supabase.from("formation_enrollments").select("*").eq("user_id", user.id),
+      supabase.from("module_progress").select("*").eq("user_id", user.id),
+    ]);
 
-  // Fetch formations
-  const { data: formations } = await supabase
-    .from("formations")
-    .select("*")
-    .eq("status", "published")
-    .order("order");
-
-  // Fetch enrollments
-  const { data: enrollments } = await supabase
-    .from("formation_enrollments")
-    .select("*")
-    .eq("user_id", user.id);
-
-  // Fetch modules for counts
+  // Fetch modules for counts (depends on formations result)
   const formationIds = formations?.map((f) => f.id) || [];
   const { data: modules } = formationIds.length > 0
     ? await supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
     : { data: [] };
-
-  // Fetch progress
-  const { data: progress } = await supabase
-    .from("module_progress")
-    .select("*")
-    .eq("user_id", user.id);
 
   // Process formations
   const processedFormations = formations?.map((f) => {

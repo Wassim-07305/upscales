@@ -18,14 +18,6 @@ export default async function CommunityPage({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) redirect("/login");
-
   const filter = params?.filter || "recent";
 
   let query = supabase
@@ -43,9 +35,15 @@ export default async function CommunityPage({
     query = query.order("created_at", { ascending: false });
   }
 
-  const { data: posts } = await query;
+  // Parallelize profile and posts queries
+  const [{ data: profile }, { data: posts }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    query,
+  ]);
 
-  // Get user's likes
+  if (!profile) redirect("/login");
+
+  // Get user's likes (depends on posts result)
   const postIds = posts?.map((p) => p.id) || [];
   const { data: userLikes } = postIds.length > 0
     ? await supabase

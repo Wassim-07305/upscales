@@ -21,7 +21,9 @@ export default async function AdminDashboardPage() {
 
   if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
-  // Stats
+  // Parallelize all independent queries
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
   const [
     { count: totalUsers },
     { count: totalFormations },
@@ -29,6 +31,11 @@ export default async function AdminDashboardPage() {
     { count: totalMessages },
     { count: totalEnrollments },
     { count: totalCertificates },
+    { count: activeUsers },
+    { data: recentEnrollments },
+    { data: recentPosts },
+    { data: formations },
+    { data: enrollmentData },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("formations").select("*", { count: "exact", head: true }).eq("status", "published"),
@@ -36,42 +43,17 @@ export default async function AdminDashboardPage() {
     supabase.from("messages").select("*", { count: "exact", head: true }),
     supabase.from("formation_enrollments").select("*", { count: "exact", head: true }),
     supabase.from("certificates").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).gte("last_seen_at", sevenDaysAgo),
+    supabase.from("formation_enrollments").select("enrolled_at").order("enrolled_at", { ascending: true }),
+    supabase.from("posts").select("*, author:profiles(full_name)").order("created_at", { ascending: false }).limit(5),
+    supabase.from("formations").select("id, title").eq("status", "published"),
+    supabase.from("formation_enrollments").select("formation_id"),
   ]);
-
-  // Active users (last 7 days)
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const { count: activeUsers } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true })
-    .gte("last_seen_at", sevenDaysAgo);
 
   // Completion rate
   const completionRate = totalEnrollments && totalCertificates
     ? Math.round(((totalCertificates || 0) / (totalEnrollments || 1)) * 100)
     : 0;
-
-  // Recent enrollments for chart (last 6 months)
-  const { data: recentEnrollments } = await supabase
-    .from("formation_enrollments")
-    .select("enrolled_at")
-    .order("enrolled_at", { ascending: true });
-
-  // Recent activity
-  const { data: recentPosts } = await supabase
-    .from("posts")
-    .select("*, author:profiles(full_name)")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // Top formations
-  const { data: formations } = await supabase
-    .from("formations")
-    .select("id, title")
-    .eq("status", "published");
-
-  const { data: enrollmentData } = await supabase
-    .from("formation_enrollments")
-    .select("formation_id");
 
   const topFormations = formations?.map((f) => ({
     ...f,

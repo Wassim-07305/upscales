@@ -2,9 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,9 +16,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -29,50 +25,41 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { pathname } = request.nextUrl;
+
+  // Skip auth check for public/API routes
+  if (
+    pathname.startsWith("/api/") ||
+    pathname === "/"
+  ) {
+    // Still refresh the session cookie if it exists
+    await supabase.auth.getUser();
+    return supabaseResponse;
+  }
 
   const isAuthPage =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/register") ||
-    request.nextUrl.pathname.startsWith("/forgot-password");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/forgot-password");
 
-  const isDashboardPage = request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/formations") ||
-    request.nextUrl.pathname.startsWith("/community") ||
-    request.nextUrl.pathname.startsWith("/chat") ||
-    request.nextUrl.pathname.startsWith("/calendar") ||
-    request.nextUrl.pathname.startsWith("/certificates") ||
-    request.nextUrl.pathname.startsWith("/notifications") ||
-    request.nextUrl.pathname.startsWith("/profile") ||
-    request.nextUrl.pathname.startsWith("/admin");
-
-  if (!user && isDashboardPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  // Check admin routes
-  if (user && request.nextUrl.pathname.startsWith("/admin")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  // For auth pages, only check if user is already logged in (redirect to dashboard)
+  if (isAuthPage) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
+    return supabaseResponse;
+  }
+
+  // For all dashboard routes - check auth
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;

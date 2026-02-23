@@ -19,20 +19,14 @@ export default async function CRMPage() {
 
   if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
-  // Fetch all profiles
-  const { data: students } = await supabase
-    .from("profiles")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  // Fetch tags
-  const { data: tags } = await supabase.from("tags").select("*").order("name");
-
-  // Fetch user tags
-  const { data: userTags } = await supabase.from("user_tags").select("*, tag:tags(*)");
-
-  // Fetch enrollment counts
-  const { data: enrollments } = await supabase.from("formation_enrollments").select("user_id");
+  // Parallelize independent queries
+  const [{ data: students }, { data: tags }, { data: userTags }, { data: enrollments }] =
+    await Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("tags").select("*").order("name"),
+      supabase.from("user_tags").select("*, tag:tags(*)"),
+      supabase.from("formation_enrollments").select("user_id"),
+    ]);
 
   const studentsWithData = students?.map((s) => ({
     ...s,

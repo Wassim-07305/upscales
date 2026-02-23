@@ -33,19 +33,28 @@ export default async function StudentDetailPage({
 
   if (!student) notFound();
 
-  // Fetch enrollments with formation info
-  const { data: enrollments } = await supabase
-    .from("formation_enrollments")
-    .select("*, formation:formations(title)")
-    .eq("user_id", userId);
+  // Parallelize independent queries
+  const [
+    { data: enrollments },
+    { data: progress },
+    { data: certificates },
+    { data: notes },
+    { data: userTags },
+    { data: allTags },
+    { count: messageCount },
+    { count: postCount },
+  ] = await Promise.all([
+    supabase.from("formation_enrollments").select("*, formation:formations(title)").eq("user_id", userId),
+    supabase.from("module_progress").select("*").eq("user_id", userId),
+    supabase.from("certificates").select("*, formation:formations(title)").eq("user_id", userId),
+    supabase.from("crm_notes").select("*, author:profiles(full_name)").eq("student_id", userId).order("created_at", { ascending: false }),
+    supabase.from("user_tags").select("*, tag:tags(*)").eq("user_id", userId),
+    supabase.from("tags").select("*").order("name"),
+    supabase.from("messages").select("*", { count: "exact", head: true }).eq("sender_id", userId),
+    supabase.from("posts").select("*", { count: "exact", head: true }).eq("author_id", userId),
+  ]);
 
-  // Fetch progress
-  const { data: progress } = await supabase
-    .from("module_progress")
-    .select("*")
-    .eq("user_id", userId);
-
-  // Fetch modules for enrolled formations
+  // Fetch modules for enrolled formations (depends on enrollments result)
   const formationIds = enrollments?.map((e) => e.formation_id) || [];
   const { data: modules } = formationIds.length > 0
     ? await supabase.from("modules").select("id, formation_id").in("formation_id", formationIds)
@@ -64,38 +73,6 @@ export default async function StudentDetailPage({
       percent: fModules.length > 0 ? Math.round((completed / fModules.length) * 100) : 0,
     };
   }) || [];
-
-  // Fetch certificates
-  const { data: certificates } = await supabase
-    .from("certificates")
-    .select("*, formation:formations(title)")
-    .eq("user_id", userId);
-
-  // Fetch CRM notes
-  const { data: notes } = await supabase
-    .from("crm_notes")
-    .select("*, author:profiles(full_name)")
-    .eq("student_id", userId)
-    .order("created_at", { ascending: false });
-
-  // Fetch tags
-  const { data: userTags } = await supabase
-    .from("user_tags")
-    .select("*, tag:tags(*)")
-    .eq("user_id", userId);
-
-  const { data: allTags } = await supabase.from("tags").select("*").order("name");
-
-  // Activity stats
-  const { count: messageCount } = await supabase
-    .from("messages")
-    .select("*", { count: "exact", head: true })
-    .eq("sender_id", userId);
-
-  const { count: postCount } = await supabase
-    .from("posts")
-    .select("*", { count: "exact", head: true })
-    .eq("author_id", userId);
 
   return (
     <StudentDetail

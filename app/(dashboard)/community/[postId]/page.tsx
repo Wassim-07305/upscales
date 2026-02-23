@@ -19,39 +19,24 @@ export default async function PostDetailPage({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Parallelize profile, post, user like, and comments queries
+  const [{ data: profile }, { data: post }, { data: userLike }, { data: comments }] =
+    await Promise.all([
+      supabase.from("profiles").select("*").eq("id", user.id).single(),
+      supabase.from("posts").select("*, author:profiles(*)").eq("id", postId).single(),
+      supabase.from("post_likes").select("id").eq("post_id", postId).eq("user_id", user.id).single(),
+      supabase
+        .from("comments")
+        .select("*, author:profiles(*)")
+        .eq("post_id", postId)
+        .is("parent_id", null)
+        .order("created_at", { ascending: true }),
+    ]);
 
   if (!profile) redirect("/login");
-
-  const { data: post } = await supabase
-    .from("posts")
-    .select("*, author:profiles(*)")
-    .eq("id", postId)
-    .single();
-
   if (!post) notFound();
 
-  // Check if user liked the post
-  const { data: userLike } = await supabase
-    .from("post_likes")
-    .select("id")
-    .eq("post_id", postId)
-    .eq("user_id", user.id)
-    .single();
-
-  // Fetch comments with authors
-  const { data: comments } = await supabase
-    .from("comments")
-    .select("*, author:profiles(*)")
-    .eq("post_id", postId)
-    .is("parent_id", null)
-    .order("created_at", { ascending: true });
-
-  // Fetch replies
+  // Fetch replies (depends on comments result)
   const commentIds = comments?.map((c) => c.id) || [];
   const { data: replies } = commentIds.length > 0
     ? await supabase
@@ -61,7 +46,7 @@ export default async function PostDetailPage({
         .order("created_at", { ascending: true })
     : { data: [] };
 
-  // Fetch user's comment likes
+  // Fetch user's comment likes (depends on comments + replies)
   const allCommentIds = [
     ...(comments?.map((c) => c.id) || []),
     ...(replies?.map((r) => r.id) || []),

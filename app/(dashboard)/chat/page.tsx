@@ -19,20 +19,15 @@ export default async function ChatPage() {
 
   if (!profile || !isMember(profile.role)) redirect("/dashboard");
 
-  // Fetch channels where user is member
-  const { data: memberChannels } = await supabase
-    .from("channel_members")
-    .select("channel_id")
-    .eq("user_id", user.id);
+  // Parallelize independent queries
+  const [{ data: memberChannels }, { data: channels }, { data: allProfiles }] =
+    await Promise.all([
+      supabase.from("channel_members").select("channel_id").eq("user_id", user.id),
+      supabase.from("channels").select("*").eq("is_archived", false).order("created_at"),
+      supabase.from("profiles").select("id, full_name, avatar_url, is_online").neq("id", user.id),
+    ]);
 
   const memberChannelIds = memberChannels?.map((m) => m.channel_id) || [];
-
-  // Fetch all public channels + channels user is member of
-  const { data: channels } = await supabase
-    .from("channels")
-    .select("*")
-    .eq("is_archived", false)
-    .order("created_at");
 
   const publicChannels = channels?.filter((c) => c.type === "public") || [];
   const dmChannels = channels?.filter(
@@ -41,12 +36,6 @@ export default async function ChatPage() {
   const privateChannels = channels?.filter(
     (c) => c.type === "private" && memberChannelIds.includes(c.id)
   ) || [];
-
-  // Get all members for DMs
-  const { data: allProfiles } = await supabase
-    .from("profiles")
-    .select("id, full_name, avatar_url, is_online")
-    .neq("id", user.id);
 
   return (
     <ChatLayout

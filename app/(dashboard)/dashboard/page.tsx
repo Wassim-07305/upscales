@@ -1,12 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, CalendarDays, MessageCircle, Award } from "lucide-react";
 import Link from "next/link";
-import { formatDate, timeAgo, formatDuration } from "@/lib/utils/dates";
-import { isAdmin } from "@/lib/utils/roles";
+import { formatDate } from "@/lib/utils/dates";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,76 +14,75 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Parallel fetch all data at once
+  const [
+    { data: profile },
+    { data: enrollments },
+    { data: progress },
+    { data: upcomingSessions },
+    { count: certCount },
+    { data: recentNotifs },
+  ] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("formation_enrollments")
+      .select("*, formation:formations(*)")
+      .eq("user_id", user.id)
+      .order("enrolled_at", { ascending: false }),
+    supabase.from("module_progress").select("*").eq("user_id", user.id),
+    supabase
+      .from("sessions")
+      .select("*, host:profiles(full_name)")
+      .eq("status", "scheduled")
+      .gte("start_time", new Date().toISOString())
+      .order("start_time")
+      .limit(3),
+    supabase
+      .from("certificates")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_read", false)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   if (!profile) redirect("/login");
 
-  // Redirect admin to admin dashboard
-  if (isAdmin(profile.role)) {
-    // Still show member dashboard but with admin link
-  }
-
-  // Fetch user's enrollments with formation details
-  const { data: enrollments } = await supabase
-    .from("formation_enrollments")
-    .select("*, formation:formations(*)")
-    .eq("user_id", user.id)
-    .order("enrolled_at", { ascending: false });
-
-  // Fetch progress for all enrolled formations
-  const { data: progress } = await supabase
-    .from("module_progress")
-    .select("*")
-    .eq("user_id", user.id);
-
-  // Fetch module counts per formation
+  // Fetch module counts (depends on enrollments)
   const formationIds = enrollments?.map((e) => e.formation_id) || [];
-  const { data: modules } = formationIds.length > 0
-    ? await supabase
-        .from("modules")
-        .select("id, formation_id")
-        .in("formation_id", formationIds)
-    : { data: [] };
-
-  // Upcoming sessions
-  const { data: upcomingSessions } = await supabase
-    .from("sessions")
-    .select("*, host:profiles(full_name)")
-    .eq("status", "scheduled")
-    .gte("start_time", new Date().toISOString())
-    .order("start_time")
-    .limit(3);
-
-  // Recent notifications
-  const { data: recentNotifs } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("is_read", false)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // Certificates count
-  const { count: certCount } = await supabase
-    .from("certificates")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id);
+  const { data: modules } =
+    formationIds.length > 0
+      ? await supabase
+          .from("modules")
+          .select("id, formation_id")
+          .in("formation_id", formationIds)
+      : { data: [] as { id: string; formation_id: string }[] };
 
   // Calculate progress per formation
-  const formationProgress = enrollments?.map((enrollment) => {
-    const formModules = modules?.filter((m) => m.formation_id === enrollment.formation_id) || [];
-    const completedModules = progress?.filter(
-      (p) => p.formation_id === enrollment.formation_id && p.completed
-    ) || [];
-    const percent = formModules.length > 0
-      ? Math.round((completedModules.length / formModules.length) * 100)
-      : 0;
-    return { ...enrollment, percent, totalModules: formModules.length, completedModules: completedModules.length };
-  }) || [];
+  const formationProgress =
+    enrollments?.map((enrollment) => {
+      const formModules =
+        modules?.filter((m) => m.formation_id === enrollment.formation_id) ||
+        [];
+      const completedModules =
+        progress?.filter(
+          (p) => p.formation_id === enrollment.formation_id && p.completed
+        ) || [];
+      const percent =
+        formModules.length > 0
+          ? Math.round((completedModules.length / formModules.length) * 100)
+          : 0;
+      return {
+        ...enrollment,
+        percent,
+        totalModules: formModules.length,
+        completedModules: completedModules.length,
+      };
+    }) || [];
 
   const firstName = profile.full_name?.split(" ")[0] || "vous";
 
@@ -93,7 +90,9 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Bonjour, {firstName} !</h1>
-        <p className="text-muted-foreground">Voici un résumé de votre activité</p>
+        <p className="text-muted-foreground">
+          Voici un résumé de votre activité
+        </p>
       </div>
 
       {/* Stats */}
@@ -105,7 +104,9 @@ export default async function DashboardPage() {
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{enrollments?.length || 0}</p>
+                <p className="text-2xl font-bold">
+                  {enrollments?.length || 0}
+                </p>
                 <p className="text-xs text-muted-foreground">Formations</p>
               </div>
             </div>
@@ -131,8 +132,12 @@ export default async function DashboardPage() {
                 <CalendarDays className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{upcomingSessions?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">Sessions à venir</p>
+                <p className="text-2xl font-bold">
+                  {upcomingSessions?.length || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sessions à venir
+                </p>
               </div>
             </div>
           </CardContent>
@@ -144,8 +149,12 @@ export default async function DashboardPage() {
                 <MessageCircle className="h-5 w-5 text-orange-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{recentNotifs?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">Notifs non lues</p>
+                <p className="text-2xl font-bold">
+                  {recentNotifs?.length || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Notifs non lues
+                </p>
               </div>
             </div>
           </CardContent>
@@ -156,13 +165,18 @@ export default async function DashboardPage() {
         {/* Formations en cours */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Mes formations en cours</CardTitle>
+            <CardTitle className="text-base">
+              Mes formations en cours
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {formationProgress.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Aucune formation en cours.{" "}
-                <Link href="/formations" className="text-primary hover:underline">
+                <Link
+                  href="/formations"
+                  className="text-primary hover:underline"
+                >
                   Découvrir les formations
                 </Link>
               </p>
@@ -177,7 +191,9 @@ export default async function DashboardPage() {
                     <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
                       {(fp as any).formation?.title}
                     </p>
-                    <span className="text-xs text-muted-foreground">{fp.percent}%</span>
+                    <span className="text-xs text-muted-foreground">
+                      {fp.percent}%
+                    </span>
                   </div>
                   <Progress value={fp.percent} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-1">
@@ -196,7 +212,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {!upcomingSessions || upcomingSessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucune session planifiée</p>
+              <p className="text-sm text-muted-foreground">
+                Aucune session planifiée
+              </p>
             ) : (
               upcomingSessions.map((session) => (
                 <Link

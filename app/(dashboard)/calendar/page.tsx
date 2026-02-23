@@ -10,25 +10,15 @@ export default async function CalendarPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // Parallelize independent queries
+  const [{ data: profile }, { data: sessions }, { data: registrations }] =
+    await Promise.all([
+      supabase.from("profiles").select("role").eq("id", user.id).single(),
+      supabase.from("sessions").select("*, host:profiles(full_name, avatar_url)").order("start_time"),
+      supabase.from("session_participants").select("session_id").eq("user_id", user.id),
+    ]);
 
-  // Fetch sessions
-  const { data: sessions } = await supabase
-    .from("sessions")
-    .select("*, host:profiles(full_name, avatar_url)")
-    .order("start_time");
-
-  // Fetch user's registrations
-  const { data: registrations } = await supabase
-    .from("session_participants")
-    .select("session_id")
-    .eq("user_id", user.id);
-
-  // Fetch participant counts
+  // Fetch participant counts (depends on sessions result)
   const sessionIds = sessions?.map((s) => s.id) || [];
   const { data: participants } = sessionIds.length > 0
     ? await supabase

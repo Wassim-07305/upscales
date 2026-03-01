@@ -249,3 +249,94 @@ export interface PlatformSetting {
   value: Record<string, unknown>;
   updated_at: string;
 }
+
+// ============================================
+// Booking System
+// ============================================
+export type BookingStatus = "confirme" | "annule" | "realise" | "no_show";
+
+export interface QualificationField {
+  id: string;
+  type: "text" | "textarea" | "select" | "email" | "phone";
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+}
+
+export interface BookingPage {
+  id: string;
+  slug: string;
+  is_active: boolean;
+  title: string | null;
+  description: string | null;
+  brand_color: string;
+  logo_url: string | null;
+  slot_duration: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_days_ahead: number;
+  qualification_fields: QualificationField[];
+  timezone: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BookingAvailability {
+  id: string;
+  booking_page_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface BookingException {
+  id: string;
+  booking_page_id: string;
+  exception_date: string;
+  type: "blocked" | "override";
+  start_time: string | null;
+  end_time: string | null;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface Booking {
+  id: string;
+  booking_page_id: string;
+  prospect_name: string;
+  prospect_email: string;
+  prospect_phone: string | null;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: BookingStatus;
+  qualification_answers: Record<string, string | string[]>;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  booking_page?: BookingPage;
+}
+
+export interface AvailableSlot {
+  start_time: string;
+  end_time: string;
+}
+
+export interface PublicBookingPageData {
+  id: string;
+  slug: string;
+  title: string | null;
+  description: string | null;
+  brand_color: string;
+  logo_url: string | null;
+  slot_duration: number;
+  buffer_minutes: number;
+  min_notice_hours: number;
+  max_days_ahead: number;
+  qualification_fields: QualificationField[];
+  timezone: string;
+}

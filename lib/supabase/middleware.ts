@@ -30,6 +30,7 @@ export async function updateSession(request: NextRequest) {
   // Skip auth check for public/API routes
   if (
     pathname.startsWith("/api/") ||
+    pathname.startsWith("/book/") ||
     pathname === "/"
   ) {
     // Still refresh the session cookie if it exists

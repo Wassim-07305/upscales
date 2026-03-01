@@ -157,11 +157,14 @@ export function Sidebar({
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive =
-                      item.href === logoHref
-                        ? pathname === logoHref
-                        : pathname === item.href ||
-                          pathname.startsWith(item.href + "/");
+                    // Match exact pour les pages "index" (/dashboard, /admin)
+                    // Match prefix pour les autres (/formations → /formations/xxx)
+                    const isExactOnly =
+                      item.href === logoHref || item.href === "/admin";
+                    const isActive = isExactOnly
+                      ? pathname === item.href
+                      : pathname === item.href ||
+                        pathname.startsWith(item.href + "/");
 
                     const linkContent = (
                       <Link

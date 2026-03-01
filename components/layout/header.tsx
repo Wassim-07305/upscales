@@ -99,7 +99,7 @@ export function Header({
         <button
           onClick={() => setSearchOpen(true)}
           className={cn(
-            "flex h-10 w-full max-w-md items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm text-muted-foreground",
+            "flex h-10 w-full max-w-md items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm text-muted-foreground",
             "transition-all duration-200 hover:border-border hover:bg-background"
           )}
         >

@@ -167,6 +167,7 @@ export function Sidebar({
                       <Link
                         href={item.href}
                         onClick={closeMobile}
+                        data-active={isActive ? "" : undefined}
                         className={cn(
                           "sidebar-glow-active group relative flex items-center rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200",
                           isActive

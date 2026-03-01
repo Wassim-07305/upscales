@@ -56,8 +56,9 @@
   --color-surface: #141414;
   --color-surface-hover: #1C1C1C;
   --color-surface-elevated: #222222;
-  /* Brand color */
-  --color-brand: #C6FF00;
+  /* Brand color — adaptive via CSS var */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
   /* Animation timing */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -65,6 +66,8 @@
 
 :root {
   --radius: 0.75rem;
+  --brand: #3D6B00;
+  --brand-dark: #1A2E00;
   --background: #FAFAFA;
   --foreground: #171717;
   --card: #FFFFFF;
@@ -100,6 +103,8 @@
 }
 
 .dark {
+  --brand: #C6FF00;
+  --brand-dark: #0D0D0D;
   --background: #0D0D0D;
   --foreground: #EDEDED;
   --card: #141414;

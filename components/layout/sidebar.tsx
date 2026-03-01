@@ -127,7 +127,7 @@ export function Sidebar({
               className="shrink-0"
             />
             {!isCollapsed && (
-              <span className="font-display text-lg font-bold text-white whitespace-nowrap">
+              <span className="font-display text-lg font-bold text-sidebar-accent-foreground whitespace-nowrap">
                 {appName}
               </span>
             )}
@@ -201,7 +201,7 @@ export function Sidebar({
                           <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
                           <TooltipContent
                             side="right"
-                            className="bg-sidebar text-white border-sidebar-border"
+                            className="bg-sidebar text-sidebar-accent-foreground border-sidebar-border"
                           >
                             {item.label}
                           </TooltipContent>
@@ -264,7 +264,7 @@ export function Sidebar({
                 isCollapsed && "md:hidden"
               )}
             >
-              <p className="truncate text-sm font-semibold text-white">
+              <p className="truncate text-sm font-semibold text-sidebar-accent-foreground">
                 {userName}
               </p>
               <p className="truncate text-xs text-sidebar-foreground/50 capitalize">
@@ -302,7 +302,7 @@ export function Sidebar({
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-white border-sidebar-border"
+                  className="bg-sidebar text-sidebar-accent-foreground border-sidebar-border"
                 >
                   Parametres
                 </TooltipContent>
@@ -337,7 +337,7 @@ export function Sidebar({
               {isCollapsed && (
                 <TooltipContent
                   side="right"
-                  className="bg-sidebar text-white border-sidebar-border"
+                  className="bg-sidebar text-sidebar-accent-foreground border-sidebar-border"
                 >
                   Profil
                 </TooltipContent>
@@ -369,7 +369,7 @@ export function Sidebar({
             {isCollapsed && (
               <TooltipContent
                 side="right"
-                className="bg-sidebar text-white border-sidebar-border"
+                className="bg-sidebar text-sidebar-accent-foreground border-sidebar-border"
               >
                 Deconnexion
               </TooltipContent>

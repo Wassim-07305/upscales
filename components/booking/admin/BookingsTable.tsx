@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -107,8 +107,8 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
             Object.keys(booking.qualification_answers).length > 0;
 
           return (
-            <>
-              <TableRow key={booking.id}>
+            <Fragment key={booking.id}>
+              <TableRow>
                 <TableCell>
                   {hasAnswers && (
                     <button
@@ -209,7 +209,7 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
                   </TableCell>
                 </TableRow>
               )}
-            </>
+            </Fragment>
           );
         })}
       </TableBody>

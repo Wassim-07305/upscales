@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays } from "lucide-react";
 import { Session, SessionStatus } from "@/lib/types/database";
 import { formatDateTime, formatTime } from "@/lib/utils/dates";
 import { toast } from "sonner";
@@ -169,6 +169,13 @@ export default function AdminCalendarPage() {
         </Button>
       </div>
 
+      {sessions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <CalendarDays className="h-12 w-12 mb-4 opacity-50" />
+          <p className="text-lg font-medium">Aucune session</p>
+          <p className="text-sm mt-1">Créez votre première session pour commencer.</p>
+        </div>
+      ) : (
       <div className="grid gap-3">
         {sessions.map((s) => (
           <Card key={s.id}>
@@ -227,6 +234,7 @@ export default function AdminCalendarPage() {
           </Card>
         ))}
       </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>

@@ -5,7 +5,6 @@ import {
   Sparkles,
   Newspaper,
   CalendarDays,
-  Bell,
   Award,
   User,
   BarChart3,
@@ -65,21 +64,9 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
     roles: ALL_ROLES,
   },
   {
-    label: "Notifications",
-    href: "/notifications",
-    icon: Bell,
-    roles: ALL_ROLES,
-  },
-  {
     label: "Certificats",
     href: "/certificates",
     icon: Award,
-    roles: ALL_ROLES,
-  },
-  {
-    label: "Profil",
-    href: "/profile",
-    icon: User,
     roles: ALL_ROLES,
   },
 ];
@@ -164,12 +151,6 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Communaute",
     items: MAIN_NAV_ITEMS.filter((i) =>
       ["/chat", "/ai", "/community"].includes(i.href)
-    ),
-  },
-  {
-    label: "Mon espace",
-    items: MAIN_NAV_ITEMS.filter((i) =>
-      ["/notifications", "/profile"].includes(i.href)
     ),
   },
   {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,26 @@ export function Header({
   const breadcrumbs = segments
     .filter((seg) => !UUID_RE.test(seg))
     .map((seg) => breadcrumbLabels[seg] || seg.charAt(0).toUpperCase() + seg.slice(1));
+
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le menu au clic extérieur
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [userMenuOpen]);
+
+  // Fermer le menu lors d'un changement de route
+  useEffect(() => {
+    setUserMenuOpen(false);
+  }, [pathname]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -161,8 +182,11 @@ export function Header({
         </button>
 
         {/* Menu utilisateur */}
-        <div className="relative group">
-          <button className="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-secondary">
+        <div className="relative" ref={userMenuRef}>
+          <button
+            onClick={() => setUserMenuOpen((v) => !v)}
+            className="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-muted"
+          >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -177,28 +201,36 @@ export function Header({
           </button>
 
           {/* Dropdown */}
-          <div className="invisible absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-card p-1 opacity-0 shadow-lg transition-all group-focus-within:visible group-focus-within:opacity-100">
-            <div className="px-3 py-2">
-              <p className="text-sm font-medium text-foreground">{userName}</p>
-              <p className="text-xs text-muted-foreground">{email}</p>
+          {userMenuOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-card p-1 shadow-lg animate-fade-in">
+              <div className="px-3 py-2">
+                <p className="text-sm font-medium text-foreground">{userName}</p>
+                <p className="text-xs text-muted-foreground">{email}</p>
+              </div>
+              <div className="mx-2 border-t border-border" />
+              <button
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  router.push("/profile");
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
+              >
+                <User className="h-4 w-4" />
+                Mon profil
+              </button>
+              <div className="mx-2 border-t border-border" />
+              <button
+                onClick={() => {
+                  setUserMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Deconnexion
+              </button>
             </div>
-            <div className="mx-2 border-t border-border" />
-            <button
-              onClick={() => router.push("/profile")}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
-            >
-              <User className="h-4 w-4" />
-              Mon profil
-            </button>
-            <div className="mx-2 border-t border-border" />
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
-            >
-              <LogOut className="h-4 w-4" />
-              Deconnexion
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </header>

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Syne, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { PWARegister } from "@/components/providers/PWARegister";
 
@@ -75,11 +74,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <body className={`${outfit.variable} ${syne.variable} ${geistMono.variable} font-sans antialiased`}>
-        <ThemeProvider>
-          {children}
-          <Toaster richColors position="top-right" />
-          <PWARegister />
-        </ThemeProvider>
+        {children}
+        <Toaster richColors position="top-right" />
+        <PWARegister />
       </body>
     </html>
   );

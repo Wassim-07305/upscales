@@ -340,3 +340,75 @@ export interface PublicBookingPageData {
   qualification_fields: QualificationField[];
   timezone: string;
 }
+
+// ============================================
+// Landing Pages (Puck Builder)
+// ============================================
+export interface LandingPage {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  og_image_url: string | null;
+  is_active: boolean;
+  puck_data: Record<string, unknown>;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  published_at: string | null;
+}
+
+export interface PublicLandingPageData {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  og_image_url: string | null;
+  puck_data: Record<string, unknown>;
+}
+
+// ============================================
+// AI / RAG (MateuzsIA)
+// ============================================
+export type AIDocumentSourceType = "pdf" | "txt" | "formation";
+export type AIDocumentStatus = "processing" | "ready" | "error";
+export type AIMessageRole = "user" | "assistant";
+
+export interface AIDocument {
+  id: string;
+  title: string;
+  source_type: AIDocumentSourceType;
+  formation_id: string | null;
+  module_id: string | null;
+  file_url: string | null;
+  file_name: string | null;
+  chunk_count: number;
+  status: AIDocumentStatus;
+  error_message: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AIConversation {
+  id: string;
+  user_id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AIMessage {
+  id: string;
+  conversation_id: string;
+  role: AIMessageRole;
+  content: string;
+  sources: AIMessageSource[] | null;
+  created_at: string;
+}
+
+export interface AIMessageSource {
+  document_id: string;
+  title: string;
+  chunk_preview: string;
+}

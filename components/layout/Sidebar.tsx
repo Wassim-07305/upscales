@@ -17,6 +17,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  Sparkles,
+  Brain,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -32,6 +35,7 @@ const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/formations", icon: BookOpen, label: "Formations" },
   { href: "/chat", icon: MessageCircle, label: "Chat" },
+  { href: "/ai", icon: Sparkles, label: "MateuzsIA" },
   { href: "/community", icon: Newspaper, label: "Communauté" },
   { href: "/calendar", icon: CalendarDays, label: "Calendrier" },
   { href: "/notifications", icon: Bell, label: "Notifications" },
@@ -43,9 +47,11 @@ const adminNavItems = [
   { href: "/admin", icon: BarChart3, label: "Analytics" },
   { href: "/admin/crm", icon: Users, label: "CRM" },
   { href: "/admin/formations", icon: BookOpen, label: "Formations" },
+  { href: "/admin/pages", icon: FileText, label: "Pages" },
   { href: "/admin/booking", icon: CalendarCheck, label: "Booking" },
   { href: "/admin/channels", icon: MessageCircle, label: "Channels" },
   { href: "/admin/calendar", icon: CalendarDays, label: "Sessions" },
+  { href: "/admin/ai", icon: Brain, label: "Base IA" },
   { href: "/admin/settings", icon: Settings, label: "Paramètres" },
 ];
 
@@ -101,8 +107,8 @@ export function Sidebar({ user }: SidebarProps) {
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
-          // Hide chat for prospects
-          if (item.href === "/chat" && user.role === "prospect") return null;
+          // Hide chat and AI for prospects
+          if ((item.href === "/chat" || item.href === "/ai") && user.role === "prospect") return null;
 
           return (
             <Link

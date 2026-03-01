@@ -31,6 +31,7 @@ export async function updateSession(request: NextRequest) {
   if (
     pathname.startsWith("/api/") ||
     pathname.startsWith("/book/") ||
+    pathname.startsWith("/p/") ||
     pathname === "/"
   ) {
     // Still refresh the session cookie if it exists

@@ -13,7 +13,6 @@ import {
   CalendarCheck,
   MessageSquare,
   Brain,
-  Settings,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -121,12 +120,6 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     href: "/admin/ai",
     icon: Brain,
     roles: ADMIN_ROLES,
-  },
-  {
-    label: "Parametres",
-    href: "/admin/settings",
-    icon: Settings,
-    roles: ["admin"],
   },
 ];
 

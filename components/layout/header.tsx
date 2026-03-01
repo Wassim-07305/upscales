@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -208,16 +209,14 @@ export function Header({
                 <p className="text-xs text-muted-foreground">{email}</p>
               </div>
               <div className="mx-2 border-t border-border" />
-              <button
-                onClick={() => {
-                  setUserMenuOpen(false);
-                  router.push("/profile");
-                }}
+              <Link
+                href="/profile"
+                onClick={() => setUserMenuOpen(false)}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
               >
                 <User className="h-4 w-4" />
                 Mon profil
-              </button>
+              </Link>
               <div className="mx-2 border-t border-border" />
               <button
                 onClick={() => {

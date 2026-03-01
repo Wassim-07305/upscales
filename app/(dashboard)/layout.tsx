@@ -1,12 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/layout/app-shell";
-import {
-  NAV_SECTIONS,
-  NAV_ITEMS,
-  QUICK_LINKS,
-  BREADCRUMB_LABELS,
-} from "@/lib/constants/navigation";
+import { DashboardShell } from "./DashboardShell";
 
 export default async function DashboardLayout({
   children,
@@ -33,23 +27,14 @@ export default async function DashboardLayout({
   }
 
   return (
-    <AppShell
+    <DashboardShell
       role={profile.role}
       userName={profile.full_name || profile.email}
       email={profile.email}
       avatarUrl={profile.avatar_url}
       userId={profile.id}
-      navSections={NAV_SECTIONS}
-      navItems={NAV_ITEMS}
-      quickLinks={QUICK_LINKS}
-      breadcrumbLabels={BREADCRUMB_LABELS}
-      logoSrc="/icons/icon-48x48.png"
-      appName={
-        <span className="font-display font-bold tracking-tight">UPSCALE</span>
-      }
-      adminRoles={["admin", "moderator"]}
     >
       {children}
-    </AppShell>
+    </DashboardShell>
   );
 }

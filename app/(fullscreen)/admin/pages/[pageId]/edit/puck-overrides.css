@@ -1,0 +1,88 @@
+/* Puck dark theme overrides — match Upscale neon theme */
+
+:root {
+  --puck-color-azure-01: #0D0D0D;
+  --puck-color-azure-02: #0D0D0D;
+  --puck-color-azure-03: #141414;
+  --puck-color-azure-04: #1C1C1C;
+  --puck-color-azure-05: #252525;
+  --puck-color-azure-06: #333333;
+  --puck-color-azure-07: #555555;
+  --puck-color-azure-08: #888888;
+  --puck-color-azure-09: #C6FF00;
+  --puck-color-azure-10: #a8d900;
+  --puck-color-azure-11: #C6FF00;
+  --puck-color-azure-12: #ffffff;
+
+  --puck-color-grey-01: #0D0D0D;
+  --puck-color-grey-02: #111111;
+  --puck-color-grey-03: #1a1a1a;
+  --puck-color-grey-04: #222222;
+  --puck-color-grey-05: #2a2a2a;
+  --puck-color-grey-06: #333333;
+  --puck-color-grey-07: #444444;
+  --puck-color-grey-08: #666666;
+  --puck-color-grey-09: #999999;
+  --puck-color-grey-10: #aaaaaa;
+  --puck-color-grey-11: #cccccc;
+  --puck-color-grey-12: #eeeeee;
+
+  --puck-color-white: #0D0D0D;
+  --puck-color-black: #ffffff;
+
+  --puck-font-family: "Outfit", system-ui, sans-serif;
+}
+
+/* Override Puck preview background */
+[class*="PuckLayout-frame"],
+[class*="Puck-portal"] {
+  background-color: #0D0D0D !important;
+  color: #ffffff !important;
+}
+
+/* Publish button → neon style */
+[class*="Puck-header"] button[class*="publish"],
+[class*="Puck-header"] button:last-child {
+  background-color: #C6FF00 !important;
+  color: #0D0D0D !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+}
+
+/* Side panel dark bg */
+[class*="SidebarSection"],
+[class*="Puck-leftSidebar"],
+[class*="Puck-rightSidebar"] {
+  background-color: #111111 !important;
+  border-color: #1C1C1C !important;
+}
+
+/* Input fields dark theme */
+[class*="Puck"] input,
+[class*="Puck"] textarea,
+[class*="Puck"] select {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[class*="Puck"] input::placeholder,
+[class*="Puck"] textarea::placeholder {
+  color: #666666 !important;
+}
+
+/* Component list items */
+[class*="ComponentList-item"] {
+  background-color: #141414 !important;
+  border-color: #1C1C1C !important;
+}
+
+[class*="ComponentList-item"]:hover {
+  border-color: #C6FF00 !important;
+}
+
+/* Header dark */
+[class*="Puck-header"] {
+  background-color: #0D0D0D !important;
+  border-color: #1C1C1C !important;
+}

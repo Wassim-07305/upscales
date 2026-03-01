@@ -48,7 +48,7 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
   },
   {
     label: "MateuzsIA",
-    href: "/mateuzsIA",
+    href: "/ai",
     icon: Sparkles,
     roles: MEMBERS_UP,
   },
@@ -163,7 +163,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Communaute",
     items: MAIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/mateuzsIA", "/community"].includes(i.href)
+      ["/chat", "/ai", "/community"].includes(i.href)
     ),
   },
   {
@@ -184,7 +184,6 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
   formations: "Formations",
   chat: "Chat",
-  mateuzsIA: "MateuzsIA",
   community: "Communaute",
   calendar: "Calendrier",
   notifications: "Notifications",
@@ -195,7 +194,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   pages: "Pages",
   booking: "Booking",
   channels: "Channels",
-  ai: "Base IA",
+  ai: "MateuzsIA",
   settings: "Parametres",
   edit: "Modifier",
 };
@@ -206,7 +205,7 @@ export const QUICK_LINKS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Formations", href: "/formations", icon: BookOpen },
   { label: "Chat", href: "/chat", icon: MessageCircle },
-  { label: "MateuzsIA", href: "/mateuzsIA", icon: Sparkles },
+  { label: "MateuzsIA", href: "/ai", icon: Sparkles },
   { label: "Communaute", href: "/community", icon: Newspaper },
   { label: "Calendrier", href: "/calendar", icon: CalendarDays },
   { label: "Certificats", href: "/certificates", icon: Award },

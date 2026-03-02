@@ -2,10 +2,12 @@
 
 import { AppShell } from "@/components/layout/app-shell";
 import {
-  NAV_SECTIONS,
+  ADMIN_SECTIONS,
+  STUDENT_SECTIONS,
   NAV_ITEMS,
   QUICK_LINKS,
   BREADCRUMB_LABELS,
+  ADMIN_ROLES,
 } from "@/lib/constants/navigation";
 
 interface DashboardShellProps {
@@ -25,6 +27,9 @@ export function DashboardShell({
   userId,
   children,
 }: DashboardShellProps) {
+  const isAdmin = ADMIN_ROLES.includes(role);
+  const navSections = isAdmin ? ADMIN_SECTIONS : STUDENT_SECTIONS;
+
   return (
     <AppShell
       role={role}
@@ -32,7 +37,7 @@ export function DashboardShell({
       email={email}
       avatarUrl={avatarUrl}
       userId={userId}
-      navSections={NAV_SECTIONS}
+      navSections={navSections}
       navItems={NAV_ITEMS}
       quickLinks={QUICK_LINKS}
       breadcrumbLabels={BREADCRUMB_LABELS}

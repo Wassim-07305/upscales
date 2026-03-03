@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, CalendarDays, MessageCircle, Award } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
+import { WelcomeConfetti } from "./WelcomeConfetti";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -88,6 +90,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <Suspense>
+        <WelcomeConfetti />
+      </Suspense>
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold">Bonjour, {firstName} !</h1>
         <p className="text-muted-foreground mt-1">

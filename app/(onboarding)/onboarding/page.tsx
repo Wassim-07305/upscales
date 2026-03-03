@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import confetti from "canvas-confetti";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import {
@@ -204,17 +203,8 @@ export default function OnboardingPage() {
         .update({ onboarding_completed: true })
         .eq("id", userId);
 
-      confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ["#C6FF00", "#7FFFD4", "#ffffff", "#a3e635"],
-      });
-
-      setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh();
-      }, 1500);
+      router.push("/dashboard?welcome=1");
+      router.refresh();
     } catch {
       toast.error("Erreur lors de la finalisation");
       setSaving(false);

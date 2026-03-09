@@ -1,0 +1,253 @@
+import { Suspense } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { BookOpen, CalendarDays, MessageCircle, Award } from "lucide-react";
+import Link from "next/link";
+import { formatDate } from "@/lib/utils/dates";
+import { WelcomeConfetti } from "./WelcomeConfetti";
+
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  // Parallel fetch all data at once
+  const [
+    { data: profile },
+    { data: enrollments },
+    { data: progress },
+    { data: upcomingSessions },
+    { count: certCount },
+    { data: recentNotifs },
+  ] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("formation_enrollments")
+      .select("*, formation:formations(*)")
+      .eq("user_id", user.id)
+      .order("enrolled_at", { ascending: false }),
+    supabase.from("module_progress").select("*").eq("user_id", user.id),
+    supabase
+      .from("sessions")
+      .select("*, host:profiles(full_name)")
+      .eq("status", "scheduled")
+      .gte("start_time", new Date().toISOString())
+      .order("start_time")
+      .limit(3),
+    supabase
+      .from("certificates")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_read", false)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  if (!profile) redirect("/login");
+
+  // Fetch module counts (depends on enrollments)
+  const formationIds = enrollments?.map((e) => e.formation_id) || [];
+  const { data: modules } =
+    formationIds.length > 0
+      ? await supabase
+          .from("modules")
+          .select("id, formation_id")
+          .in("formation_id", formationIds)
+      : { data: [] as { id: string; formation_id: string }[] };
+
+  // Calculate progress per formation
+  const formationProgress =
+    enrollments?.map((enrollment) => {
+      const formModules =
+        modules?.filter((m) => m.formation_id === enrollment.formation_id) ||
+        [];
+      const completedModules =
+        progress?.filter(
+          (p) => p.formation_id === enrollment.formation_id && p.completed
+        ) || [];
+      const percent =
+        formModules.length > 0
+          ? Math.round((completedModules.length / formModules.length) * 100)
+          : 0;
+      return {
+        ...enrollment,
+        percent,
+        totalModules: formModules.length,
+        completedModules: completedModules.length,
+      };
+    }) || [];
+
+  const firstName = profile.full_name?.split(" ")[0] || "vous";
+
+  return (
+    <div className="space-y-6">
+      <Suspense>
+        <WelcomeConfetti />
+      </Suspense>
+      <div className="animate-fade-up">
+        <h1 className="text-3xl font-bold">Bonjour, {firstName} !</h1>
+        <p className="text-muted-foreground mt-1">
+          Voici un résumé de votre activité
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="animate-fade-up delay-1">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10 icon-halo">
+                <BookOpen className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold stat-value">
+                  {enrollments?.length || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Formations</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="animate-fade-up delay-2">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-neon/10 icon-halo">
+                <Award className="h-5 w-5 text-neon" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold stat-value">{certCount || 0}</p>
+                <p className="text-xs text-muted-foreground">Certificats</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="animate-fade-up delay-3">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-turquoise/10 icon-halo">
+                <CalendarDays className="h-5 w-5 text-turquoise" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold stat-value">
+                  {upcomingSessions?.length || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sessions à venir
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="animate-fade-up delay-4">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-[#FFB800]/10 icon-halo">
+                <MessageCircle className="h-5 w-5 text-[#FFB800]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold stat-value">
+                  {recentNotifs?.length || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Notifs non lues
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Formations en cours */}
+        <Card className="animate-fade-up delay-5">
+          <CardHeader>
+            <CardTitle className="text-base">
+              Mes formations en cours
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {formationProgress.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucune formation en cours.{" "}
+                <Link
+                  href="/formations"
+                  className="text-primary hover:underline"
+                >
+                  Découvrir les formations
+                </Link>
+              </p>
+            ) : (
+              formationProgress.slice(0, 4).map((fp) => (
+                <Link
+                  key={fp.id}
+                  href={`/formations/${fp.formation_id}`}
+                  className="block group"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                      {(fp as any).formation?.title}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {fp.percent}%
+                    </span>
+                  </div>
+                  <Progress value={fp.percent} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {fp.completedModules}/{fp.totalModules} modules
+                  </p>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Prochaines sessions */}
+        <Card className="animate-fade-up delay-6">
+          <CardHeader>
+            <CardTitle className="text-base">Prochaines sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {!upcomingSessions || upcomingSessions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Aucune session planifiée
+              </p>
+            ) : (
+              upcomingSessions.map((session) => (
+                <Link
+                  key={session.id}
+                  href="/calendar"
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-all duration-200"
+                >
+                  <div
+                    className="w-1 h-12 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: session.color }}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{session.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(session.start_time)}
+                    </p>
+                    {session.host && (
+                      <p className="text-xs text-muted-foreground">
+                        Par {(session.host as any).full_name}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

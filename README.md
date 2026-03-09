@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Upscale LMS
 
-## Getting Started
+Plateforme de formation en ligne (Learning Management System) complète avec portail apprenant et panneau d'administration.
 
-First, run the development server:
+## Stack technique
 
+- **Frontend** : Next.js 16 (App Router) + React 19 + TypeScript 5
+- **Styling** : Tailwind CSS 4 + shadcn/ui
+- **Backend** : Supabase (PostgreSQL, Auth, RLS, Storage, Realtime)
+- **State** : Zustand
+- **Formulaires** : React Hook Form + Zod
+- **Editeur rich text** : Tiptap
+- **PDF** : @react-pdf/renderer
+- **Charts** : Recharts
+- **Page builder** : Puck
+- **IA** : OpenAI embeddings + pgvector + Claude Haiku (RAG)
+
+## Fonctionnalites
+
+### Portail Apprenant
+- Catalogue de formations (video, texte, quiz)
+- Lecteur video avec sauvegarde de progression
+- Quiz avec score et retry
+- Sidebar de navigation des modules avec barre de progression
+- Certificats PDF generes automatiquement
+- Confetti de celebration a la fin d'une formation
+- Communaute (posts, likes, commentaires, reponses)
+- Chat en temps reel (channels publics, prives, DM)
+- Calendrier de sessions avec inscription
+- Notifications en temps reel
+- Assistant IA (RAG sur le contenu des formations)
+- Profil utilisateur avec onboarding
+
+### Panneau Admin
+- Dashboard avec KPIs et graphiques
+- Editeur de formations (modules, quiz, drag & drop)
+- CRM etudiants (fiches, tags, notes)
+- Gestion des channels de discussion
+- Gestion des sessions/evenements
+- Systeme de booking (pages de reservation, creneaux, qualifications)
+- Page builder (landing pages avec Puck)
+- Gestion de la base de connaissances IA
+- Parametres de la plateforme
+
+## Installation
+
+### Pre-requis
+- Node.js 18+
+- Un projet Supabase
+
+### Configuration
+
+1. Cloner le repo :
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Wassim-07305/upscales.git
+cd upscales
+git checkout dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Installer les dependances :
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configurer les variables d'environnement :
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Remplir `.env.local` :
+```
+NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-anon-key
+SUPABASE_SERVICE_ROLE_KEY=votre-service-role-key
+```
 
-## Learn More
+4. Appliquer les migrations Supabase (dans le SQL Editor du dashboard) :
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_booking_system.sql`
+   - `supabase/migrations/003_fix_booking_day_of_week.sql`
+   - `supabase/migrations/004_landing_pages.sql`
+   - `supabase/migrations/005_ai_knowledge_base.sql`
+   - `supabase/migrations/006_fix_comment_likes_trigger.sql`
 
-To learn more about Next.js, take a look at the following resources:
+5. Creer un bucket `media` dans Supabase Storage (public).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Lancement
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+NODE_OPTIONS='--max-http-header-size=32768' npm run dev -- -p 3005
+```
 
-## Deploy on Vercel
+L'option `--max-http-header-size` est necessaire pour les JWT Supabase ES256.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Ouvrir [http://localhost:3005](http://localhost:3005).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur de developpement |
+| `npm run build` | Build de production |
+| `npm run start` | Serveur de production |
+| `npm run lint` | Linting ESLint |
+
+## Structure du projet
+
+```
+app/
+  (auth)/              # Routes publiques (login, register, forgot-password)
+  (dashboard)/         # Routes protegees (dashboard, formations, chat, etc.)
+    admin/             # Routes admin (CRM, formations editor, settings)
+  (onboarding)/        # Onboarding nouvel utilisateur
+  api/                 # API routes (upload, certificates, auth, booking, AI)
+  book/[slug]/         # Pages de reservation publiques
+  p/[slug]/            # Landing pages publiques
+components/
+  ui/                  # 26 composants shadcn/ui
+  formations/          # VideoPlayer, QuizComponent, ModuleList
+  community/           # PostCard, CommentSection, CreatePost
+  booking/             # Composants admin et public du booking
+  layout/              # Sidebar, Header, GlobalSearch, Notifications
+  notifications/       # NotificationBell, NotificationItem
+lib/
+  supabase/            # Clients Supabase (browser, server, admin, middleware)
+  stores/              # Zustand stores (chat, notifications, UI)
+  hooks/               # Custom hooks (useChat, useNotifications, useCRM, etc.)
+  puck/                # Blocs Puck pour le page builder
+  ai/                  # RAG pipeline (embeddings, chunker, system prompt)
+  types/               # TypeScript interfaces
+  utils/               # Helpers (dates, formatters, roles)
+supabase/
+  migrations/          # 6 fichiers de migration SQL
+```
+
+## Deploiement
+
+Deployer sur [Vercel](https://vercel.com) avec les variables d'environnement configurees.

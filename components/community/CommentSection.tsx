@@ -39,6 +39,17 @@ export function CommentSection({
   const [replyContent, setReplyContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set(userLikes));
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>(() => {
+    const counts: Record<string, number> = {};
+    const collectCounts = (list: CommentWithAuthor[]) => {
+      list.forEach((c) => {
+        counts[c.id] = c.likes_count;
+        c.replies?.forEach((r) => { counts[r.id] = r.likes_count; });
+      });
+    };
+    collectCounts(comments);
+    return counts;
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -70,11 +81,13 @@ export function CommentSection({
 
   const handleLike = async (commentId: string) => {
     if (likedComments.has(commentId)) {
-      await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", currentUserId);
       setLikedComments((prev) => { const next = new Set(prev); next.delete(commentId); return next; });
+      setLikeCounts((prev) => ({ ...prev, [commentId]: Math.max(0, (prev[commentId] || 0) - 1) }));
+      await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", currentUserId);
     } else {
-      await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: currentUserId });
       setLikedComments((prev) => new Set(prev).add(commentId));
+      setLikeCounts((prev) => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+      await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: currentUserId });
     }
   };
 
@@ -108,7 +121,7 @@ export function CommentSection({
             )}
           >
             <Heart className={cn("h-3 w-3", likedComments.has(comment.id) && "fill-current")} />
-            {comment.likes_count > 0 && <span>{comment.likes_count}</span>}
+            {(likeCounts[comment.id] || 0) > 0 && <span>{likeCounts[comment.id]}</span>}
           </button>
           {!isReply && (
             <button

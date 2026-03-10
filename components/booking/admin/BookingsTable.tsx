@@ -17,7 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ChevronRight, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight, Calendar, Download } from "lucide-react";
 import { Booking, BookingStatus } from "@/lib/types/database";
 import { formatDate } from "@/lib/utils/dates";
 import { createClient } from "@/lib/supabase/client";
@@ -75,6 +76,32 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
     }
   }
 
+  const handleExportCSV = () => {
+    const header = "Nom,Email,Téléphone,Date,Début,Fin,Statut,Notes\n";
+    const rows = bookings.map((b) =>
+      [
+        `"${b.prospect_name}"`,
+        b.prospect_email,
+        b.prospect_phone || "",
+        b.date,
+        b.start_time.slice(0, 5),
+        b.end_time.slice(0, 5),
+        STATUS_CONFIG[b.status].label,
+        `"${(b.notes || "").replace(/"/g, '""')}"`,
+      ].join(",")
+    );
+
+    const csv = header + rows.join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `reservations-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export CSV téléchargé");
+  };
+
   if (bookings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
@@ -86,6 +113,13 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
   }
 
   return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
+          <Download className="mr-2 h-3.5 w-3.5" />
+          Exporter CSV
+        </Button>
+      </div>
     <Table>
       <TableHeader>
         <TableRow>
@@ -214,5 +248,6 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
         })}
       </TableBody>
     </Table>
+    </div>
   );
 }

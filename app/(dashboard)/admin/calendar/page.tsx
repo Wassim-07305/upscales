@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays, Download } from "lucide-react";
 import { Session, SessionStatus } from "@/lib/types/database";
 import { formatDateTime, formatTime } from "@/lib/utils/dates";
 import { toast } from "sonner";
@@ -150,6 +150,40 @@ export default function AdminCalendarPage() {
     toast.success("Statut mis à jour");
   };
 
+  const handleExportParticipants = async (session: Session) => {
+    const { data: participants } = await supabase
+      .from("session_participants")
+      .select("*, user:profiles!session_participants_user_id_fkey(full_name, email, phone)")
+      .eq("session_id", session.id);
+
+    if (!participants || participants.length === 0) {
+      toast.error("Aucun participant à exporter");
+      return;
+    }
+
+    const header = "Nom,Email,Téléphone,Inscrit le,Présent\n";
+    const rows = participants.map((p) => {
+      const user = p.user as unknown as { full_name: string; email: string; phone: string | null } | null;
+      return [
+        user?.full_name || "",
+        user?.email || "",
+        user?.phone || "",
+        new Date(p.registered_at).toLocaleDateString("fr-FR"),
+        p.attended ? "Oui" : "Non",
+      ].join(",");
+    });
+
+    const csv = header + rows.join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `participants-${session.title.replace(/\s+/g, "-")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export CSV téléchargé");
+  };
+
   const statusColors: Record<SessionStatus, string> = {
     scheduled: "bg-turquoise/20 text-turquoise",
     completed: "bg-neon/20 text-neon",
@@ -222,6 +256,15 @@ export default function AdminCalendarPage() {
                       <SelectItem value="cancelled">Annulée</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleExportParticipants(s)}
+                    title="Exporter les participants"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                  </Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>

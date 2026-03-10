@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -21,12 +21,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Hash, Lock, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Plus, Pencil, Trash2, Loader2, Users, UserMinus, Hash } from "lucide-react";
 import { Channel, ChannelType } from "@/lib/types/database";
+import { getInitials } from "@/lib/utils/formatters";
+import { timeAgo } from "@/lib/utils/dates";
 import { toast } from "sonner";
 
+interface ChannelWithCount extends Channel {
+  members_count: number;
+}
+
+interface ChannelMember {
+  id: string;
+  user_id: string;
+  joined_at: string;
+  user: { full_name: string; email: string; avatar_url: string | null } | null;
+}
+
 export default function AdminChannelsPage() {
-  const [channels, setChannels] = useState<Channel[]>([]);
+  const [channels, setChannels] = useState<ChannelWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Channel | null>(null);
@@ -35,6 +49,13 @@ export default function AdminChannelsPage() {
   const [type, setType] = useState<ChannelType>("public");
   const [icon, setIcon] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Members management
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [membersChannel, setMembersChannel] = useState<ChannelWithCount | null>(null);
+  const [members, setMembers] = useState<ChannelMember[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -44,7 +65,21 @@ export default function AdminChannelsPage() {
         .select("*")
         .neq("type", "dm")
         .order("created_at");
-      setChannels(data || []);
+
+      if (data) {
+        const channelIds = data.map((c) => c.id);
+        const { data: memberCounts } = await supabase
+          .from("channel_members")
+          .select("channel_id")
+          .in("channel_id", channelIds);
+
+        setChannels(
+          data.map((c) => ({
+            ...c,
+            members_count: memberCounts?.filter((m) => m.channel_id === c.id).length || 0,
+          }))
+        );
+      }
       setLoading(false);
     }
     fetch();
@@ -87,7 +122,9 @@ export default function AdminChannelsPage() {
         .select()
         .single();
       if (updated) {
-        setChannels((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+        setChannels((prev) =>
+          prev.map((c) => (c.id === updated.id ? { ...updated, members_count: c.members_count } : c))
+        );
         toast.success("Channel mis à jour");
       }
     } else {
@@ -98,7 +135,7 @@ export default function AdminChannelsPage() {
         .select()
         .single();
       if (created) {
-        setChannels((prev) => [...prev, created]);
+        setChannels((prev) => [...prev, { ...created, members_count: 0 }]);
         toast.success("Channel créé");
       }
     }
@@ -121,6 +158,49 @@ export default function AdminChannelsPage() {
     toast.success(archived ? "Channel archivé" : "Channel restauré");
   };
 
+  const openMembers = async (channel: ChannelWithCount) => {
+    setMembersChannel(channel);
+    setMembersOpen(true);
+    setLoadingMembers(true);
+
+    const { data } = await supabase
+      .from("channel_members")
+      .select("id, user_id, joined_at, user:profiles!channel_members_user_id_fkey(full_name, email, avatar_url)")
+      .eq("channel_id", channel.id)
+      .order("joined_at", { ascending: false });
+
+    setMembers(
+      (data || []).map((m) => ({
+        ...m,
+        user: m.user as unknown as ChannelMember["user"],
+      }))
+    );
+    setLoadingMembers(false);
+  };
+
+  const removeMember = async (memberId: string, userId: string) => {
+    await supabase.from("channel_members").delete().eq("id", memberId);
+    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    if (membersChannel) {
+      setChannels((prev) =>
+        prev.map((c) =>
+          c.id === membersChannel.id
+            ? { ...c, members_count: Math.max(0, c.members_count - 1) }
+            : c
+        )
+      );
+    }
+    toast.success("Membre retiré du channel");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -134,57 +214,81 @@ export default function AdminChannelsPage() {
         </Button>
       </div>
 
-      <div className="grid gap-3">
-        {channels.map((ch) => (
-          <Card key={ch.id} className={ch.is_archived ? "opacity-50" : ""}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{ch.icon || (ch.type === "private" ? "🔒" : "#")}</span>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{ch.name}</p>
-                      <Badge variant="outline" className="text-[10px]">
-                        {ch.type === "public" ? "Public" : "Privé"}
-                      </Badge>
-                      {ch.is_archived && (
-                        <Badge variant="outline" className="text-[10px] text-yellow-400">
-                          Archivé
+      {channels.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <Hash className="h-12 w-12 mb-4 opacity-50" />
+          <p className="text-lg font-medium">Aucun channel</p>
+          <p className="text-sm mt-1">Créez votre premier channel pour commencer.</p>
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {channels.map((ch) => (
+            <Card key={ch.id} className={ch.is_archived ? "opacity-50" : ""}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{ch.icon || (ch.type === "private" ? "🔒" : "#")}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{ch.name}</p>
+                        <Badge variant="outline" className="text-[10px]">
+                          {ch.type === "public" ? "Public" : "Privé"}
                         </Badge>
-                      )}
+                        {ch.is_archived && (
+                          <Badge variant="outline" className="text-[10px] text-yellow-400">
+                            Archivé
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        {ch.description && (
+                          <p className="text-sm text-muted-foreground">{ch.description}</p>
+                        )}
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          {ch.members_count} membre{ch.members_count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
                     </div>
-                    {ch.description && (
-                      <p className="text-sm text-muted-foreground">{ch.description}</p>
-                    )}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => openMembers(ch)}
+                      title="Gérer les membres"
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(ch)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => handleArchive(ch.id, !ch.is_archived)}
+                    >
+                      {ch.is_archived ? "Restaurer" : "Archiver"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive"
+                      onClick={() => handleDelete(ch.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(ch)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleArchive(ch.id, !ch.is_archived)}
-                  >
-                    {ch.is_archived ? "Restaurer" : "Archiver"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-destructive"
-                    onClick={() => handleDelete(ch.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
+      {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -218,6 +322,62 @@ export default function AdminChannelsPage() {
               {editing ? "Mettre à jour" : "Créer"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Members Dialog */}
+      <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Membres — {membersChannel?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {loadingMembers ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : members.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Aucun membre dans ce channel</p>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {members.length} membre{members.length !== 1 ? "s" : ""}
+              </p>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {members.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={m.user?.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs bg-primary/20 text-primary">
+                          {getInitials(m.user?.full_name || m.user?.email || "")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{m.user?.full_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {m.user?.email} · Rejoint {timeAgo(m.joined_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive"
+                      onClick={() => removeMember(m.id, m.user_id)}
+                      title="Retirer du channel"
+                    >
+                      <UserMinus className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

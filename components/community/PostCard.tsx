@@ -25,6 +25,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Post, Profile, UserRole } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
@@ -58,6 +66,8 @@ export function PostCard({
   const [isEdited, setIsEdited] = useState(
     post.updated_at !== post.created_at
   );
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState<string>("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -108,11 +118,12 @@ export function PostCard({
     setEditing(false);
   };
 
-  const handleReport = async () => {
+  const handleReport = async (reason: string) => {
+    if (!reason) return;
     const { error } = await supabase.from("post_reports").insert({
       post_id: post.id,
       reporter_id: currentUserId,
-      reason: "inappropriate",
+      reason,
     });
 
     if (error) {
@@ -124,6 +135,8 @@ export function PostCard({
     } else {
       toast.success("Post signalé. Un modérateur l'examinera.");
     }
+    setReportOpen(false);
+    setReportReason("");
   };
 
   const canModerate = isModerator(currentUserRole);
@@ -192,7 +205,7 @@ export function PostCard({
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={handleReport}
+                    onClick={() => setReportOpen(true)}
                     className="text-[#FFB800]"
                   >
                     <Flag className="mr-2 h-4 w-4" />
@@ -287,6 +300,52 @@ export function PostCard({
           </Link>
         </div>
       </CardContent>
+
+      {/* Report Dialog */}
+      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-[#FFB800]" />
+              Signaler ce post
+            </DialogTitle>
+            <DialogDescription>
+              Choisissez la raison du signalement
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {[
+              { value: "inappropriate", label: "Contenu inapproprié" },
+              { value: "spam", label: "Spam ou publicité" },
+              { value: "harassment", label: "Harcèlement" },
+              { value: "misinformation", label: "Désinformation" },
+              { value: "other", label: "Autre" },
+            ].map((reason) => (
+              <button
+                key={reason.value}
+                onClick={() => setReportReason(reason.value)}
+                className={cn(
+                  "w-full text-left px-4 py-3 rounded-lg border transition-colors text-sm",
+                  reportReason === reason.value
+                    ? "border-[#FFB800]/50 bg-[#FFB800]/10 text-[#FFB800]"
+                    : "border-border hover:bg-accent/50"
+                )}
+              >
+                {reason.label}
+              </button>
+            ))}
+          </div>
+          <Button
+            onClick={() => handleReport(reportReason)}
+            disabled={!reportReason}
+            className="w-full"
+            variant="outline"
+          >
+            <Flag className="mr-2 h-4 w-4" />
+            Envoyer le signalement
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

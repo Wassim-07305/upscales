@@ -44,7 +44,7 @@ import {
   Loader2,
   ImageIcon,
 } from "lucide-react";
-import { Formation, FormationStatus } from "@/lib/types/database";
+import { DifficultyLevel, Formation, FormationStatus } from "@/lib/types/database";
 import { formatDate } from "@/lib/utils/dates";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -73,6 +73,8 @@ export function AdminFormationsClient({
   const [status, setStatus] = useState<FormationStatus>("draft");
   const [isFree, setIsFree] = useState(false);
   const [price, setPrice] = useState("");
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>("beginner");
+  const [category, setCategory] = useState("");
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -84,6 +86,8 @@ export function AdminFormationsClient({
     setStatus("draft");
     setIsFree(false);
     setPrice("");
+    setDifficulty("beginner");
+    setCategory("");
     setDialogOpen(true);
   };
 
@@ -94,6 +98,8 @@ export function AdminFormationsClient({
     setStatus(f.status);
     setIsFree(f.is_free);
     setPrice(f.price ? String(f.price) : "");
+    setDifficulty(f.difficulty);
+    setCategory(f.category || "");
     setDialogOpen(true);
   };
 
@@ -107,6 +113,8 @@ export function AdminFormationsClient({
       status,
       is_free: isFree,
       price: isFree ? null : price ? parseFloat(price) : null,
+      difficulty,
+      category: category.trim() || null,
     };
 
     if (editingFormation) {
@@ -310,6 +318,28 @@ export function AdminFormationsClient({
                 />
               </div>
             )}
+            <div className="space-y-2">
+              <Label>Niveau de difficulté</Label>
+              <Select value={difficulty} onValueChange={(v) => setDifficulty(v as DifficultyLevel)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Débutant</SelectItem>
+                  <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                  <SelectItem value="advanced">Avancé</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Catégorie</Label>
+              <Input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Ex: Marketing, Développement, Design..."
+                className="bg-[#141414]"
+              />
+            </div>
             <Button onClick={handleSave} disabled={!title.trim() || saving} className="w-full">
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingFormation ? "Mettre à jour" : "Créer"}

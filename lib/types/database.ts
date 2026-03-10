@@ -23,6 +23,17 @@ export interface Profile {
   is_online: boolean;
   onboarding_completed: boolean;
   notification_preferences: NotificationPreferences;
+  is_suspended: boolean;
+  suspended_at: string | null;
+  suspended_reason: string | null;
+}
+
+export interface UserWarning {
+  id: string;
+  user_id: string;
+  issued_by: string;
+  reason: string;
+  created_at: string;
 }
 
 export interface Formation {

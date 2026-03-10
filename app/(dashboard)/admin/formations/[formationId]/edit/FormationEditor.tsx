@@ -36,6 +36,7 @@ import {
   Save,
 } from "lucide-react";
 import { Formation, Module, ModuleType } from "@/lib/types/database";
+import { QuizEditor } from "@/components/admin/QuizEditor";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,8 @@ export function FormationEditor({
   const [moduleDuration, setModuleDuration] = useState("");
   const [moduleIsPreview, setModuleIsPreview] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [quizEditorModuleId, setQuizEditorModuleId] = useState<string | null>(null);
+  const [quizEditorModuleTitle, setQuizEditorModuleTitle] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -215,6 +218,20 @@ export function FormationEditor({
                       </div>
                     </div>
                     <div className="flex gap-1">
+                      {mod.type === "quiz" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-primary"
+                          onClick={() => {
+                            setQuizEditorModuleId(mod.id);
+                            setQuizEditorModuleTitle(mod.title);
+                          }}
+                        >
+                          <HelpCircle className="mr-1 h-3.5 w-3.5" />
+                          Quiz
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -331,6 +348,18 @@ export function FormationEditor({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quiz Editor */}
+      {quizEditorModuleId && (
+        <QuizEditor
+          moduleId={quizEditorModuleId}
+          moduleTitle={quizEditorModuleTitle}
+          open={!!quizEditorModuleId}
+          onOpenChange={(open) => {
+            if (!open) setQuizEditorModuleId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

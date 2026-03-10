@@ -119,7 +119,8 @@ export function GlobalSearch({
 
       if (posts) {
         posts.forEach((p) => {
-          const authorName = (p.author as { full_name: string } | null)?.full_name || "Anonyme";
+          const author = p.author as unknown as { full_name: string } | { full_name: string }[] | null;
+          const authorName = (Array.isArray(author) ? author[0]?.full_name : author?.full_name) || "Anonyme";
           allResults.push({
             id: p.id,
             title: p.content.slice(0, 60) + (p.content.length > 60 ? "..." : ""),

@@ -15,6 +15,7 @@ import {
   Bell,
   BarChart3,
   Trophy,
+  Gift,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -75,6 +76,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     href: "/ai",
     icon: Sparkles,
     roles: MEMBERS_UP,
+  },
+  {
+    label: "Parrainage",
+    href: "/referral",
+    icon: Gift,
+    roles: ALL_ROLES,
   },
   {
     label: "Notifications",
@@ -188,7 +195,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/notifications"].includes(i.href)
+      ["/referral", "/notifications"].includes(i.href)
     ),
   },
 ];
@@ -235,6 +242,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   notifications: "Notifications",
   certificates: "Certificats",
   leaderboard: "Classement",
+  referral: "Parrainage",
   profile: "Profil",
   admin: "Administration",
   crm: "CRM",

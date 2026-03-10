@@ -37,6 +37,23 @@ import {
   ImageIcon,
   Upload,
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Formation, Module, ModuleType } from "@/lib/types/database";
 import { QuizEditor } from "@/components/admin/QuizEditor";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
@@ -194,6 +211,32 @@ export function FormationEditor({
     toast.success("Module supprimé");
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = modules.findIndex((m) => m.id === active.id);
+    const newIndex = modules.findIndex((m) => m.id === over.id);
+    const reordered = arrayMove(modules, oldIndex, newIndex).map((m, i) => ({
+      ...m,
+      order: i,
+    }));
+    setModules(reordered);
+
+    // Persist new order
+    await Promise.all(
+      reordered.map((m, i) =>
+        supabase.from("modules").update({ order: i }).eq("id", m.id)
+      )
+    );
+    toast.success("Ordre mis à jour");
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <Link
@@ -273,73 +316,25 @@ export function FormationEditor({
               <p>Aucun module. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {modules.map((mod, index) => {
-                const Icon = typeIcons[mod.type];
-                return (
-                  <div
-                    key={mod.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-[#1C1C1C] hover:bg-[#141414] transition-colors"
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                    <div className="flex items-center justify-center w-7 h-7 rounded bg-secondary text-xs font-medium">
-                      {index + 1}
-                    </div>
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{mod.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-[10px]">
-                          {typeLabels[mod.type]}
-                        </Badge>
-                        {mod.is_preview && (
-                          <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
-                            Aperçu
-                          </Badge>
-                        )}
-                        {mod.duration_minutes > 0 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {mod.duration_minutes} min
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {mod.type === "quiz" && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 text-xs text-primary"
-                          onClick={() => {
-                            setQuizEditorModuleId(mod.id);
-                            setQuizEditorModuleTitle(mod.title);
-                          }}
-                        >
-                          <HelpCircle className="mr-1 h-3.5 w-3.5" />
-                          Quiz
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => openEditModule(mod)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => handleDeleteModule(mod.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {modules.map((mod, index) => (
+                    <SortableModuleItem
+                      key={mod.id}
+                      mod={mod}
+                      index={index}
+                      onEdit={() => openEditModule(mod)}
+                      onDelete={() => handleDeleteModule(mod.id)}
+                      onQuiz={() => {
+                        setQuizEditorModuleId(mod.id);
+                        setQuizEditorModuleTitle(mod.title);
+                      }}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
         </CardContent>
       </Card>
@@ -447,6 +442,88 @@ export function FormationEditor({
           }}
         />
       )}
+    </div>
+  );
+}
+
+// ─── Sortable Module Item ─────────────────────────────────
+
+function SortableModuleItem({
+  mod,
+  index,
+  onEdit,
+  onDelete,
+  onQuiz,
+}: {
+  mod: Module;
+  index: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  onQuiz: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: mod.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const Icon = typeIcons[mod.type];
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-lg bg-[#1C1C1C] hover:bg-[#141414] transition-colors",
+        isDragging && "opacity-50 shadow-lg ring-2 ring-primary/30"
+      )}
+    >
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none">
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </button>
+      <div className="flex items-center justify-center w-7 h-7 rounded bg-secondary text-xs font-medium">
+        {index + 1}
+      </div>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{mod.title}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <Badge variant="outline" className="text-[10px]">
+            {typeLabels[mod.type]}
+          </Badge>
+          {mod.is_preview && (
+            <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
+              Aperçu
+            </Badge>
+          )}
+          {mod.duration_minutes > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              {mod.duration_minutes} min
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-1">
+        {mod.type === "quiz" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-primary"
+            onClick={onQuiz}
+          >
+            <HelpCircle className="mr-1 h-3.5 w-3.5" />
+            Quiz
+          </Button>
+        )}
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }

@@ -18,6 +18,9 @@ import {
   ArrowLeft,
   Reply,
   X,
+  ImageIcon,
+  Loader2,
+  FileIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,8 +60,10 @@ export function ChatLayout({
   const [dmSearchOpen, setDmSearchOpen] = useState(false);
   const [dmSearch, setDmSearch] = useState("");
   const [replyTo, setReplyTo] = useState<(Message & { sender?: Profile }) | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   const scrollToBottom = () => {
@@ -162,6 +167,43 @@ export function ChatLayout({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!activeChannel) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (max 10 Mo)");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", "media");
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Erreur d'upload");
+      const { url } = await res.json();
+
+      const isImage = file.type.startsWith("image/");
+      const content = isImage ? "" : `📎 ${file.name}`;
+
+      await supabase.from("messages").insert({
+        channel_id: activeChannel.id,
+        sender_id: user.id,
+        content: content || "📷 Image",
+        media_url: url,
+        parent_id: replyTo?.id?.startsWith("temp-") ? null : replyTo?.id || null,
+      });
+
+      setReplyTo(null);
+    } catch {
+      toast.error("Erreur lors de l'envoi du fichier");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -412,13 +454,39 @@ export function ChatLayout({
                           </div>
                           <div
                             className={cn(
-                              "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
+                              "inline-block rounded-2xl text-sm max-w-[80%] overflow-hidden",
                               isOwn
                                 ? "bg-primary text-primary-foreground rounded-br-sm"
-                                : "bg-muted rounded-bl-sm"
+                                : "bg-muted rounded-bl-sm",
+                              msg.media_url ? "p-1" : "px-3 py-2"
                             )}
                           >
-                            {msg.content}
+                            {msg.media_url && /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(msg.media_url) ? (
+                              <div>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={msg.media_url}
+                                  alt=""
+                                  className="max-w-[300px] max-h-[200px] rounded-xl object-cover cursor-pointer"
+                                  onClick={() => window.open(msg.media_url!, "_blank")}
+                                />
+                                {msg.content && msg.content !== "📷 Image" && (
+                                  <p className="px-2 py-1 text-xs">{msg.content}</p>
+                                )}
+                              </div>
+                            ) : msg.media_url ? (
+                              <a
+                                href={msg.media_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-2 py-1 hover:underline"
+                              >
+                                <FileIcon className="h-4 w-4 flex-shrink-0" />
+                                <span>{msg.content}</span>
+                              </a>
+                            ) : (
+                              msg.content
+                            )}
                           </div>
                         </div>
                       </div>
@@ -472,6 +540,29 @@ export function ChatLayout({
                 </div>
               )}
               <div className="p-3 flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file);
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex-shrink-0"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-4 w-4" />
+                  )}
+                </Button>
                 <Input
                   ref={inputRef}
                   value={newMessage}
@@ -483,7 +574,7 @@ export function ChatLayout({
                 <Button
                   size="icon"
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() || uploading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>

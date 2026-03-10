@@ -18,6 +18,7 @@ import {
   Gift,
   TrendingUp,
   Shield,
+  Hash,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -169,6 +170,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ROLES,
   },
   {
+    label: "Channels",
+    href: "/admin/channels",
+    icon: Hash,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Modération",
     href: "/admin/moderation",
     icon: Shield,
@@ -229,7 +236,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/ai", "/admin/moderation"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/ai", "/admin/channels", "/admin/moderation"].includes(i.href)
     ),
   },
   {
@@ -265,6 +272,8 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   booking: "Booking",
   ai: "MateuzsIA",
   analytics: "Analytics",
+  members: "Membres",
+  channels: "Channels",
   moderation: "Modération",
   settings: "Parametres",
   edit: "Modifier",

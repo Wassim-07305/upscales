@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Star, Zap, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 function getInitials(name: string | null): string {
   if (!name) return "?";
@@ -187,10 +188,11 @@ export default async function LeaderboardPage() {
                 );
 
                 return (
-                  <div
+                  <Link
                     key={entry.user_id}
+                    href={`/members/${entry.user_id}`}
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg transition-colors",
+                      "flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-accent/50",
                       getRankStyle(rank),
                       isCurrentUser && "ring-1 ring-primary/40 bg-primary/5"
                     )}
@@ -261,7 +263,7 @@ export default async function LeaderboardPage() {
                       <Zap className="h-3.5 w-3.5 text-primary" />
                       {entry.total_xp.toLocaleString("fr-FR")}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

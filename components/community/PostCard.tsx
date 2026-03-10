@@ -1,15 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Heart, MessageCircle, Pin, Trash2, MoreHorizontal } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Pin,
+  Trash2,
+  MoreHorizontal,
+  Pencil,
+  Flag,
+  Check,
+  X,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +32,7 @@ import { getInitials } from "@/lib/utils/formatters";
 import { getRoleBadgeColor, getRoleLabel, isModerator } from "@/lib/utils/roles";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface PostCardProps {
   post: Post & { author: Profile; user_has_liked?: boolean };
@@ -37,17 +51,78 @@ export function PostCard({
 }: PostCardProps) {
   const [liked, setLiked] = useState(post.user_has_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count);
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [currentContent, setCurrentContent] = useState(post.content);
+  const [saving, setSaving] = useState(false);
+  const [isEdited, setIsEdited] = useState(
+    post.updated_at !== post.created_at
+  );
+  const router = useRouter();
   const supabase = createClient();
 
   const handleLike = async () => {
     if (liked) {
-      await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId);
+      await supabase
+        .from("post_likes")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("user_id", currentUserId);
       setLiked(false);
       setLikesCount((prev) => prev - 1);
     } else {
-      await supabase.from("post_likes").insert({ post_id: post.id, user_id: currentUserId });
+      await supabase
+        .from("post_likes")
+        .insert({ post_id: post.id, user_id: currentUserId });
       setLiked(true);
       setLikesCount((prev) => prev + 1);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!editContent.trim()) return;
+    setSaving(true);
+
+    const { error } = await supabase
+      .from("posts")
+      .update({
+        content: editContent.trim(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", post.id)
+      .eq("author_id", currentUserId);
+
+    if (error) {
+      toast.error("Erreur lors de la modification");
+    } else {
+      setCurrentContent(editContent.trim());
+      setIsEdited(true);
+      setEditing(false);
+      toast.success("Post modifié");
+    }
+    setSaving(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(currentContent);
+    setEditing(false);
+  };
+
+  const handleReport = async () => {
+    const { error } = await supabase.from("post_reports").insert({
+      post_id: post.id,
+      reporter_id: currentUserId,
+      reason: "inappropriate",
+    });
+
+    if (error) {
+      if (error.code === "23505") {
+        toast.info("Vous avez déjà signalé ce post");
+      } else {
+        toast.error("Erreur lors du signalement");
+      }
+    } else {
+      toast.success("Post signalé. Un modérateur l'examinera.");
     }
   };
 
@@ -79,25 +154,55 @@ export function PostCard({
                   <Pin className="h-3 w-3 text-primary" />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs text-muted-foreground">
+                  {timeAgo(post.created_at)}
+                </p>
+                {isEdited && (
+                  <span className="text-xs text-muted-foreground/60">
+                    (modifié)
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {(canModerate || isAuthor) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {canModerate && (
-                  <DropdownMenuItem onClick={() => onTogglePin?.(post.id, !post.is_pinned)}>
-                    <Pin className="mr-2 h-4 w-4" />
-                    {post.is_pinned ? "Désépingler" : "Épingler"}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isAuthor && (
+                <DropdownMenuItem onClick={() => setEditing(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Modifier
+                </DropdownMenuItem>
+              )}
+              {canModerate && (
+                <DropdownMenuItem
+                  onClick={() => onTogglePin?.(post.id, !post.is_pinned)}
+                >
+                  <Pin className="mr-2 h-4 w-4" />
+                  {post.is_pinned ? "Désépingler" : "Épingler"}
+                </DropdownMenuItem>
+              )}
+              {!isAuthor && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleReport}
+                    className="text-[#FFB800]"
+                  >
+                    <Flag className="mr-2 h-4 w-4" />
+                    Signaler
                   </DropdownMenuItem>
-                )}
-                {(canModerate || isAuthor) && (
+                </>
+              )}
+              {(canModerate || isAuthor) && (
+                <>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => onDelete?.(post.id)}
                     className="text-destructive"
@@ -105,20 +210,50 @@ export function PostCard({
                     <Trash2 className="mr-2 h-4 w-4" />
                     Supprimer
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Title */}
         {post.title && <h3 className="font-semibold mb-2">{post.title}</h3>}
 
-        {/* Content */}
-        <div
-          className="text-sm leading-relaxed mb-3 prose prose-sm dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        {/* Content — editable or static */}
+        {editing ? (
+          <div className="mb-3 space-y-2">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[80px] resize-none bg-muted/50 border-border text-sm"
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancelEdit}
+                disabled={saving}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Annuler
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleEdit}
+                disabled={saving || !editContent.trim()}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Enregistrer
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="text-sm leading-relaxed mb-3 prose prose-sm dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: currentContent }}
+          />
+        )}
 
         {/* Media */}
         {post.media_url && (

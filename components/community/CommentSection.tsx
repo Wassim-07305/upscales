@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Reply, Trash2, Send, Loader2 } from "lucide-react";
+import { Heart, Reply, Trash2, Send, Loader2, Pencil, Check, X } from "lucide-react";
 import { Comment, Profile, UserRole } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
 import { getInitials } from "@/lib/utils/formatters";
@@ -96,74 +96,172 @@ export function CommentSection({
     router.refresh();
   };
 
-  const renderComment = (comment: Omit<Comment, 'replies'> & { author: Profile }, isReply = false) => (
-    <div key={comment.id} className={cn("flex gap-3", isReply && "ml-12")}>
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={comment.author?.avatar_url || undefined} />
-        <AvatarFallback className="bg-primary/20 text-primary text-xs">
-          {getInitials(comment.author?.full_name || "")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <div className="bg-muted/50 rounded-lg px-3 py-2">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-medium">{comment.author?.full_name}</span>
-            <span className="text-xs text-muted-foreground">{timeAgo(comment.created_at)}</span>
-          </div>
-          <p className="text-sm">{comment.content}</p>
-        </div>
-        <div className="flex items-center gap-3 mt-1 ml-1">
-          <button
-            onClick={() => handleLike(comment.id)}
-            className={cn(
-              "flex items-center gap-1 text-xs transition-colors",
-              likedComments.has(comment.id) ? "text-destructive" : "text-muted-foreground hover:text-destructive"
-            )}
-          >
-            <Heart className={cn("h-3 w-3", likedComments.has(comment.id) && "fill-current")} />
-            {(likeCounts[comment.id] || 0) > 0 && <span>{likeCounts[comment.id]}</span>}
-          </button>
-          {!isReply && (
-            <button
-              onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Reply className="h-3 w-3" />
-              Répondre
-            </button>
-          )}
-          {(isModerator(currentUserRole) || comment.author_id === currentUserId) && (
-            <button
-              onClick={() => handleDelete(comment.id)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <Trash2 className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+  const [editingComment, setEditingComment] = useState<string | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
+  const [editedComments, setEditedComments] = useState<Record<string, string>>({});
 
-        {/* Reply input */}
-        {replyTo === comment.id && (
-          <div className="flex gap-2 mt-2 ml-2">
-            <Textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="Votre réponse..."
-              className="min-h-[60px] resize-none text-sm bg-muted/50 border-0"
-            />
-            <Button
-              size="icon"
-              className="flex-shrink-0"
-              onClick={() => handleComment(comment.id)}
-              disabled={!replyContent.trim() || loading}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+  const handleEditComment = async (commentId: string) => {
+    if (!editCommentContent.trim()) return;
+
+    const { error } = await supabase
+      .from("comments")
+      .update({
+        content: editCommentContent.trim(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", commentId)
+      .eq("author_id", currentUserId);
+
+    if (error) {
+      toast.error("Erreur lors de la modification");
+    } else {
+      setEditedComments((prev) => ({
+        ...prev,
+        [commentId]: editCommentContent.trim(),
+      }));
+      setEditingComment(null);
+      toast.success("Commentaire modifié");
+    }
+  };
+
+  const renderComment = (comment: Omit<Comment, 'replies'> & { author: Profile }, isReply = false) => {
+    const displayContent = editedComments[comment.id] || comment.content;
+    const wasEdited =
+      editedComments[comment.id] !== undefined ||
+      comment.updated_at !== comment.created_at;
+
+    return (
+      <div key={comment.id} className={cn("flex gap-3", isReply && "ml-12")}>
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          <AvatarImage src={comment.author?.avatar_url || undefined} />
+          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+            {getInitials(comment.author?.full_name || "")}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <div className="bg-muted/50 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-medium">
+                {comment.author?.full_name}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {timeAgo(comment.created_at)}
+              </span>
+              {wasEdited && (
+                <span className="text-xs text-muted-foreground/60">
+                  (modifié)
+                </span>
+              )}
+            </div>
+            {editingComment === comment.id ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editCommentContent}
+                  onChange={(e) => setEditCommentContent(e.target.value)}
+                  className="min-h-[50px] resize-none text-sm bg-background/50 border-border"
+                  autoFocus
+                />
+                <div className="flex gap-1.5 justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setEditingComment(null)}
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Annuler
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => handleEditComment(comment.id)}
+                    disabled={!editCommentContent.trim()}
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    OK
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm">{displayContent}</p>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-3 mt-1 ml-1">
+            <button
+              onClick={() => handleLike(comment.id)}
+              className={cn(
+                "flex items-center gap-1 text-xs transition-colors",
+                likedComments.has(comment.id)
+                  ? "text-destructive"
+                  : "text-muted-foreground hover:text-destructive"
+              )}
+            >
+              <Heart
+                className={cn(
+                  "h-3 w-3",
+                  likedComments.has(comment.id) && "fill-current"
+                )}
+              />
+              {(likeCounts[comment.id] || 0) > 0 && (
+                <span>{likeCounts[comment.id]}</span>
+              )}
+            </button>
+            {!isReply && (
+              <button
+                onClick={() =>
+                  setReplyTo(replyTo === comment.id ? null : comment.id)
+                }
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Reply className="h-3 w-3" />
+                Répondre
+              </button>
+            )}
+            {comment.author_id === currentUserId && (
+              <button
+                onClick={() => {
+                  setEditingComment(comment.id);
+                  setEditCommentContent(displayContent);
+                }}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Pencil className="h-3 w-3" />
+              </button>
+            )}
+            {(isModerator(currentUserRole) ||
+              comment.author_id === currentUserId) && (
+              <button
+                onClick={() => handleDelete(comment.id)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+
+          {/* Reply input */}
+          {replyTo === comment.id && (
+            <div className="flex gap-2 mt-2 ml-2">
+              <Textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder="Votre réponse..."
+                className="min-h-[60px] resize-none text-sm bg-muted/50 border-0"
+              />
+              <Button
+                size="icon"
+                className="flex-shrink-0"
+                onClick={() => handleComment(comment.id)}
+                disabled={!replyContent.trim() || loading}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-4">

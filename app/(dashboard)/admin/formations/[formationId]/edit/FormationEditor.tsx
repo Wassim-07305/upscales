@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -34,6 +34,8 @@ import {
   Pencil,
   Loader2,
   Save,
+  ImageIcon,
+  Upload,
 } from "lucide-react";
 import { Formation, Module, ModuleType } from "@/lib/types/database";
 import { QuizEditor } from "@/components/admin/QuizEditor";
@@ -74,8 +76,43 @@ export function FormationEditor({
   const [saving, setSaving] = useState(false);
   const [quizEditorModuleId, setQuizEditorModuleId] = useState<string | null>(null);
   const [quizEditorModuleTitle, setQuizEditorModuleTitle] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState(formation.thumbnail_url);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  const handleThumbnailUpload = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 5 Mo)");
+      return;
+    }
+
+    setUploadingThumbnail(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("bucket", "media");
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Erreur d'upload");
+      const { url } = await res.json();
+
+      const { error } = await supabase
+        .from("formations")
+        .update({ thumbnail_url: url })
+        .eq("id", formation.id);
+
+      if (error) throw error;
+
+      setThumbnailUrl(url);
+      toast.success("Thumbnail mise à jour");
+    } catch {
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
 
   const openAddModule = () => {
     setEditingModule(null);
@@ -170,6 +207,55 @@ export function FormationEditor({
         <h1 className="text-2xl font-bold">{formation.title}</h1>
         <p className="text-muted-foreground">Gérer les modules de cette formation</p>
       </div>
+
+      {/* Thumbnail */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Thumbnail</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-4">
+            <div className="relative w-48 h-28 rounded-lg overflow-hidden bg-[#1C1C1C] flex-shrink-0">
+              {thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumbnailUrl} alt={formation.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Image affichée sur la carte de formation. Ratio 16:9 recommandé.
+              </p>
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleThumbnailUpload(file);
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => thumbnailInputRef.current?.click()}
+                disabled={uploadingThumbnail}
+              >
+                {uploadingThumbnail ? (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-3.5 w-3.5" />
+                )}
+                {thumbnailUrl ? "Changer" : "Uploader"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Modules list */}
       <Card>

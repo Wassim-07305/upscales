@@ -169,10 +169,18 @@ export default async function DashboardPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Formations en cours */}
         <Card className="animate-fade-up delay-5">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
               Mes formations en cours
             </CardTitle>
+            {formationProgress.length > 0 && (
+              <Link
+                href="/formations"
+                className="text-xs text-primary hover:underline"
+              >
+                Voir tout ({formationProgress.length})
+              </Link>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {formationProgress.length === 0 ? (
@@ -186,7 +194,7 @@ export default async function DashboardPage() {
                 </Link>
               </p>
             ) : (
-              formationProgress.slice(0, 4).map((fp) => (
+              formationProgress.slice(0, 6).map((fp) => (
                 <Link
                   key={fp.id}
                   href={`/formations/${fp.formation_id}`}

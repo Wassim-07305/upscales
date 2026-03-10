@@ -42,7 +42,7 @@ import {
   Users,
   BookOpen,
   Loader2,
-  GripVertical,
+  ImageIcon,
 } from "lucide-react";
 import { Formation, FormationStatus } from "@/lib/types/database";
 import { formatDate } from "@/lib/utils/dates";
@@ -179,16 +179,37 @@ export function AdminFormationsClient({
                   <tr key={f.id} className="hover:bg-accent/50 transition-colors">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <BookOpen className="h-4 w-4 text-primary" />
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {f.thumbnail_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={f.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <BookOpen className="h-4 w-4 text-primary" />
+                          )}
                         </div>
                         <span className="text-sm font-medium">{f.title}</span>
                       </div>
                     </td>
                     <td className="p-3">
-                      <Badge variant="outline" className={cn("text-[10px]", statusColors[f.status])}>
-                        {f.status === "draft" ? "Brouillon" : f.status === "published" ? "Publié" : "Archivé"}
-                      </Badge>
+                      <Select
+                        value={f.status}
+                        onValueChange={async (v) => {
+                          await supabase.from("formations").update({ status: v }).eq("id", f.id);
+                          setFormations((prev) => prev.map((x) => x.id === f.id ? { ...x, status: v as FormationStatus } : x));
+                          toast.success("Statut mis à jour");
+                        }}
+                      >
+                        <SelectTrigger className="w-[120px] h-7 border-0 p-0">
+                          <Badge variant="outline" className={cn("text-[10px] cursor-pointer", statusColors[f.status])}>
+                            {f.status === "draft" ? "Brouillon" : f.status === "published" ? "Publié" : "Archivé"}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Brouillon</SelectItem>
+                          <SelectItem value="published">Publié</SelectItem>
+                          <SelectItem value="archived">Archivé</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="p-3 hidden md:table-cell">
                       <span className="text-sm flex items-center gap-1">
@@ -205,13 +226,10 @@ export function AdminFormationsClient({
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/admin/formations/${f.id}/edit`}>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Gérer les modules">
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(f)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">

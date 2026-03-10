@@ -27,6 +27,7 @@ import confetti from "canvas-confetti";
 import { Module, ModuleProgress, Quiz, QuizQuestion, QuizOption } from "@/lib/types/database";
 import { showXPToast } from "@/components/gamification/XPToast";
 import { ModuleNotes } from "@/components/formations/ModuleNotes";
+import { ModuleDiscussions } from "@/components/formations/ModuleDiscussions";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
@@ -49,6 +50,26 @@ interface ModuleContentProps {
   allModules: { id: string; title: string; order: number; type: string; duration_minutes: number }[];
   allProgress: { module_id: string; completed: boolean }[];
   initialNoteContent: string;
+  discussions: {
+    id: string;
+    content: string;
+    author_id: string;
+    parent_id: string | null;
+    is_resolved: boolean;
+    created_at: string;
+    author: { full_name: string; avatar_url: string | null; role: string } | null;
+    replies?: {
+      id: string;
+      content: string;
+      author_id: string;
+      parent_id: string | null;
+      is_resolved: boolean;
+      created_at: string;
+      author: { full_name: string; avatar_url: string | null; role: string } | null;
+    }[];
+  }[];
+  currentUserId: string;
+  isAdmin: boolean;
 }
 
 export function ModuleContent({
@@ -62,6 +83,9 @@ export function ModuleContent({
   allModules,
   allProgress,
   initialNoteContent,
+  discussions,
+  currentUserId,
+  isAdmin,
 }: ModuleContentProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -402,12 +426,21 @@ export function ModuleContent({
           />
         )}
 
-        {/* Notes */}
-        <ModuleNotes
-          moduleId={module.id}
-          formationId={formationId}
-          initialContent={initialNoteContent}
-        />
+        {/* Notes & Discussions */}
+        <div className="flex gap-2 flex-wrap">
+          <ModuleNotes
+            moduleId={module.id}
+            formationId={formationId}
+            initialContent={initialNoteContent}
+          />
+          <ModuleDiscussions
+            moduleId={module.id}
+            formationId={formationId}
+            discussions={discussions}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
+          />
+        </div>
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border/50">

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, Video, Send, Loader2, X } from "lucide-react";
+import { ImageIcon, Video, Send, Loader2, X, Type } from "lucide-react";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { showXPToast } from "@/components/gamification/XPToast";
 import { Profile, PostType } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
@@ -20,6 +21,7 @@ interface CreatePostProps {
 export function CreatePost({ user }: CreatePostProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [richMode, setRichMode] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
@@ -138,12 +140,21 @@ export function CreatePost({ user }: CreatePostProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <Textarea
-              placeholder="Partagez quelque chose avec la communauté..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[80px] resize-none bg-muted/50 border-0"
-            />
+            {richMode ? (
+              <RichTextEditor
+                content={content}
+                onChange={setContent}
+                placeholder="Partagez quelque chose avec la communauté..."
+                minHeight="80px"
+              />
+            ) : (
+              <Textarea
+                placeholder="Partagez quelque chose avec la communauté..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-[80px] resize-none bg-muted/50 border-0"
+              />
+            )}
 
             {/* Aperçu média */}
             {mediaPreview && (
@@ -175,6 +186,17 @@ export function CreatePost({ user }: CreatePostProps) {
 
             <div className="flex items-center justify-between mt-3">
               <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={richMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+                  onClick={() => setRichMode(!richMode)}
+                  disabled={loading || uploading}
+                >
+                  <Type className="h-4 w-4 mr-1" />
+                  Mise en forme
+                </Button>
+
                 <input
                   ref={imageInputRef}
                   type="file"

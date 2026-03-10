@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { Formation, Module, ModuleType } from "@/lib/types/database";
 import { QuizEditor } from "@/components/admin/QuizEditor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -394,11 +395,11 @@ export function FormationEditor({
             {moduleType === "text" && (
               <div className="space-y-2">
                 <Label>Contenu</Label>
-                <Textarea
-                  value={moduleContent}
-                  onChange={(e) => setModuleContent(e.target.value)}
-                  className="bg-[#141414] min-h-[120px]"
-                  placeholder="Contenu du module (supporte le HTML)"
+                <RichTextEditor
+                  content={moduleContent}
+                  onChange={setModuleContent}
+                  placeholder="Rédigez le contenu du module..."
+                  minHeight="200px"
                 />
               </div>
             )}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock } from "lucide-react";
+import { BookOpen, Clock, Users } from "lucide-react";
 import { Formation } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice, truncate } from "@/lib/utils/formatters";
@@ -13,6 +13,7 @@ interface FormationCardProps {
   formation: Formation;
   moduleCount?: number;
   totalDuration?: number;
+  enrolledCount?: number;
   progress?: number;
   enrolled?: boolean;
 }
@@ -21,6 +22,7 @@ export function FormationCard({
   formation,
   moduleCount = 0,
   totalDuration = 0,
+  enrolledCount,
   progress,
   enrolled,
 }: FormationCardProps) {
@@ -69,6 +71,12 @@ export function FormationCard({
               <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 {formatDuration(totalDuration)}
+              </span>
+            )}
+            {enrolledCount !== undefined && enrolledCount > 0 && (
+              <span className="flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" />
+                {enrolledCount} inscrits
               </span>
             )}
           </div>

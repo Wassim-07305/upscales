@@ -10,7 +10,7 @@ import { FormationsFilters } from "./FormationsFilters";
 export default async function FormationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -29,11 +29,16 @@ export default async function FormationsPage({
       supabase.from("module_progress").select("*").eq("user_id", user.id),
     ]);
 
-  // Fetch modules for counts (depends on formations result)
+  // Fetch modules and enrollment counts (depends on formations result)
   const formationIds = formations?.map((f) => f.id) || [];
-  const { data: modules } = formationIds.length > 0
-    ? await supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
-    : { data: [] };
+  const [{ data: modules }, { data: allEnrollments }] = await Promise.all([
+    formationIds.length > 0
+      ? supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { id: string; formation_id: string; duration_minutes: number }[] }),
+    formationIds.length > 0
+      ? supabase.from("formation_enrollments").select("formation_id").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { formation_id: string }[] }),
+  ]);
 
   // Process formations
   const processedFormations = formations?.map((f) => {
@@ -48,6 +53,7 @@ export default async function FormationsPage({
       ...f,
       moduleCount: fModules.length,
       totalDuration: fModules.reduce((sum, m) => sum + (m.duration_minutes || 0), 0),
+      enrolledCount: allEnrollments?.filter((e) => e.formation_id === f.id).length || 0,
       enrolled: !!enrollment,
       progress: progressPercent,
       completed: enrollment?.completed_at != null,
@@ -56,13 +62,24 @@ export default async function FormationsPage({
 
   // Filter
   const filter = params?.filter || "all";
+  const searchQuery = params?.q?.toLowerCase() || "";
   let filtered = processedFormations;
+
+  // Text search
+  if (searchQuery) {
+    filtered = filtered.filter(
+      (f) =>
+        f.title.toLowerCase().includes(searchQuery) ||
+        f.description?.toLowerCase().includes(searchQuery)
+    );
+  }
+
   if (filter === "in_progress") {
-    filtered = processedFormations.filter((f) => f.enrolled && !f.completed && f.progress > 0);
+    filtered = filtered.filter((f) => f.enrolled && !f.completed && f.progress > 0);
   } else if (filter === "completed") {
-    filtered = processedFormations.filter((f) => f.completed);
+    filtered = filtered.filter((f) => f.completed);
   } else if (filter === "free") {
-    filtered = processedFormations.filter((f) => f.is_free);
+    filtered = filtered.filter((f) => f.is_free);
   }
 
   return (
@@ -82,7 +99,7 @@ export default async function FormationsPage({
         )}
       </div>
 
-      <FormationsFilters currentFilter={filter} />
+      <FormationsFilters currentFilter={filter} currentSearch={searchQuery} />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((formation) => (
@@ -91,6 +108,7 @@ export default async function FormationsPage({
             formation={formation}
             moduleCount={formation.moduleCount}
             totalDuration={formation.totalDuration}
+            enrolledCount={formation.enrolledCount}
             progress={formation.enrolled ? formation.progress : undefined}
             enrolled={formation.enrolled}
           />

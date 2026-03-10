@@ -14,12 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, ExternalLink } from "lucide-react";
+import { Search, ExternalLink, Download } from "lucide-react";
 import { Profile, Tag, UserRole } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate, timeAgo } from "@/lib/utils/dates";
 import { getRoleBadgeColor, getRoleLabel } from "@/lib/utils/roles";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface StudentData extends Profile {
   tags: Tag[];
@@ -58,11 +59,43 @@ export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClie
     return result;
   }, [initialStudents, search, roleFilter, tagFilter]);
 
+  const handleExportCSV = () => {
+    const header = "Nom,Email,Téléphone,Rôle,Tags,Formations,Dernière activité,Inscription\n";
+    const rows = filtered.map((s) =>
+      [
+        `"${s.full_name || ""}"`,
+        s.email,
+        s.phone || "",
+        getRoleLabel(s.role),
+        `"${s.tags.map((t) => t.name).join(", ")}"`,
+        s.enrollments_count,
+        s.last_seen_at ? new Date(s.last_seen_at).toLocaleDateString("fr-FR") : "",
+        new Date(s.created_at).toLocaleDateString("fr-FR"),
+      ].join(",")
+    );
+
+    const csv = header + rows.join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `crm-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${filtered.length} utilisateur(s) exporté(s)`);
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">CRM — Suivi des élèves</h1>
-        <p className="text-muted-foreground">{initialStudents.length} utilisateurs au total</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">CRM — Suivi des élèves</h1>
+          <p className="text-muted-foreground">{initialStudents.length} utilisateurs au total</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExportCSV}>
+          <Download className="mr-2 h-3.5 w-3.5" />
+          Exporter CSV
+        </Button>
       </div>
 
       {/* Filters */}

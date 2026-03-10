@@ -3,8 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModuleList } from "@/components/formations/ModuleList";
-import { BookOpen, Clock, Users } from "lucide-react";
+import { BookOpen, Clock, Users, UserCircle } from "lucide-react";
+import { getInitials } from "@/lib/utils/formatters";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
 import { EnrollButton } from "./EnrollButton";
@@ -24,7 +26,7 @@ export default async function FormationDetailPage({
 
   const [formationRes, modulesRes, enrollmentRes, progressRes, enrollCountRes] =
     await Promise.all([
-      supabase.from("formations").select("*").eq("id", formationId).single(),
+      supabase.from("formations").select("*, creator:profiles!formations_created_by_fkey(full_name, avatar_url, bio)").eq("id", formationId).single(),
       supabase.from("modules").select("*").eq("formation_id", formationId).order("order"),
       supabase
         .from("formation_enrollments")
@@ -146,6 +148,31 @@ export default async function FormationDetailPage({
               )}
             </CardContent>
           </Card>
+
+          {/* Instructor */}
+          {formation.creator && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Formateur</p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={(formation.creator as any)?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                      {getInitials((formation.creator as any)?.full_name || "")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{(formation.creator as any)?.full_name}</p>
+                    {(formation.creator as any)?.bio && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                        {(formation.creator as any).bio}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

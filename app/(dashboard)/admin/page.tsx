@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, CalendarDays, MessageCircle, TrendingUp, Activity } from "lucide-react";
 import { isModerator } from "@/lib/utils/roles";
@@ -77,12 +78,12 @@ export default async function AdminDashboardPage() {
   }
 
   const stats = [
-    { label: "Total élèves", value: totalUsers || 0, icon: Users, color: "text-turquoise", bg: "bg-turquoise/10" },
-    { label: "Élèves actifs", value: activeUsers || 0, icon: Activity, color: "text-neon", bg: "bg-neon/10" },
-    { label: "Formations", value: totalFormations || 0, icon: BookOpen, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Sessions", value: totalSessions || 0, icon: CalendarDays, color: "text-[#FFB800]", bg: "bg-[#FFB800]/10" },
-    { label: "Taux de complétion", value: `${completionRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Messages", value: totalMessages || 0, icon: MessageCircle, color: "text-turquoise", bg: "bg-turquoise/10" },
+    { label: "Total élèves", value: totalUsers || 0, icon: Users, color: "text-turquoise", bg: "bg-turquoise/10", href: "/admin/crm" },
+    { label: "Élèves actifs", value: activeUsers || 0, icon: Activity, color: "text-neon", bg: "bg-neon/10", href: "/admin/crm" },
+    { label: "Formations", value: totalFormations || 0, icon: BookOpen, color: "text-primary", bg: "bg-primary/10", href: "/admin/formations" },
+    { label: "Sessions", value: totalSessions || 0, icon: CalendarDays, color: "text-[#FFB800]", bg: "bg-[#FFB800]/10", href: "/admin/calendar" },
+    { label: "Taux de complétion", value: `${completionRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", href: "/admin/formations" },
+    { label: "Messages", value: totalMessages || 0, icon: MessageCircle, color: "text-turquoise", bg: "bg-turquoise/10", href: "/chat" },
   ];
 
   return (
@@ -95,17 +96,19 @@ export default async function AdminDashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <div className={`p-2 rounded-lg ${stat.bg} mb-2`}>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+          <Link key={stat.label} href={stat.href}>
+            <Card className="hover:border-primary/30 transition-colors cursor-pointer h-full">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center text-center">
+                  <div className={`p-2 rounded-lg ${stat.bg} mb-2`}>
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

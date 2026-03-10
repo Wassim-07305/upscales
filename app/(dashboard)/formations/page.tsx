@@ -10,7 +10,13 @@ import { FormationsFilters } from "./FormationsFilters";
 export default async function FormationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; q?: string }>;
+  searchParams: Promise<{
+    filter?: string;
+    q?: string;
+    difficulty?: string;
+    duration?: string;
+    category?: string;
+  }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -60,9 +66,21 @@ export default async function FormationsPage({
     };
   }) || [];
 
+  // Extract available categories
+  const categories = [
+    ...new Set(
+      formations
+        ?.map((f) => f.category)
+        .filter((c): c is string => !!c) || []
+    ),
+  ].sort();
+
   // Filter
   const filter = params?.filter || "all";
   const searchQuery = params?.q?.toLowerCase() || "";
+  const difficultyFilter = params?.difficulty || "all";
+  const durationFilter = params?.duration || "all";
+  const categoryFilter = params?.category || "all";
   let filtered = processedFormations;
 
   // Text search
@@ -74,12 +92,33 @@ export default async function FormationsPage({
     );
   }
 
+  // Status filter
   if (filter === "in_progress") {
     filtered = filtered.filter((f) => f.enrolled && !f.completed && f.progress > 0);
   } else if (filter === "completed") {
     filtered = filtered.filter((f) => f.completed);
   } else if (filter === "free") {
     filtered = filtered.filter((f) => f.is_free);
+  }
+
+  // Difficulty filter
+  if (difficultyFilter !== "all") {
+    filtered = filtered.filter((f) => f.difficulty === difficultyFilter);
+  }
+
+  // Duration filter
+  if (durationFilter !== "all") {
+    filtered = filtered.filter((f) => {
+      if (durationFilter === "short") return f.totalDuration < 60;
+      if (durationFilter === "medium") return f.totalDuration >= 60 && f.totalDuration <= 180;
+      if (durationFilter === "long") return f.totalDuration > 180;
+      return true;
+    });
+  }
+
+  // Category filter
+  if (categoryFilter !== "all") {
+    filtered = filtered.filter((f) => f.category === categoryFilter);
   }
 
   return (
@@ -99,7 +138,14 @@ export default async function FormationsPage({
         )}
       </div>
 
-      <FormationsFilters currentFilter={filter} currentSearch={searchQuery} />
+      <FormationsFilters
+        currentFilter={filter}
+        currentSearch={searchQuery}
+        currentDifficulty={difficultyFilter}
+        currentDuration={durationFilter}
+        currentCategory={categoryFilter}
+        categories={categories}
+      />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((formation) => (

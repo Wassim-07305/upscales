@@ -5,6 +5,7 @@ export type ChannelType = "public" | "private" | "dm";
 export type NotificationType = "message" | "post" | "formation" | "session" | "certificate" | "system";
 export type SessionStatus = "scheduled" | "completed" | "cancelled";
 export type PostType = "text" | "image" | "video" | "announcement";
+export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
 
 export interface Profile {
   id: string;
@@ -30,6 +31,8 @@ export interface Formation {
   is_free: boolean;
   price: number | null;
   order: number;
+  difficulty: DifficultyLevel;
+  category: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

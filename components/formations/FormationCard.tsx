@@ -4,10 +4,26 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, Users } from "lucide-react";
-import { Formation } from "@/lib/types/database";
+import { BookOpen, Clock, Users, Signal } from "lucide-react";
+import { DifficultyLevel, Formation } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice, truncate } from "@/lib/utils/formatters";
+import { cn } from "@/lib/utils";
+
+const DIFFICULTY_CONFIG: Record<
+  DifficultyLevel,
+  { label: string; className: string }
+> = {
+  beginner: { label: "Débutant", className: "bg-neon/20 text-neon border-neon/30" },
+  intermediate: {
+    label: "Intermédiaire",
+    className: "bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30",
+  },
+  advanced: {
+    label: "Avancé",
+    className: "bg-destructive/20 text-destructive border-destructive/30",
+  },
+};
 
 interface FormationCardProps {
   formation: Formation;
@@ -42,12 +58,27 @@ export function FormationCard({
               <BookOpen className="h-12 w-12 text-primary/40" />
             </div>
           )}
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 flex gap-1.5">
+            {formation.difficulty && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px]",
+                  DIFFICULTY_CONFIG[formation.difficulty]?.className
+                )}
+              >
+                {DIFFICULTY_CONFIG[formation.difficulty]?.label}
+              </Badge>
+            )}
             <Badge
               variant={formation.is_free ? "secondary" : "default"}
               className={formation.is_free ? "bg-neon/20 text-neon border-neon/30" : ""}
             >
-              {formation.is_free ? "Gratuit" : formation.price ? formatPrice(formation.price) : "Premium"}
+              {formation.is_free
+                ? "Gratuit"
+                : formation.price
+                  ? formatPrice(formation.price)
+                  : "Premium"}
             </Badge>
           </div>
         </div>
@@ -56,6 +87,11 @@ export function FormationCard({
           <h3 className="font-semibold text-base group-hover:text-primary transition-colors line-clamp-2">
             {formation.title}
           </h3>
+          {formation.category && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+              {formation.category}
+            </Badge>
+          )}
           {formation.description && (
             <p className="text-sm text-muted-foreground line-clamp-2">
               {formation.description}

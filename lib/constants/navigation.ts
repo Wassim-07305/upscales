@@ -99,6 +99,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     icon: Bell,
     roles: ALL_ROLES,
   },
+  {
+    label: "Paramètres",
+    href: "/settings",
+    icon: Settings,
+    roles: ALL_ROLES,
+  },
 ];
 
 // ─── Navigation admin ───────────────────────────────────────
@@ -223,7 +229,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/referral", "/notifications"].includes(i.href)
+      ["/referral", "/notifications", "/settings"].includes(i.href)
     ),
   },
 ];
@@ -283,7 +289,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   broadcast: "Annonces",
   channels: "Channels",
   moderation: "Modération",
-  settings: "Parametres",
+  settings: "Paramètres",
   edit: "Modifier",
 };
 
@@ -299,4 +305,5 @@ export const QUICK_LINKS = [
   { label: "Classement", href: "/leaderboard", icon: Trophy },
   { label: "Ma progression", href: "/progress", icon: TrendingUp },
   { label: "Profil", href: "/profile", icon: User },
+  { label: "Paramètres", href: "/settings", icon: Settings },
 ];

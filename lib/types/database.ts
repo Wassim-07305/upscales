@@ -7,6 +7,8 @@ export type SessionStatus = "scheduled" | "completed" | "cancelled";
 export type PostType = "text" | "image" | "video" | "announcement";
 export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
 
+export type NotificationPreferences = Record<NotificationType, boolean>;
+
 export interface Profile {
   id: string;
   email: string;
@@ -20,6 +22,7 @@ export interface Profile {
   last_seen_at: string | null;
   is_online: boolean;
   onboarding_completed: boolean;
+  notification_preferences: NotificationPreferences;
 }
 
 export interface Formation {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, Users, Signal } from "lucide-react";
+import { BookOpen, Clock, Users, Star } from "lucide-react";
 import { DifficultyLevel, Formation } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice, truncate } from "@/lib/utils/formatters";
@@ -32,6 +32,8 @@ interface FormationCardProps {
   enrolledCount?: number;
   progress?: number;
   enrolled?: boolean;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 export function FormationCard({
@@ -41,6 +43,8 @@ export function FormationCard({
   enrolledCount,
   progress,
   enrolled,
+  averageRating,
+  reviewCount,
 }: FormationCardProps) {
   return (
     <Link href={`/formations/${formation.id}`}>
@@ -113,6 +117,13 @@ export function FormationCard({
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
                 {enrolledCount} inscrits
+              </span>
+            )}
+            {averageRating !== undefined && averageRating > 0 && (
+              <span className="flex items-center gap-1">
+                <Star className="h-3.5 w-3.5 fill-[#FFB800] text-[#FFB800]" />
+                {averageRating.toFixed(1)}
+                {reviewCount !== undefined && <span>({reviewCount})</span>}
               </span>
             )}
           </div>

@@ -37,13 +37,16 @@ export default async function FormationsPage({
 
   // Fetch modules and enrollment counts (depends on formations result)
   const formationIds = formations?.map((f) => f.id) || [];
-  const [{ data: modules }, { data: allEnrollments }] = await Promise.all([
+  const [{ data: modules }, { data: allEnrollments }, { data: allReviews }] = await Promise.all([
     formationIds.length > 0
       ? supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
       : Promise.resolve({ data: [] as { id: string; formation_id: string; duration_minutes: number }[] }),
     formationIds.length > 0
       ? supabase.from("formation_enrollments").select("formation_id").in("formation_id", formationIds)
       : Promise.resolve({ data: [] as { formation_id: string }[] }),
+    formationIds.length > 0
+      ? supabase.from("formation_reviews").select("formation_id, rating").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { formation_id: string; rating: number }[] }),
   ]);
 
   // Process formations
@@ -55,6 +58,11 @@ export default async function FormationsPage({
       ? Math.round((fProgress.length / fModules.length) * 100)
       : 0;
 
+    const fReviews = allReviews?.filter((r) => r.formation_id === f.id) || [];
+    const avgRating = fReviews.length > 0
+      ? fReviews.reduce((sum, r) => sum + r.rating, 0) / fReviews.length
+      : 0;
+
     return {
       ...f,
       moduleCount: fModules.length,
@@ -63,6 +71,8 @@ export default async function FormationsPage({
       enrolled: !!enrollment,
       progress: progressPercent,
       completed: enrollment?.completed_at != null,
+      averageRating: avgRating,
+      reviewCount: fReviews.length,
     };
   }) || [];
 
@@ -157,6 +167,8 @@ export default async function FormationsPage({
             enrolledCount={formation.enrolledCount}
             progress={formation.enrolled ? formation.progress : undefined}
             enrolled={formation.enrolled}
+            averageRating={formation.averageRating}
+            reviewCount={formation.reviewCount}
           />
         ))}
       </div>

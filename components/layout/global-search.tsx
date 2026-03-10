@@ -95,7 +95,7 @@ export function GlobalSearch({
         .from("formations")
         .select("id, title, description")
         .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
-        .eq("is_published", true)
+        .eq("status", "published")
         .limit(5);
 
       if (formations) {

@@ -10,8 +10,10 @@ import { getInitials } from "@/lib/utils/formatters";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
 import { EnrollButton } from "./EnrollButton";
+import { FormationReviews } from "./FormationReviews";
 import { Suspense } from "react";
 import { PaymentToast } from "./PaymentToast";
+import { Star } from "lucide-react";
 
 export default async function FormationDetailPage({
   params,
@@ -26,7 +28,7 @@ export default async function FormationDetailPage({
 
   if (!user) redirect("/login");
 
-  const [formationRes, modulesRes, enrollmentRes, progressRes, enrollCountRes] =
+  const [formationRes, modulesRes, enrollmentRes, progressRes, enrollCountRes, reviewsRes] =
     await Promise.all([
       supabase.from("formations").select("*, creator:profiles!formations_created_by_fkey(full_name, avatar_url, bio)").eq("id", formationId).single(),
       supabase.from("modules").select("*").eq("formation_id", formationId).order("order"),
@@ -45,6 +47,11 @@ export default async function FormationDetailPage({
         .from("formation_enrollments")
         .select("*", { count: "exact", head: true })
         .eq("formation_id", formationId),
+      supabase
+        .from("formation_reviews")
+        .select("*, author:profiles!formation_reviews_user_id_fkey(full_name, avatar_url)")
+        .eq("formation_id", formationId)
+        .order("created_at", { ascending: false }),
     ]);
 
   const formation = formationRes.data;
@@ -54,6 +61,10 @@ export default async function FormationDetailPage({
   const enrollment = enrollmentRes.data;
   const progress = progressRes.data || [];
   const enrollCount = enrollCountRes.count || 0;
+  const reviews = reviewsRes.data || [];
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   const completedCount = progress.filter((p) => p.completed).length;
   const completionPercent =
@@ -129,6 +140,14 @@ export default async function FormationDetailPage({
               />
             </CardContent>
           </Card>
+
+          <FormationReviews
+            formationId={formationId}
+            reviews={reviews}
+            currentUserId={user.id}
+            enrolled={!!enrollment}
+            averageRating={averageRating}
+          />
         </div>
 
         {/* Sidebar */}
@@ -147,6 +166,12 @@ export default async function FormationDetailPage({
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span>{enrollCount} inscrits</span>
               </div>
+              {reviews.length > 0 && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Star className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
+                  <span>{averageRating.toFixed(1)} ({reviews.length} avis)</span>
+                </div>
+              )}
 
               {!enrollment && (
                 <EnrollButton

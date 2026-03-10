@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy } from "lucide-react";
+import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
 import { WelcomeConfetti } from "./WelcomeConfetti";
@@ -33,7 +34,7 @@ export default async function DashboardPage() {
       .select("*, formation:formations(*)")
       .eq("user_id", user.id)
       .order("enrolled_at", { ascending: false }),
-    supabase.from("module_progress").select("*").eq("user_id", user.id),
+    supabase.from("module_progress").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }),
     supabase
       .from("sessions")
       .select("*, host:profiles(full_name)")
@@ -99,6 +100,28 @@ export default async function DashboardPage() {
       };
     }) || [];
 
+  // Trouver le dernier module consulté pour "Reprendre"
+  const lastProgress = progress?.find((p) => !p.completed) || progress?.[0];
+  const lastFormation = lastProgress
+    ? enrollments?.find((e) => e.formation_id === lastProgress.formation_id)
+    : null;
+  const lastModuleId = lastProgress?.module_id;
+  const lastFormationId = lastProgress?.formation_id;
+  const lastFormationTitle = lastFormation
+    ? (lastFormation as { formation?: { title: string } }).formation?.title
+    : null;
+
+  // Trouver le prochain module non complété
+  const nextUncompletedModule = lastFormationId
+    ? modules?.find(
+        (m) =>
+          m.formation_id === lastFormationId &&
+          !progress?.find((p) => p.module_id === m.id && p.completed)
+      )
+    : null;
+
+  const continueModuleId = nextUncompletedModule?.id || lastModuleId;
+
   const firstName = profile.full_name?.split(" ")[0] || "vous";
 
   return (
@@ -112,6 +135,30 @@ export default async function DashboardPage() {
           Voici un résumé de votre activité
         </p>
       </div>
+
+      {/* Reprendre la dernière formation */}
+      {continueModuleId && lastFormationId && lastFormationTitle && (
+        <Link href={`/formations/${lastFormationId}/${continueModuleId}`}>
+          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer bg-gradient-to-r from-primary/5 to-transparent">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Play className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Reprendre où vous en étiez</p>
+                    <p className="font-medium">{lastFormationTitle}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="default">
+                  Continuer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* XP Banner */}
       {(userXp || userBadges?.length) ? (

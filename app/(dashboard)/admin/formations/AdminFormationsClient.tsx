@@ -43,6 +43,7 @@ import {
   BookOpen,
   Loader2,
   ImageIcon,
+  Settings2,
 } from "lucide-react";
 import { DifficultyLevel, Formation, FormationStatus } from "@/lib/types/database";
 import { formatDate } from "@/lib/utils/dates";
@@ -53,6 +54,18 @@ import Link from "next/link";
 interface FormationWithCount extends Formation {
   enrolled_count: number;
 }
+
+const DIFFICULTY_LABELS: Record<string, string> = {
+  beginner: "Débutant",
+  intermediate: "Intermédiaire",
+  advanced: "Avancé",
+};
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  beginner: "bg-neon/20 text-neon border-neon/30",
+  intermediate: "bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30",
+  advanced: "bg-destructive/20 text-destructive border-destructive/30",
+};
 
 const statusColors: Record<FormationStatus, string> = {
   draft: "bg-[#FFB800]/20 text-[#FFB800] border-[#FFB800]/30",
@@ -176,6 +189,8 @@ export function AdminFormationsClient({
                 <tr className="border-b border-border">
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground">Formation</th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground">Statut</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Niveau</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Catégorie</th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Inscrits</th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Prix</th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Créée le</th>
@@ -220,6 +235,22 @@ export function AdminFormationsClient({
                       </Select>
                     </td>
                     <td className="p-3 hidden md:table-cell">
+                      {f.difficulty && (
+                        <Badge variant="outline" className={cn("text-[10px]", DIFFICULTY_COLORS[f.difficulty])}>
+                          {DIFFICULTY_LABELS[f.difficulty] || f.difficulty}
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="p-3 hidden lg:table-cell">
+                      {f.category ? (
+                        <Badge variant="outline" className="text-[10px]">
+                          {f.category}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="p-3 hidden md:table-cell">
                       <span className="text-sm flex items-center gap-1">
                         <Users className="h-3.5 w-3.5 text-muted-foreground" />
                         {f.enrolled_count}
@@ -233,6 +264,15 @@ export function AdminFormationsClient({
                     </td>
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Modifier les infos"
+                          onClick={() => openEditDialog(f)}
+                        >
+                          <Settings2 className="h-3.5 w-3.5" />
+                        </Button>
                         <Link href={`/admin/formations/${f.id}/edit`}>
                           <Button variant="ghost" size="icon" className="h-7 w-7" title="Gérer les modules">
                             <Pencil className="h-3.5 w-3.5" />

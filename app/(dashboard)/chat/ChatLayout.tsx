@@ -16,6 +16,8 @@ import {
   Users,
   Search,
   ArrowLeft,
+  Reply,
+  X,
 } from "lucide-react";
 import {
   Dialog,
@@ -54,7 +56,9 @@ export function ChatLayout({
   const [showChannelList, setShowChannelList] = useState(true);
   const [dmSearchOpen, setDmSearchOpen] = useState(false);
   const [dmSearch, setDmSearch] = useState("");
+  const [replyTo, setReplyTo] = useState<(Message & { sender?: Profile }) | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   const scrollToBottom = () => {
@@ -126,26 +130,31 @@ export function ChatLayout({
     const content = newMessage.trim();
     setNewMessage("");
 
+    const parentId = replyTo?.id?.startsWith("temp-") ? null : replyTo?.id || null;
+
     // Optimistic update
-    const optimisticMsg: Message & { sender?: Profile } = {
+    const optimisticMsg: Message & { sender?: Profile; reply_to?: Message & { sender?: Profile } } = {
       id: `temp-${Date.now()}`,
       channel_id: activeChannel.id,
       sender_id: user.id,
       content,
       media_url: null,
       is_edited: false,
-      parent_id: null,
+      parent_id: parentId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       sender: user,
+      reply_to: replyTo || undefined,
     };
     setMessages((prev) => [...prev, optimisticMsg]);
+    setReplyTo(null);
     setTimeout(scrollToBottom, 50);
 
     await supabase.from("messages").insert({
       channel_id: activeChannel.id,
       sender_id: user.id,
       content,
+      parent_id: parentId,
     });
   };
 
@@ -367,39 +376,79 @@ export function ChatLayout({
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((msg) => {
+                {messages.filter((m) => !m.parent_id).map((msg) => {
                   const isOwn = msg.sender_id === user.id;
+                  const replies = messages.filter((m) => m.parent_id === msg.id);
 
                   return (
-                    <div key={msg.id} className="flex items-start gap-3">
-                      {!isOwn && (
-                        <Avatar className="h-8 w-8 flex-shrink-0">
-                          <AvatarImage src={msg.sender?.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs bg-primary/20 text-primary">
-                            {getInitials(msg.sender?.full_name || "")}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div className={cn("flex-1", isOwn && "flex flex-col items-end")}>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-medium">
-                            {isOwn ? "Vous" : msg.sender?.full_name}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatMessageDate(msg.created_at)}
-                          </span>
-                        </div>
-                        <div
-                          className={cn(
-                            "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
-                            isOwn
-                              ? "bg-primary text-primary-foreground rounded-br-sm"
-                              : "bg-muted rounded-bl-sm"
-                          )}
-                        >
-                          {msg.content}
+                    <div key={msg.id}>
+                      <div className="group flex items-start gap-3">
+                        {!isOwn && (
+                          <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={msg.sender?.avatar_url || undefined} />
+                            <AvatarFallback className="text-xs bg-primary/20 text-primary">
+                              {getInitials(msg.sender?.full_name || "")}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={cn("flex-1", isOwn && "flex flex-col items-end")}>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-medium">
+                              {isOwn ? "Vous" : msg.sender?.full_name}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatMessageDate(msg.created_at)}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setReplyTo(msg);
+                                inputRef.current?.focus();
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                              title="Répondre"
+                            >
+                              <Reply className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <div
+                            className={cn(
+                              "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
+                              isOwn
+                                ? "bg-primary text-primary-foreground rounded-br-sm"
+                                : "bg-muted rounded-bl-sm"
+                            )}
+                          >
+                            {msg.content}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Thread replies */}
+                      {replies.length > 0 && (
+                        <div className="ml-11 mt-1 space-y-1 border-l-2 border-border/50 pl-3">
+                          {replies.map((reply) => {
+                            const isReplyOwn = reply.sender_id === user.id;
+                            return (
+                              <div key={reply.id} className="flex items-start gap-2">
+                                <Avatar className="h-5 w-5 flex-shrink-0">
+                                  <AvatarImage src={reply.sender?.avatar_url || undefined} />
+                                  <AvatarFallback className="text-[8px] bg-primary/20 text-primary">
+                                    {getInitials(reply.sender?.full_name || "")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <span className="text-[10px] font-medium mr-1.5">
+                                    {isReplyOwn ? "Vous" : reply.sender?.full_name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {reply.content}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -408,13 +457,27 @@ export function ChatLayout({
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
-              <div className="flex gap-2">
+            <div className="border-t border-border">
+              {replyTo && (
+                <div className="px-3 pt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Reply className="h-3 w-3" />
+                  <span>
+                    Réponse à <span className="font-medium text-foreground">{replyTo.sender_id === user.id ? "vous" : replyTo.sender?.full_name}</span>
+                    {" : "}
+                    <span className="truncate max-w-[200px] inline-block align-bottom">{replyTo.content.slice(0, 50)}{replyTo.content.length > 50 ? "…" : ""}</span>
+                  </span>
+                  <button onClick={() => setReplyTo(null)} className="ml-auto hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+              <div className="p-3 flex gap-2">
                 <Input
+                  ref={inputRef}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Écrire un message..."
+                  placeholder={replyTo ? "Écrire une réponse..." : "Écrire un message..."}
                   className="bg-[#141414] border-0"
                 />
                 <Button

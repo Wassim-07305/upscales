@@ -151,6 +151,15 @@ export async function POST(request: NextRequest) {
         if (!badgeError) {
           newBadges.push(badge.name);
 
+          // Notification de badge obtenu
+          await admin.from("notifications").insert({
+            user_id: user.id,
+            type: "system",
+            title: `Badge obtenu : ${badge.name}`,
+            message: `Vous avez débloqué le badge "${badge.name}". Continuez comme ça !`,
+            link: "/leaderboard",
+          });
+
           // Attribuer l'XP bonus du badge
           if (badge.xp_reward > 0) {
             await admin.rpc("add_user_xp", {

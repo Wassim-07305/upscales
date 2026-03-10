@@ -128,6 +128,24 @@ export function ModuleContent({
           completed_at: new Date().toISOString(),
         }).eq("user_id", user.id).eq("formation_id", formationId);
 
+        // Notification de formation complétée + certificat
+        await supabase.from("notifications").insert([
+          {
+            user_id: user.id,
+            type: "formation" as const,
+            title: "Formation terminée !",
+            message: `Vous avez terminé "${formationTitle}". Bravo !`,
+            link: `/formations/${formationId}`,
+          },
+          {
+            user_id: user.id,
+            type: "certificate" as const,
+            title: "Certificat obtenu",
+            message: `Votre certificat pour "${formationTitle}" est disponible.`,
+            link: "/certificates",
+          },
+        ]);
+
         // Attribuer XP pour la formation complétée
         try {
           const xpRes = await fetch("/api/xp", {

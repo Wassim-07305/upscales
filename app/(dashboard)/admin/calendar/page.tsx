@@ -21,8 +21,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays, Download, ClipboardCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Session, SessionStatus } from "@/lib/types/database";
+import { getInitials } from "@/lib/utils/formatters";
 import { formatDateTime, formatTime } from "@/lib/utils/dates";
 import { toast } from "sonner";
 
@@ -39,6 +42,15 @@ export default function AdminCalendarPage() {
   const [maxParts, setMaxParts] = useState("");
   const [color, setColor] = useState("#C6FF00");
   const [saving, setSaving] = useState(false);
+  const [attendanceOpen, setAttendanceOpen] = useState(false);
+  const [attendanceSession, setAttendanceSession] = useState<Session | null>(null);
+  const [participants, setParticipants] = useState<{
+    id: string;
+    user_id: string;
+    attended: boolean;
+    user: { full_name: string; email: string; avatar_url: string | null } | null;
+  }[]>([]);
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -184,6 +196,47 @@ export default function AdminCalendarPage() {
     toast.success("Export CSV téléchargé");
   };
 
+  const openAttendance = async (session: Session) => {
+    setAttendanceSession(session);
+    setAttendanceOpen(true);
+    setLoadingAttendance(true);
+
+    const { data } = await supabase
+      .from("session_participants")
+      .select("id, user_id, attended, user:profiles!session_participants_user_id_fkey(full_name, email, avatar_url)")
+      .eq("session_id", session.id);
+
+    setParticipants(
+      (data || []).map((p) => ({
+        ...p,
+        user: p.user as unknown as { full_name: string; email: string; avatar_url: string | null } | null,
+      }))
+    );
+    setLoadingAttendance(false);
+  };
+
+  const toggleAttendance = async (participantId: string, attended: boolean) => {
+    await supabase
+      .from("session_participants")
+      .update({ attended })
+      .eq("id", participantId);
+
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === participantId ? { ...p, attended } : p))
+    );
+  };
+
+  const markAllPresent = async () => {
+    if (!attendanceSession) return;
+    await supabase
+      .from("session_participants")
+      .update({ attended: true })
+      .eq("session_id", attendanceSession.id);
+
+    setParticipants((prev) => prev.map((p) => ({ ...p, attended: true })));
+    toast.success("Tous marqués comme présents");
+  };
+
   const statusColors: Record<SessionStatus, string> = {
     scheduled: "bg-turquoise/20 text-turquoise",
     completed: "bg-neon/20 text-neon",
@@ -260,6 +313,15 @@ export default function AdminCalendarPage() {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
+                    onClick={() => openAttendance(s)}
+                    title="Gérer les présences"
+                  >
+                    <ClipboardCheck className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => handleExportParticipants(s)}
                     title="Exporter les participants"
                   >
@@ -322,6 +384,60 @@ export default function AdminCalendarPage() {
               {editing ? "Mettre à jour" : "Créer"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attendance Dialog */}
+      <Dialog open={attendanceOpen} onOpenChange={setAttendanceOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Présences — {attendanceSession?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {loadingAttendance ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : participants.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Aucun participant inscrit</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {participants.filter((p) => p.attended).length}/{participants.length} présent(s)
+                </p>
+                <Button variant="outline" size="sm" onClick={markAllPresent}>
+                  Tous présents
+                </Button>
+              </div>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {participants.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={p.user?.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs bg-primary/20 text-primary">
+                          {getInitials(p.user?.full_name || p.user?.email || "")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{p.user?.full_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">{p.user?.email}</p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      checked={p.attended}
+                      onCheckedChange={(checked) => toggleAttendance(p.id, !!checked)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

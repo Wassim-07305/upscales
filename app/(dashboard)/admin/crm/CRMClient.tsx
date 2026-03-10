@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, ExternalLink, Download, ChevronDown, UserCog, TagIcon, X } from "lucide-react";
+import { Search, ExternalLink, Download, ChevronDown, UserCog, TagIcon, X, BookOpen } from "lucide-react";
 import { Profile, Tag, UserRole } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate, timeAgo } from "@/lib/utils/dates";
@@ -37,13 +37,19 @@ interface StudentData extends Profile {
   enrollments_count: number;
 }
 
+interface FormationOption {
+  id: string;
+  title: string;
+}
+
 interface CRMClientProps {
   initialStudents: StudentData[];
   allTags: Tag[];
+  allFormations: FormationOption[];
   currentUserRole: UserRole;
 }
 
-export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClientProps) {
+export function CRMClient({ initialStudents, allTags, allFormations, currentUserRole }: CRMClientProps) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
@@ -129,6 +135,29 @@ export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClie
     } else {
       const tagName = allTags.find((t) => t.id === tagId)?.name || "Tag";
       toast.success(`Tag "${tagName}" ajouté à ${ids.length} utilisateur(s)`);
+      setSelected(new Set());
+      router.refresh();
+    }
+  };
+
+  const handleBulkEnroll = async (formationId: string) => {
+    if (selected.size === 0) return;
+
+    const ids = Array.from(selected);
+    const inserts = ids.map((userId) => ({
+      user_id: userId,
+      formation_id: formationId,
+    }));
+
+    const { error } = await supabase
+      .from("formation_enrollments")
+      .upsert(inserts, { onConflict: "user_id,formation_id", ignoreDuplicates: true });
+
+    if (error) {
+      toast.error("Erreur", { description: error.message });
+    } else {
+      const formTitle = allFormations.find((f) => f.id === formationId)?.title || "Formation";
+      toast.success(`${ids.length} utilisateur(s) inscrit(s) à "${formTitle}"`);
       setSelected(new Set());
       router.refresh();
     }
@@ -271,6 +300,25 @@ export function CRMClient({ initialStudents, allTags, currentUserRole }: CRMClie
                         style={{ backgroundColor: tag.color }}
                       />
                       {tag.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {allFormations.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <BookOpen className="mr-2 h-3.5 w-3.5" />
+                    Inscrire à une formation
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                  {allFormations.map((f) => (
+                    <DropdownMenuItem key={f.id} onClick={() => handleBulkEnroll(f.id)}>
+                      {f.title}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

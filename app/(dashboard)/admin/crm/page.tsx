@@ -20,12 +20,13 @@ export default async function CRMPage() {
   if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   // Parallelize independent queries
-  const [{ data: students }, { data: tags }, { data: userTags }, { data: enrollments }] =
+  const [{ data: students }, { data: tags }, { data: userTags }, { data: enrollments }, { data: formations }] =
     await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("tags").select("*").order("name"),
       supabase.from("user_tags").select("*, tag:tags(*)"),
       supabase.from("formation_enrollments").select("user_id"),
+      supabase.from("formations").select("id, title").eq("status", "published").order("title"),
     ]);
 
   const studentsWithData = students?.map((s) => ({
@@ -38,6 +39,7 @@ export default async function CRMPage() {
     <CRMClient
       initialStudents={studentsWithData}
       allTags={tags || []}
+      allFormations={formations || []}
       currentUserRole={profile.role}
     />
   );

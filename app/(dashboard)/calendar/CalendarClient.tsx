@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar, CalendarPlus } from "lucide-react";
 import { Session, UserRole } from "@/lib/types/database";
 import { formatTime, formatDateTime } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils";
@@ -298,14 +298,26 @@ export function CalendarClient({ sessions, userId, userRole }: CalendarClientPro
                     </div>
                   )}
                 </div>
-                <Button
-                  className="w-full"
-                  variant={selectedSession.is_registered ? "outline" : "default"}
-                  disabled={registering}
-                  onClick={() => handleRegister(selectedSession)}
-                >
-                  {selectedSession.is_registered ? "Se désinscrire" : "S'inscrire"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    variant={selectedSession.is_registered ? "outline" : "default"}
+                    disabled={registering}
+                    onClick={() => handleRegister(selectedSession)}
+                  >
+                    {selectedSession.is_registered ? "Se désinscrire" : "S'inscrire"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    asChild
+                    title="Ajouter au calendrier"
+                  >
+                    <a href={`/api/calendar/${selectedSession.id}`} download>
+                      <CalendarPlus className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
               </div>
             </>
           )}

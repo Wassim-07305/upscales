@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, Video, Send, Loader2, X } from "lucide-react";
+import { showXPToast } from "@/components/gamification/XPToast";
 import { Profile, PostType } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { toast } from "sonner";
@@ -109,6 +110,18 @@ export function CreatePost({ user }: CreatePostProps) {
       setContent("");
       handleRemoveMedia();
       toast.success("Post publié !");
+      // Attribuer XP pour le post
+      try {
+        const xpRes = await fetch("/api/xp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "post_create" }),
+        });
+        if (xpRes.ok) {
+          const xpData = await xpRes.json();
+          showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+        }
+      } catch { /* XP non bloquant */ }
       router.refresh();
     }
     setLoading(false);

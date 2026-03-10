@@ -8,6 +8,7 @@ const XP_ACTIONS: Record<string, number> = {
   quiz_pass: 50,
   post_create: 10,
   formation_complete: 200,
+  referral_signup: 100,
 };
 
 interface BadgeCriteria {
@@ -55,9 +56,14 @@ export async function POST(request: NextRequest) {
   const xpAmount = XP_ACTIONS[action];
   const admin = createAdminClient();
 
+  // Pour le parrainage, l'XP va au parrain
+  const targetUserId = action === "referral_signup" && body.metadata?.referrer_id
+    ? body.metadata.referrer_id as string
+    : user.id;
+
   // Ajouter l'XP via la fonction SQL
   const { error: xpError } = await admin.rpc("add_user_xp", {
-    p_user_id: user.id,
+    p_user_id: targetUserId,
     p_xp: xpAmount,
   });
 

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { Module, ModuleProgress, Quiz, QuizQuestion, QuizOption } from "@/lib/types/database";
+import { showXPToast } from "@/components/gamification/XPToast";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
@@ -89,6 +90,19 @@ export function ModuleContent({
       setCompleted(true);
       toast.success("Module marqué comme terminé !");
 
+      // Attribuer XP pour le module complété
+      try {
+        const xpRes = await fetch("/api/xp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "module_complete" }),
+        });
+        if (xpRes.ok) {
+          const xpData = await xpRes.json();
+          showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+        }
+      } catch { /* XP non bloquant */ }
+
       const { data: allModulesCheck } = await supabase
         .from("modules")
         .select("id")
@@ -113,6 +127,19 @@ export function ModuleContent({
         await supabase.from("formation_enrollments").update({
           completed_at: new Date().toISOString(),
         }).eq("user_id", user.id).eq("formation_id", formationId);
+
+        // Attribuer XP pour la formation complétée
+        try {
+          const xpRes = await fetch("/api/xp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "formation_complete" }),
+          });
+          if (xpRes.ok) {
+            const xpData = await xpRes.json();
+            showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+          }
+        } catch { /* XP non bloquant */ }
 
         confetti({
           particleCount: 150,
@@ -306,9 +333,23 @@ export function ModuleContent({
           <QuizComponent
             quiz={quizData.quiz}
             questions={quizData.questions}
-            onComplete={(passed) => {
-              if (passed && !completed) {
-                handleMarkCompleted();
+            onComplete={async (passed) => {
+              if (passed) {
+                // XP pour quiz réussi
+                try {
+                  const xpRes = await fetch("/api/xp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "quiz_pass" }),
+                  });
+                  if (xpRes.ok) {
+                    const xpData = await xpRes.json();
+                    showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+                  }
+                } catch { /* XP non bloquant */ }
+                if (!completed) {
+                  handleMarkCompleted();
+                }
               }
             }}
           />

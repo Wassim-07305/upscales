@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CalendarDays, MessageCircle, Award } from "lucide-react";
+import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
 import { WelcomeConfetti } from "./WelcomeConfetti";
@@ -24,6 +24,8 @@ export default async function DashboardPage() {
     { data: upcomingSessions },
     { count: certCount },
     { data: recentNotifs },
+    { data: userXp },
+    { data: userBadges },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
@@ -49,6 +51,17 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .eq("is_read", false)
       .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("user_xp")
+      .select("total_xp, level")
+      .eq("user_id", user.id)
+      .single(),
+    supabase
+      .from("user_badges")
+      .select("*, badge:badges(name, icon, description)")
+      .eq("user_id", user.id)
+      .order("earned_at", { ascending: false })
       .limit(5),
   ]);
 
@@ -99,6 +112,41 @@ export default async function DashboardPage() {
           Voici un résumé de votre activité
         </p>
       </div>
+
+      {/* XP Banner */}
+      {(userXp || userBadges?.length) ? (
+        <Link href="/leaderboard">
+          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold">{userXp?.total_xp || 0} XP</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                        Niveau {userXp?.level || 1}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {userBadges?.length || 0} badge{(userBadges?.length || 0) > 1 ? "s" : ""} obtenu{(userBadges?.length || 0) > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  {userBadges?.slice(0, 3).map((ub) => (
+                    <div key={ub.id} className="p-1.5 rounded-lg bg-muted/50" title={(ub.badge as unknown as { name: string })?.name}>
+                      <Trophy className="h-4 w-4 text-neon" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ) : null}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

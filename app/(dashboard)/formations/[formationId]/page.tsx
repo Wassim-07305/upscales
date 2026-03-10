@@ -10,6 +10,8 @@ import { getInitials } from "@/lib/utils/formatters";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
 import { EnrollButton } from "./EnrollButton";
+import { Suspense } from "react";
+import { PaymentToast } from "./PaymentToast";
 
 export default async function FormationDetailPage({
   params,
@@ -60,6 +62,9 @@ export default async function FormationDetailPage({
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <Suspense>
+        <PaymentToast />
+      </Suspense>
       {/* Header */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
         {formation.thumbnail_url ? (
@@ -144,7 +149,11 @@ export default async function FormationDetailPage({
               </div>
 
               {!enrollment && (
-                <EnrollButton formationId={formationId} />
+                <EnrollButton
+                  formationId={formationId}
+                  isFree={formation.is_free ?? true}
+                  price={formation.price ? Number(formation.price) : null}
+                />
               )}
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,17 +29,30 @@ const registerSchema = z
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref");
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const supabase = createClient();
 
   const handleOAuthLogin = async (provider: "google" | "github") => {
     setOauthLoading(true);
+    const redirectUrl = refCode
+      ? `${window.location.origin}/api/auth/callback?ref=${refCode}`
+      : `${window.location.origin}/api/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
+        redirectTo: redirectUrl,
       },
     });
     if (error) {
@@ -58,16 +71,42 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterForm) => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { error, data: signUpData } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
         data: {
           full_name: data.full_name,
           role: "prospect",
+          ...(refCode ? { referral_code: refCode } : {}),
         },
       },
     });
+
+    // Créer le parrainage si un code de parrainage est présent
+    if (!error && refCode && signUpData.user) {
+      try {
+        const { data: referrer } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("referral_code", refCode)
+          .single();
+
+        if (referrer) {
+          await supabase.from("referrals").insert({
+            referrer_id: referrer.id,
+            referred_id: signUpData.user.id,
+            status: "registered",
+          });
+          // Attribuer XP au parrain
+          await fetch("/api/xp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "referral_signup", referrer_id: referrer.id }),
+          });
+        }
+      } catch { /* Parrainage non bloquant */ }
+    }
 
     if (error) {
       toast.error("Erreur lors de l'inscription", {
@@ -90,6 +129,9 @@ export default function RegisterPage() {
           <img src="/icons/icon-96x96.png" alt="UPSCALE" className="w-16 h-16 rounded-2xl mx-auto mb-4 animate-float" />
           <h1 className="text-3xl font-bold text-gradient">UPSCALE</h1>
           <p className="text-muted-foreground mt-2">Créez votre compte</p>
+          {refCode && (
+            <p className="text-xs text-neon mt-2">Vous avez été parrainé !</p>
+          )}
         </div>
 
         <Card className="gradient-border bg-card/80 backdrop-blur-sm">

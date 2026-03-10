@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Award, Download, Calendar } from "lucide-react";
 import { formatDate } from "@/lib/utils/dates";
 import Link from "next/link";
+import { ShareButton } from "./ShareButton";
 
 export default async function CertificatesPage() {
   const supabase = await createClient();
@@ -64,12 +65,15 @@ export default async function CertificatesPage() {
                       </Badge>
                     </div>
                   </div>
-                  <Link href={`/api/certificates/${cert.id}`} target="_blank">
-                    <Button variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" />
-                      PDF
-                    </Button>
-                  </Link>
+                  <div className="flex gap-1.5 shrink-0">
+                    <ShareButton certificateNumber={cert.certificate_number} />
+                    <Link href={`/api/certificates/${cert.id}`} target="_blank">
+                      <Button variant="outline" size="sm">
+                        <Download className="mr-2 h-4 w-4" />
+                        PDF
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

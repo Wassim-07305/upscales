@@ -13,6 +13,8 @@ import {
   Globe,
   Settings,
   Bell,
+  BarChart3,
+  Trophy,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -51,6 +53,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: ALL_ROLES,
   },
   {
+    label: "Classement",
+    href: "/leaderboard",
+    icon: Trophy,
+    roles: ALL_ROLES,
+  },
+  {
     label: "Chat",
     href: "/chat",
     icon: MessageCircle,
@@ -83,6 +91,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     href: "/admin",
     icon: LayoutDashboard,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
     roles: ADMIN_ROLES,
   },
   {
@@ -162,7 +176,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "Apprendre",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/formations", "/calendar", "/certificates"].includes(i.href)
+      ["/formations", "/calendar", "/certificates", "/leaderboard"].includes(i.href)
     ),
   },
   {
@@ -188,7 +202,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/formations", "/admin/pages"].includes(i.href)
+      ["/admin/crm", "/admin/formations", "/admin/pages", "/admin/analytics"].includes(i.href)
     ),
   },
   {
@@ -220,12 +234,14 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   calendar: "Calendrier",
   notifications: "Notifications",
   certificates: "Certificats",
+  leaderboard: "Classement",
   profile: "Profil",
   admin: "Administration",
   crm: "CRM",
   pages: "Pages",
   booking: "Booking",
   ai: "MateuzsIA",
+  analytics: "Analytics",
   settings: "Parametres",
   edit: "Modifier",
 };
@@ -239,5 +255,6 @@ export const QUICK_LINKS = [
   { label: "MateuzsIA", href: "/ai", icon: Sparkles },
   { label: "Calendrier", href: "/calendar", icon: CalendarDays },
   { label: "Certificats", href: "/certificates", icon: Award },
+  { label: "Classement", href: "/leaderboard", icon: Trophy },
   { label: "Profil", href: "/profile", icon: User },
 ];

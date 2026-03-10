@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import QRCode from "qrcode";
 
 export async function GET(
   request: Request,
@@ -37,13 +38,24 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Générer le QR code de vérification
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://upscales-ahmanewassim6-2668s-projects.vercel.app";
+  const verificationUrl = `${siteUrl}/verify/${certificate.certificate_number}`;
+  const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
+    width: 150,
+    margin: 1,
+    color: { dark: "#C6FF00", light: "#00000000" },
+  });
+
   // Generate a simple HTML certificate as PDF alternative
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Certificat - ${(certificate.formation as any)?.title}</title>
+      <title>Certificat - ${(certificate.formation as Record<string, string>)?.title}</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body {
@@ -121,6 +133,11 @@ export async function GET(
           font-size: 14px;
           margin-top: 4px;
         }
+        .qr-section {
+          margin-top: 40px;
+          padding-top: 24px;
+          border-top: 1px solid #333;
+        }
         @media print {
           body { background: white; color: black; }
           .certificate { border-color: #C6FF00; background: white; }
@@ -132,9 +149,9 @@ export async function GET(
         <div class="logo">UPSCALE</div>
         <div class="subtitle">Plateforme de Formation</div>
         <div class="heading">Certificat de complétion délivré à</div>
-        <div class="name">${(certificate as any).user?.full_name || "Participant"}</div>
+        <div class="name">${(certificate as Record<string, Record<string, string>>).user?.full_name || "Participant"}</div>
         <div class="heading">Pour avoir complété avec succès la formation</div>
-        <div class="formation">${(certificate.formation as any)?.title || "Formation"}</div>
+        <div class="formation">${(certificate.formation as Record<string, string>)?.title || "Formation"}</div>
         <div class="meta">
           <div class="meta-item">
             Date de délivrance
@@ -144,6 +161,10 @@ export async function GET(
             Numéro de certificat
             <strong>${certificate.certificate_number}</strong>
           </div>
+        </div>
+        <div class="qr-section">
+          <img src="${qrDataUrl}" alt="QR Code de vérification" style="width: 120px; height: 120px;" />
+          <p style="color: #666; font-size: 11px; margin-top: 8px;">Scannez pour vérifier l&apos;authenticité</p>
         </div>
       </div>
     </body>

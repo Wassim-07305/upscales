@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy, Play } from "lucide-react";
+import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy, Play, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
@@ -122,6 +122,31 @@ export default async function DashboardPage() {
 
   const continueModuleId = nextUncompletedModule?.id || lastModuleId;
 
+  // Calculate streak (consecutive days with completed modules)
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const completedDates = new Set(
+    progress
+      ?.filter((p) => p.completed && p.completed_at)
+      .map((p) => {
+        const d = new Date(p.completed_at);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }) || []
+  );
+  for (let i = 0; i < 365; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(checkDate.getDate() - i);
+    if (completedDates.has(checkDate.getTime())) {
+      streak++;
+    } else if (i > 0) {
+      break;
+    }
+  }
+
+  const totalModulesCompleted = progress?.filter((p) => p.completed).length || 0;
+
   const firstName = profile.full_name?.split(" ")[0] || "vous";
 
   return (
@@ -194,6 +219,31 @@ export default async function DashboardPage() {
           </Card>
         </Link>
       ) : null}
+
+      {/* Streak */}
+      {streak > 0 && (
+        <Link href="/progress">
+          <Card className="animate-fade-up delay-1 hover:border-[#FF6B35]/30 transition-colors cursor-pointer bg-gradient-to-r from-[#FF6B35]/5 to-transparent">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-[#FF6B35]/10">
+                    <Flame className="h-5 w-5 text-[#FF6B35]" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold">{streak} jour{streak > 1 ? "s" : ""}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Série d&apos;apprentissage en cours · {totalModulesCompleted} module{totalModulesCompleted > 1 ? "s" : ""} terminé{totalModulesCompleted > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

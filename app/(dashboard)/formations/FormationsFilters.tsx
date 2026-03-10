@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 const statusFilters = [
   { value: "all", label: "Toutes" },
+  { value: "favorites", label: "Favoris" },
   { value: "in_progress", label: "En cours" },
   { value: "completed", label: "Terminées" },
   { value: "free", label: "Gratuites" },

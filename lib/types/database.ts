@@ -429,3 +429,13 @@ export interface AIMessageSource {
   title: string;
   chunk_preview: string;
 }
+
+// ============================================
+// Formation Favorites
+// ============================================
+export interface FormationFavorite {
+  id: string;
+  user_id: string;
+  formation_id: string;
+  created_at: string;
+}

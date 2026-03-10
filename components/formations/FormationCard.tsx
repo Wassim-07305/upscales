@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, Users, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Clock, Users, Star, Heart } from "lucide-react";
 import { DifficultyLevel, Formation } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice, truncate } from "@/lib/utils/formatters";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const DIFFICULTY_CONFIG: Record<
   DifficultyLevel,
@@ -34,6 +38,9 @@ interface FormationCardProps {
   enrolled?: boolean;
   averageRating?: number;
   reviewCount?: number;
+  isFavorite?: boolean;
+  userId?: string;
+  showFavorite?: boolean;
 }
 
 export function FormationCard({
@@ -45,7 +52,40 @@ export function FormationCard({
   enrolled,
   averageRating,
   reviewCount,
+  isFavorite: initialFavorite = false,
+  userId,
+  showFavorite = false,
 }: FormationCardProps) {
+  const [isFavorite, setIsFavorite] = useState(initialFavorite);
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userId) return;
+    setLoading(true);
+
+    if (isFavorite) {
+      await supabase
+        .from("formation_favorites")
+        .delete()
+        .eq("user_id", userId)
+        .eq("formation_id", formation.id);
+      setIsFavorite(false);
+      toast.success("Retiré des favoris");
+    } else {
+      await supabase.from("formation_favorites").insert({
+        user_id: userId,
+        formation_id: formation.id,
+      });
+      setIsFavorite(true);
+      toast.success("Ajouté aux favoris");
+    }
+    setLoading(false);
+  };
+
   return (
     <Link href={`/formations/${formation.id}`}>
       <Card className="group overflow-hidden hover:border-primary/30 transition-all duration-300 h-full">
@@ -62,6 +102,24 @@ export function FormationCard({
               <BookOpen className="h-12 w-12 text-primary/40" />
             </div>
           )}
+          <div className="absolute top-3 left-3">
+            {showFavorite && userId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60",
+                  isFavorite && "text-red-500 hover:text-red-400"
+                )}
+                onClick={handleToggleFavorite}
+                disabled={loading}
+              >
+                <Heart
+                  className={cn("h-4 w-4", isFavorite && "fill-current")}
+                />
+              </Button>
+            )}
+          </div>
           <div className="absolute top-3 right-3 flex gap-1.5">
             {formation.difficulty && (
               <Badge

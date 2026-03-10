@@ -27,12 +27,13 @@ export default async function FormationsPage({
   if (!user) redirect("/login");
 
   // Parallelize independent queries
-  const [{ data: profile }, { data: formations }, { data: enrollments }, { data: progress }] =
+  const [{ data: profile }, { data: formations }, { data: enrollments }, { data: progress }, { data: favorites }] =
     await Promise.all([
       supabase.from("profiles").select("role").eq("id", user.id).single(),
       supabase.from("formations").select("*").eq("status", "published").order("order"),
       supabase.from("formation_enrollments").select("*").eq("user_id", user.id),
       supabase.from("module_progress").select("*").eq("user_id", user.id),
+      supabase.from("formation_favorites").select("formation_id").eq("user_id", user.id),
     ]);
 
   // Fetch modules and enrollment counts (depends on formations result)
@@ -48,6 +49,9 @@ export default async function FormationsPage({
       ? supabase.from("formation_reviews").select("formation_id, rating").in("formation_id", formationIds)
       : Promise.resolve({ data: [] as { formation_id: string; rating: number }[] }),
   ]);
+
+  // Set of favorite formation ids for quick lookup
+  const favoriteIds = new Set(favorites?.map((f) => f.formation_id) || []);
 
   // Process formations
   const processedFormations = formations?.map((f) => {
@@ -73,6 +77,7 @@ export default async function FormationsPage({
       completed: enrollment?.completed_at != null,
       averageRating: avgRating,
       reviewCount: fReviews.length,
+      isFavorite: favoriteIds.has(f.id),
     };
   }) || [];
 
@@ -109,6 +114,8 @@ export default async function FormationsPage({
     filtered = filtered.filter((f) => f.completed);
   } else if (filter === "free") {
     filtered = filtered.filter((f) => f.is_free);
+  } else if (filter === "favorites") {
+    filtered = filtered.filter((f) => f.isFavorite);
   }
 
   // Difficulty filter
@@ -169,6 +176,9 @@ export default async function FormationsPage({
             enrolled={formation.enrolled}
             averageRating={formation.averageRating}
             reviewCount={formation.reviewCount}
+            isFavorite={formation.isFavorite}
+            userId={user.id}
+            showFavorite
           />
         ))}
       </div>

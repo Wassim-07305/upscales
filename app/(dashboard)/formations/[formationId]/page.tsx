@@ -54,6 +54,12 @@ export default async function FormationDetailPage({
         .order("created_at", { ascending: false }),
     ]);
 
+  // Fetch prerequisites for all modules in this formation
+  const moduleIds = modulesRes.data?.map((m) => m.id) || [];
+  const { data: prerequisites } = moduleIds.length > 0
+    ? await supabase.from("module_prerequisites").select("*").in("module_id", moduleIds)
+    : { data: [] };
+
   const formation = formationRes.data;
   if (!formation) notFound();
 
@@ -137,6 +143,7 @@ export default async function FormationDetailPage({
                 progress={progress}
                 formationId={formationId}
                 enrolled={!!enrollment}
+                prerequisites={prerequisites || []}
               />
             </CardContent>
           </Card>

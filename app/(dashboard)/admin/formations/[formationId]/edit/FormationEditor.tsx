@@ -36,6 +36,7 @@ import {
   Save,
   ImageIcon,
   Upload,
+  Link2,
 } from "lucide-react";
 import {
   DndContext,
@@ -54,7 +55,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Formation, Module, ModuleType } from "@/lib/types/database";
+import { Formation, Module, ModuleType, ModulePrerequisite } from "@/lib/types/database";
 import { QuizEditor } from "@/components/admin/QuizEditor";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { toast } from "sonner";
@@ -77,11 +78,14 @@ const typeLabels: Record<ModuleType, string> = {
 export function FormationEditor({
   formation,
   initialModules,
+  initialPrerequisites = [],
 }: {
   formation: Formation;
   initialModules: Module[];
+  initialPrerequisites?: ModulePrerequisite[];
 }) {
   const [modules, setModules] = useState(initialModules);
+  const [prerequisites, setPrerequisites] = useState<ModulePrerequisite[]>(initialPrerequisites);
   const [moduleDialogOpen, setModuleDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [moduleTitle, setModuleTitle] = useState("");
@@ -91,6 +95,7 @@ export function FormationEditor({
   const [moduleContent, setModuleContent] = useState("");
   const [moduleDuration, setModuleDuration] = useState("");
   const [moduleIsPreview, setModuleIsPreview] = useState(false);
+  const [modulePrerequisiteIds, setModulePrerequisiteIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [quizEditorModuleId, setQuizEditorModuleId] = useState<string | null>(null);
   const [quizEditorModuleTitle, setQuizEditorModuleTitle] = useState("");
@@ -99,6 +104,10 @@ export function FormationEditor({
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  // Get prerequisites for a specific module
+  const getPrerequisitesForModule = (moduleId: string) =>
+    prerequisites.filter((p) => p.module_id === moduleId).map((p) => p.prerequisite_module_id);
 
   const handleThumbnailUpload = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -141,6 +150,7 @@ export function FormationEditor({
     setModuleContent("");
     setModuleDuration("");
     setModuleIsPreview(false);
+    setModulePrerequisiteIds([]);
     setModuleDialogOpen(true);
   };
 
@@ -153,6 +163,7 @@ export function FormationEditor({
     setModuleContent(mod.content || "");
     setModuleDuration(String(mod.duration_minutes || ""));
     setModuleIsPreview(mod.is_preview);
+    setModulePrerequisiteIds(getPrerequisitesForModule(mod.id));
     setModuleDialogOpen(true);
   };
 
@@ -172,6 +183,8 @@ export function FormationEditor({
       order: editingModule ? editingModule.order : modules.length,
     };
 
+    let savedModuleId: string | null = null;
+
     if (editingModule) {
       const { data: updated, error } = await supabase
         .from("modules")
@@ -182,9 +195,11 @@ export function FormationEditor({
 
       if (error) {
         toast.error("Erreur", { description: error.message });
+        setSaving(false);
+        return;
       } else if (updated) {
         setModules((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
-        toast.success("Module mis à jour");
+        savedModuleId = updated.id;
       }
     } else {
       const { data: created, error } = await supabase
@@ -195,10 +210,44 @@ export function FormationEditor({
 
       if (error) {
         toast.error("Erreur", { description: error.message });
+        setSaving(false);
+        return;
       } else if (created) {
         setModules((prev) => [...prev, created]);
-        toast.success("Module ajouté");
+        savedModuleId = created.id;
       }
+    }
+
+    // Save prerequisites
+    if (savedModuleId) {
+      // Delete existing prerequisites for this module
+      await supabase.from("module_prerequisites").delete().eq("module_id", savedModuleId);
+
+      // Insert new prerequisites
+      if (modulePrerequisiteIds.length > 0) {
+        const prereqData = modulePrerequisiteIds.map((prereqId) => ({
+          module_id: savedModuleId!,
+          prerequisite_module_id: prereqId,
+        }));
+        const { error: prereqError } = await supabase.from("module_prerequisites").insert(prereqData);
+        if (prereqError) {
+          toast.error("Erreur prérequis", { description: prereqError.message });
+        }
+      }
+
+      // Update local prerequisites state
+      setPrerequisites((prev) => {
+        const filtered = prev.filter((p) => p.module_id !== savedModuleId);
+        const newPrereqs = modulePrerequisiteIds.map((prereqId) => ({
+          id: crypto.randomUUID(),
+          module_id: savedModuleId!,
+          prerequisite_module_id: prereqId,
+          created_at: new Date().toISOString(),
+        }));
+        return [...filtered, ...newPrereqs];
+      });
+
+      toast.success(editingModule ? "Module mis à jour" : "Module ajouté");
     }
 
     setSaving(false);
@@ -324,6 +373,7 @@ export function FormationEditor({
                       key={mod.id}
                       mod={mod}
                       index={index}
+                      prerequisiteCount={getPrerequisitesForModule(mod.id).length}
                       onEdit={() => openEditModule(mod)}
                       onDelete={() => handleDeleteModule(mod.id)}
                       onQuiz={() => {
@@ -419,6 +469,42 @@ export function FormationEditor({
               />
             </div>
 
+            {/* Prerequisites selection */}
+            {modules.length > 0 && (
+              <div className="space-y-2">
+                <Label>Prérequis (modules à compléter avant)</Label>
+                <div className="space-y-1 max-h-32 overflow-y-auto rounded-md border border-border p-2 bg-[#141414]">
+                  {modules
+                    .filter((m) => m.id !== editingModule?.id)
+                    .map((m) => (
+                      <label
+                        key={m.id}
+                        className="flex items-center gap-2 py-1 px-1 rounded hover:bg-accent/30 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={modulePrerequisiteIds.includes(m.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setModulePrerequisiteIds((prev) => [...prev, m.id]);
+                            } else {
+                              setModulePrerequisiteIds((prev) => prev.filter((id) => id !== m.id));
+                            }
+                          }}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span className="text-sm truncate">{m.title}</span>
+                      </label>
+                    ))}
+                  {modules.filter((m) => m.id !== editingModule?.id).length === 0 && (
+                    <p className="text-xs text-muted-foreground py-1">
+                      Ajoutez d'autres modules pour définir des prérequis
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             <Button
               onClick={handleSaveModule}
               disabled={!moduleTitle.trim() || saving}
@@ -451,12 +537,14 @@ export function FormationEditor({
 function SortableModuleItem({
   mod,
   index,
+  prerequisiteCount,
   onEdit,
   onDelete,
   onQuiz,
 }: {
   mod: Module;
   index: number;
+  prerequisiteCount: number;
   onEdit: () => void;
   onDelete: () => void;
   onQuiz: () => void;
@@ -496,6 +584,12 @@ function SortableModuleItem({
           {mod.is_preview && (
             <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
               Aperçu
+            </Badge>
+          )}
+          {prerequisiteCount > 0 && (
+            <Badge variant="outline" className="text-[10px] text-amber-500 border-amber-500/30">
+              <Link2 className="h-2.5 w-2.5 mr-0.5" />
+              {prerequisiteCount} prérequis
             </Badge>
           )}
           {mod.duration_minutes > 0 && (

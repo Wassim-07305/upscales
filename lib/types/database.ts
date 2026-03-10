@@ -439,3 +439,13 @@ export interface FormationFavorite {
   formation_id: string;
   created_at: string;
 }
+
+// ============================================
+// Module Prerequisites
+// ============================================
+export interface ModulePrerequisite {
+  id: string;
+  module_id: string;
+  prerequisite_module_id: string;
+  created_at: string;
+}

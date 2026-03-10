@@ -86,6 +86,23 @@ export function PostCard({
         .insert({ post_id: post.id, user_id: currentUserId });
       setLiked(true);
       setLikesCount((prev) => prev + 1);
+
+      // Notifier l'auteur du like (sauf si c'est soi-même)
+      if (post.author_id !== currentUserId) {
+        const { data: likerProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", currentUserId)
+          .single();
+
+        await supabase.from("notifications").insert({
+          user_id: post.author_id,
+          type: "post",
+          title: `${likerProfile?.full_name || "Quelqu'un"} a aimé votre post`,
+          message: post.title || undefined,
+          link: `/community/${post.id}`,
+        });
+      }
     }
   };
 

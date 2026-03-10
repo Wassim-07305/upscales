@@ -146,6 +146,32 @@ export function ModuleContent({
           },
         ]);
 
+        // Notifier les admins de la complétion
+        const { data: admins } = await supabase
+          .from("profiles")
+          .select("id")
+          .in("role", ["admin", "moderator"]);
+
+        if (admins && admins.length > 0) {
+          const { data: studentProfile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .single();
+
+          await supabase.from("notifications").insert(
+            admins
+              .filter((a) => a.id !== user.id)
+              .map((admin) => ({
+                user_id: admin.id,
+                type: "formation" as const,
+                title: `${studentProfile?.full_name || "Un élève"} a terminé une formation`,
+                message: `"${formationTitle}" — certificat délivré`,
+                link: `/admin/crm/${user.id}`,
+              }))
+          );
+        }
+
         // Attribuer XP pour la formation complétée
         try {
           const xpRes = await fetch("/api/xp", {

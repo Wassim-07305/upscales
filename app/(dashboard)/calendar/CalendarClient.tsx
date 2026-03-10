@@ -78,6 +78,33 @@ export function CalendarClient({ sessions, userId, userRole }: CalendarClientPro
       await supabase
         .from("session_participants")
         .insert({ session_id: session.id, user_id: userId });
+
+      // Notification de confirmation pour l'utilisateur
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        type: "session",
+        title: `Inscription confirmée : ${session.title}`,
+        message: `Vous êtes inscrit à la session du ${formatDateTime(session.start_time)}`,
+        link: "/calendar",
+      });
+
+      // Notification pour l'hôte
+      if (session.host_id && session.host_id !== userId) {
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userId)
+          .single();
+
+        await supabase.from("notifications").insert({
+          user_id: session.host_id,
+          type: "session",
+          title: `Nouvelle inscription : ${session.title}`,
+          message: `${userProfile?.full_name || "Un utilisateur"} s'est inscrit à votre session`,
+          link: "/admin/calendar",
+        });
+      }
+
       toast.success("Inscription confirmée !");
     }
     setRegistering(false);

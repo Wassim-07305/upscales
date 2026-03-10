@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { Module, ModuleProgress, Quiz, QuizQuestion, QuizOption } from "@/lib/types/database";
 import { showXPToast } from "@/components/gamification/XPToast";
+import { ModuleNotes } from "@/components/formations/ModuleNotes";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
@@ -47,6 +48,7 @@ interface ModuleContentProps {
   } | null;
   allModules: { id: string; title: string; order: number; type: string; duration_minutes: number }[];
   allProgress: { module_id: string; completed: boolean }[];
+  initialNoteContent: string;
 }
 
 export function ModuleContent({
@@ -59,6 +61,7 @@ export function ModuleContent({
   quizData,
   allModules,
   allProgress,
+  initialNoteContent,
 }: ModuleContentProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -398,6 +401,13 @@ export function ModuleContent({
             }}
           />
         )}
+
+        {/* Notes */}
+        <ModuleNotes
+          moduleId={module.id}
+          formationId={formationId}
+          initialContent={initialNoteContent}
+        />
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border/50">

@@ -63,6 +63,14 @@ export default async function ModulePage({
     .eq("user_id", user.id)
     .eq("formation_id", formationId);
 
+  // Fetch user's note for this module
+  const { data: moduleNote } = await supabase
+    .from("module_notes")
+    .select("content")
+    .eq("user_id", user.id)
+    .eq("module_id", moduleId)
+    .single();
+
   // If quiz module, fetch quiz data
   let quizData = null;
   if (module.type === "quiz") {
@@ -114,6 +122,7 @@ export default async function ModulePage({
       quizData={quizData}
       allModules={modules}
       allProgress={allProgress || []}
+      initialNoteContent={moduleNote?.content || ""}
     />
   );
 }

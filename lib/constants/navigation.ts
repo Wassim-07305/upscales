@@ -20,6 +20,7 @@ import {
   Shield,
   Hash,
   Megaphone,
+  StickyNote,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -67,6 +68,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     label: "Ma progression",
     href: "/progress",
     icon: TrendingUp,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Mes notes",
+    href: "/notes",
+    icon: StickyNote,
     roles: ALL_ROLES,
   },
   {
@@ -217,7 +224,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "Apprendre",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/formations", "/calendar", "/certificates", "/leaderboard", "/progress"].includes(i.href)
+      ["/formations", "/calendar", "/certificates", "/leaderboard", "/progress", "/notes"].includes(i.href)
     ),
   },
   {
@@ -277,6 +284,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   certificates: "Certificats",
   leaderboard: "Classement",
   progress: "Ma progression",
+  notes: "Mes notes",
   referral: "Parrainage",
   profile: "Profil",
   admin: "Administration",

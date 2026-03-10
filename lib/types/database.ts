@@ -58,10 +58,14 @@ export interface Quiz {
   created_at: string;
 }
 
+export type QuestionType = "multiple_choice" | "true_false" | "free_response";
+
 export interface QuizQuestion {
   id: string;
   quiz_id: string;
   question: string;
+  question_type: QuestionType;
+  explanation: string | null;
   order: number;
   created_at: string;
 }

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, XCircle, Loader2, History, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Quiz, QuizQuestion, QuizOption } from "@/lib/types/database";
+import { Quiz, QuizQuestion, QuizOption, QuizAttempt } from "@/lib/types/database";
+import { timeAgo } from "@/lib/utils/dates";
 
 interface QuizComponentProps {
   quiz: Quiz;
@@ -21,25 +23,88 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const supabase = createClient();
 
-  const handleSelect = (questionId: string, optionId: string) => {
+  useEffect(() => {
+    async function fetchAttempts() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("quiz_attempts")
+        .select("*")
+        .eq("quiz_id", quiz.id)
+        .eq("user_id", user.id)
+        .order("completed_at", { ascending: false })
+        .limit(10);
+      if (data) setAttempts(data);
+    }
+    fetchAttempts();
+  }, [quiz.id, submitted]);
+
+  const handleSelectOption = (questionId: string, optionId: string) => {
     if (submitted) return;
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
+  const handleTrueFalse = (questionId: string, value: "true" | "false") => {
+    if (submitted) return;
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleFreeResponse = (questionId: string, value: string) => {
+    if (submitted) return;
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const isQuestionCorrect = (q: QuizQuestion & { options: QuizOption[] }): boolean => {
+    const type = q.question_type || "multiple_choice";
+    if (type === "multiple_choice") {
+      return q.options.find((o) => o.id === answers[q.id])?.is_correct || false;
+    }
+    if (type === "true_false") {
+      const correct = q.options.find((o) => o.is_correct);
+      return correct?.option_text === answers[q.id];
+    }
+    return true;
+  };
+
+  const getCorrectAnswer = (q: QuizQuestion & { options: QuizOption[] }): string => {
+    const type = q.question_type || "multiple_choice";
+    if (type === "multiple_choice") {
+      return q.options.find((o) => o.is_correct)?.option_text || "";
+    }
+    if (type === "true_false") {
+      return q.options.find((o) => o.is_correct)?.option_text === "true" ? "Vrai" : "Faux";
+    }
+    return "";
+  };
+
   const handleSubmit = async () => {
-    if (Object.keys(answers).length < questions.length) return;
+    const unanswered = questions.filter((q) => {
+      if ((q.question_type || "multiple_choice") === "free_response") return false;
+      return !answers[q.id];
+    });
+    if (unanswered.length > 0) return;
 
     setLoading(true);
 
     let correct = 0;
+    let gradableCount = 0;
+
     questions.forEach((q) => {
-      const selectedOption = q.options.find((o) => o.id === answers[q.id]);
-      if (selectedOption?.is_correct) correct++;
+      const type = q.question_type || "multiple_choice";
+      if (type === "free_response") {
+        gradableCount++;
+        correct++;
+      } else {
+        gradableCount++;
+        if (isQuestionCorrect(q)) correct++;
+      }
     });
 
-    const calcScore = Math.round((correct / questions.length) * 100);
+    const calcScore = gradableCount > 0 ? Math.round((correct / gradableCount) * 100) : 0;
     const hasPassed = calcScore >= quiz.passing_score;
 
     setScore(calcScore);
@@ -61,15 +126,61 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
     setLoading(false);
   };
 
-  const allAnswered = Object.keys(answers).length === questions.length;
+  const allAnswered = questions.every((q) => {
+    if ((q.question_type || "multiple_choice") === "free_response") return true;
+    return !!answers[q.id];
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{quiz.title}</h2>
-        <Badge variant="outline">Score requis : {quiz.passing_score}%</Badge>
+        <div className="flex items-center gap-2">
+          {attempts.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+              className="text-muted-foreground"
+            >
+              <History className="mr-1 h-4 w-4" />
+              {attempts.length} tentative{attempts.length > 1 ? "s" : ""}
+            </Button>
+          )}
+          <Badge variant="outline">Score requis : {quiz.passing_score}%</Badge>
+        </div>
       </div>
 
+      {/* Historique */}
+      {showHistory && attempts.length > 0 && (
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Historique des tentatives</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {attempts.map((attempt, i) => (
+              <div key={attempt.id} className="flex items-center justify-between py-1.5 text-sm">
+                <span className="text-muted-foreground">
+                  Tentative {attempts.length - i}
+                  <span className="ml-2 text-xs">{timeAgo(attempt.completed_at)}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className={cn("font-medium", attempt.passed ? "text-neon" : "text-destructive")}>
+                    {attempt.score}%
+                  </span>
+                  {attempt.passed ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-neon" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-destructive" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resultat */}
       {submitted && (
         <Card className={cn("border-2", passed ? "border-neon/50 bg-neon/5" : "border-destructive/50 bg-destructive/5")}>
           <CardContent className="pt-6">
@@ -92,51 +203,131 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
         </Card>
       )}
 
+      {/* Questions */}
       <div className="space-y-4">
-        {questions.map((question, qIndex) => (
-          <Card key={question.id}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                {qIndex + 1}. {question.question}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {question.options.map((option) => {
-                const isSelected = answers[question.id] === option.id;
-                const showCorrect = submitted && option.is_correct;
-                const showWrong = submitted && isSelected && !option.is_correct;
+        {questions.map((question, qIndex) => {
+          const type = question.question_type || "multiple_choice";
+          const correct = submitted ? isQuestionCorrect(question) : null;
 
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleSelect(question.id, option.id)}
+          return (
+            <Card key={question.id}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium flex-1">
+                    {qIndex + 1}. {question.question}
+                  </CardTitle>
+                  {type !== "multiple_choice" && (
+                    <Badge variant="outline" className="text-[10px] flex-shrink-0">
+                      {type === "true_false" ? "Vrai / Faux" : "Réponse libre"}
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {/* Choix multiple */}
+                {type === "multiple_choice" &&
+                  question.options.map((option) => {
+                    const isSelected = answers[question.id] === option.id;
+                    const showCorrect = submitted && option.is_correct;
+                    const showWrong = submitted && isSelected && !option.is_correct;
+
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => handleSelectOption(question.id, option.id)}
+                        disabled={submitted}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-3 rounded-lg border text-left text-sm transition-colors",
+                          isSelected && !submitted && "border-primary bg-primary/5",
+                          showCorrect && "border-neon bg-neon/10",
+                          showWrong && "border-destructive bg-destructive/10",
+                          !isSelected && !submitted && "border-border hover:border-primary/50 hover:bg-accent/50",
+                          submitted && !showCorrect && !showWrong && "opacity-50"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                            isSelected ? "border-primary" : "border-muted-foreground/30"
+                          )}
+                        >
+                          {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                        </div>
+                        <span>{option.option_text}</span>
+                        {showCorrect && <CheckCircle className="h-4 w-4 text-neon ml-auto" />}
+                        {showWrong && <XCircle className="h-4 w-4 text-destructive ml-auto" />}
+                      </button>
+                    );
+                  })}
+
+                {/* Vrai / Faux */}
+                {type === "true_false" && (
+                  <div className="flex gap-3">
+                    {(["true", "false"] as const).map((val) => {
+                      const isSelected = answers[question.id] === val;
+                      const correctOption = question.options.find((o) => o.is_correct);
+                      const isCorrectVal = correctOption?.option_text === val;
+                      const showCorrect = submitted && isCorrectVal;
+                      const showWrong = submitted && isSelected && !isCorrectVal;
+
+                      return (
+                        <button
+                          key={val}
+                          onClick={() => handleTrueFalse(question.id, val)}
+                          disabled={submitted}
+                          className={cn(
+                            "flex-1 flex items-center justify-center gap-2 p-4 rounded-lg border text-sm font-medium transition-colors",
+                            isSelected && !submitted && "border-primary bg-primary/5",
+                            showCorrect && "border-neon bg-neon/10",
+                            showWrong && "border-destructive bg-destructive/10",
+                            !isSelected && !submitted && "border-border hover:border-primary/50 hover:bg-accent/50",
+                            submitted && !showCorrect && !showWrong && "opacity-50"
+                          )}
+                        >
+                          {val === "true" ? (
+                            <CheckCircle className={cn("h-5 w-5", isSelected ? "text-neon" : "text-muted-foreground")} />
+                          ) : (
+                            <XCircle className={cn("h-5 w-5", isSelected ? "text-destructive" : "text-muted-foreground")} />
+                          )}
+                          {val === "true" ? "Vrai" : "Faux"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Réponse libre */}
+                {type === "free_response" && (
+                  <Textarea
+                    value={answers[question.id] || ""}
+                    onChange={(e) => handleFreeResponse(question.id, e.target.value)}
                     disabled={submitted}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-3 rounded-lg border text-left text-sm transition-colors",
-                      isSelected && !submitted && "border-primary bg-primary/5",
-                      showCorrect && "border-neon bg-neon/10",
-                      showWrong && "border-destructive bg-destructive/10",
-                      !isSelected && !submitted && "border-border hover:border-primary/50 hover:bg-accent/50",
-                      submitted && !showCorrect && !showWrong && "opacity-50"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0",
-                        isSelected ? "border-primary" : "border-muted-foreground/30"
-                      )}
-                    >
-                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    placeholder="Votre réponse..."
+                    className="min-h-[100px] bg-muted/50 border-0"
+                  />
+                )}
+
+                {/* Explication */}
+                {submitted && question.explanation && (
+                  <div className="flex gap-2 mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <Lightbulb className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <span className="font-medium text-primary">Explication : </span>
+                      <span className="text-muted-foreground">{question.explanation}</span>
                     </div>
-                    <span>{option.option_text}</span>
-                    {showCorrect && <CheckCircle className="h-4 w-4 text-neon ml-auto" />}
-                    {showWrong && <XCircle className="h-4 w-4 text-destructive ml-auto" />}
-                  </button>
-                );
-              })}
-            </CardContent>
-          </Card>
-        ))}
+                  </div>
+                )}
+
+                {/* Bonne réponse quand faux */}
+                {submitted && correct === false && type !== "free_response" && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Bonne réponse : <span className="text-neon font-medium">{getCorrectAnswer(question)}</span>
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {!submitted && (

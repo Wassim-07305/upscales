@@ -1,5 +1,161 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import React from "react";
+import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: "#0D0D0D",
+    padding: 60,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  border: {
+    border: "2px solid #C6FF00",
+    borderRadius: 16,
+    padding: 50,
+    width: "100%",
+    alignItems: "center",
+  },
+  topBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: "#C6FF00",
+  },
+  logo: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#C6FF00",
+    letterSpacing: 4,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: "#999999",
+    marginBottom: 40,
+  },
+  heading: {
+    fontSize: 14,
+    color: "#999999",
+    marginBottom: 10,
+  },
+  name: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#EDEDED",
+    marginBottom: 28,
+  },
+  formation: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#C6FF00",
+    marginBottom: 40,
+    textAlign: "center",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 60,
+  },
+  metaItem: {
+    alignItems: "center",
+  },
+  metaLabel: {
+    fontSize: 10,
+    color: "#999999",
+    marginBottom: 4,
+  },
+  metaValue: {
+    fontSize: 12,
+    color: "#EDEDED",
+    fontWeight: "bold",
+  },
+  decorLeft: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    fontSize: 8,
+    color: "#333333",
+  },
+  decorRight: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    fontSize: 8,
+    color: "#333333",
+  },
+});
+
+function CertificateDocument({
+  studentName,
+  formationTitle,
+  issuedAt,
+  certificateNumber,
+}: {
+  studentName: string;
+  formationTitle: string;
+  issuedAt: string;
+  certificateNumber: string;
+}) {
+  return React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", orientation: "landscape", style: styles.page },
+      React.createElement(
+        View,
+        { style: styles.border },
+        React.createElement(View, { style: styles.topBar }),
+        React.createElement(Text, { style: styles.logo }, "UPSCALE"),
+        React.createElement(Text, { style: styles.subtitle }, "Plateforme de Formation"),
+        React.createElement(
+          Text,
+          { style: styles.heading },
+          "Certificat de completion delivre a"
+        ),
+        React.createElement(Text, { style: styles.name }, studentName),
+        React.createElement(
+          Text,
+          { style: styles.heading },
+          "Pour avoir complete avec succes la formation"
+        ),
+        React.createElement(Text, { style: styles.formation }, formationTitle),
+        React.createElement(
+          View,
+          { style: styles.metaRow },
+          React.createElement(
+            View,
+            { style: styles.metaItem },
+            React.createElement(Text, { style: styles.metaLabel }, "Date de delivrance"),
+            React.createElement(Text, { style: styles.metaValue }, issuedAt)
+          ),
+          React.createElement(
+            View,
+            { style: styles.metaItem },
+            React.createElement(Text, { style: styles.metaLabel }, "Numero de certificat"),
+            React.createElement(Text, { style: styles.metaValue }, certificateNumber)
+          )
+        ),
+        React.createElement(
+          Text,
+          { style: styles.decorLeft },
+          "Verifie sur upscale.app"
+        ),
+        React.createElement(
+          Text,
+          { style: styles.decorRight },
+          "Document genere automatiquement"
+        )
+      )
+    )
+  );
+}
 
 export async function GET(
   request: Request,
@@ -37,122 +193,51 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Generate a simple HTML certificate as PDF alternative
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Certificat - ${(certificate.formation as any)?.title}</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body {
-          font-family: 'Inter', sans-serif;
-          margin: 0;
-          padding: 40px;
-          background: #0D0D0D;
-          color: #EDEDED;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-        }
-        .certificate {
-          background: linear-gradient(135deg, #141414, #1C1C1C);
-          border: 2px solid #C6FF00;
-          border-radius: 24px;
-          padding: 60px;
-          max-width: 800px;
-          width: 100%;
-          text-align: center;
-          position: relative;
-          overflow: hidden;
-        }
-        .certificate::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
-          background: linear-gradient(90deg, #C6FF00, #7FFFD4, #C6FF00);
-        }
-        .logo {
-          font-size: 32px;
-          font-weight: 700;
-          color: #C6FF00;
-          margin-bottom: 8px;
-          letter-spacing: 4px;
-        }
-        .subtitle {
-          color: #999999;
-          font-size: 14px;
-          margin-bottom: 40px;
-        }
-        .heading {
-          font-size: 18px;
-          color: #999999;
-          margin-bottom: 12px;
-        }
-        .name {
-          font-size: 36px;
-          font-weight: 700;
-          margin-bottom: 32px;
-          background: linear-gradient(135deg, #EDEDED, #999999);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        .formation {
-          font-size: 24px;
-          font-weight: 600;
-          color: #C6FF00;
-          margin-bottom: 40px;
-        }
-        .meta {
-          display: flex;
-          justify-content: center;
-          gap: 40px;
-          color: #999999;
-          font-size: 12px;
-        }
-        .meta-item strong {
-          display: block;
-          color: #EDEDED;
-          font-size: 14px;
-          margin-top: 4px;
-        }
-        @media print {
-          body { background: white; color: black; }
-          .certificate { border-color: #C6FF00; background: white; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="certificate">
-        <div class="logo">UPSCALE</div>
-        <div class="subtitle">Plateforme de Formation</div>
-        <div class="heading">Certificat de complétion délivré à</div>
-        <div class="name">${(certificate as any).user?.full_name || "Participant"}</div>
-        <div class="heading">Pour avoir complété avec succès la formation</div>
-        <div class="formation">${(certificate.formation as any)?.title || "Formation"}</div>
-        <div class="meta">
-          <div class="meta-item">
-            Date de délivrance
-            <strong>${new Date(certificate.issued_at).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })}</strong>
-          </div>
-          <div class="meta-item">
-            Numéro de certificat
-            <strong>${certificate.certificate_number}</strong>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+  const studentName =
+    (certificate as Record<string, unknown>).user &&
+    typeof (certificate as Record<string, unknown>).user === "object"
+      ? ((certificate as Record<string, unknown>).user as { full_name: string }).full_name
+      : "Participant";
 
-  return new NextResponse(html, {
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-    },
+  const formationTitle =
+    (certificate as Record<string, unknown>).formation &&
+    typeof (certificate as Record<string, unknown>).formation === "object"
+      ? ((certificate as Record<string, unknown>).formation as { title: string }).title
+      : "Formation";
+
+  const issuedAt = new Date(certificate.issued_at).toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
+
+  try {
+    const pdfBuffer = await renderToBuffer(
+      CertificateDocument({
+        studentName,
+        formationTitle,
+        issuedAt,
+        certificateNumber: certificate.certificate_number,
+      })
+    );
+
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="certificat-${certificate.certificate_number}.pdf"`,
+      },
+    });
+  } catch {
+    // Fallback to HTML if PDF generation fails
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Certificat</title>
+    <style>body{font-family:sans-serif;margin:0;padding:40px;background:#0D0D0D;color:#EDEDED;display:flex;justify-content:center;align-items:center;min-height:100vh}.cert{background:#141414;border:2px solid #C6FF00;border-radius:24px;padding:60px;max-width:800px;width:100%;text-align:center}.logo{font-size:32px;font-weight:700;color:#C6FF00;letter-spacing:4px;margin-bottom:8px}.sub{color:#999;font-size:14px;margin-bottom:40px}.hd{font-size:18px;color:#999;margin-bottom:12px}.nm{font-size:36px;font-weight:700;margin-bottom:32px;color:#EDEDED}.fm{font-size:24px;font-weight:600;color:#C6FF00;margin-bottom:40px}.meta{display:flex;justify-content:center;gap:40px;color:#999;font-size:12px}.meta strong{display:block;color:#EDEDED;font-size:14px;margin-top:4px}</style></head>
+    <body><div class="cert"><div class="logo">UPSCALE</div><div class="sub">Plateforme de Formation</div>
+    <div class="hd">Certificat de complétion délivré à</div><div class="nm">${studentName}</div>
+    <div class="hd">Pour avoir complété avec succès la formation</div><div class="fm">${formationTitle}</div>
+    <div class="meta"><div>Date<strong>${issuedAt}</strong></div><div>N°<strong>${certificate.certificate_number}</strong></div></div></div></body></html>`;
+
+    return new NextResponse(html, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
 }

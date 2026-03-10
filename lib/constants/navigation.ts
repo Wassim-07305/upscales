@@ -10,6 +10,9 @@ import {
   FileText,
   CalendarCheck,
   Brain,
+  Globe,
+  Settings,
+  Bell,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -54,10 +57,22 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: MEMBERS_UP,
   },
   {
+    label: "Communauté",
+    href: "/community",
+    icon: Globe,
+    roles: MEMBERS_UP,
+  },
+  {
     label: "MateuzsIA",
     href: "/ai",
     icon: Sparkles,
     roles: MEMBERS_UP,
+  },
+  {
+    label: "Notifications",
+    href: "/notifications",
+    icon: Bell,
+    roles: ALL_ROLES,
   },
 ];
 
@@ -118,6 +133,18 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     icon: CalendarCheck,
     roles: ADMIN_ROLES,
   },
+  {
+    label: "Communauté",
+    href: "/community",
+    icon: Globe,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Paramètres",
+    href: "/admin/settings",
+    icon: Settings,
+    roles: ADMIN_ROLES,
+  },
 ];
 
 // ─── Liste plate combinee (mobile nav) ──────────────────────
@@ -139,9 +166,15 @@ export const STUDENT_SECTIONS: NavSection[] = [
     ),
   },
   {
-    label: "Communication",
+    label: "Social",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/chat", "/ai"].includes(i.href)
+      ["/chat", "/community", "/ai"].includes(i.href)
+    ),
+  },
+  {
+    label: "",
+    items: STUDENT_NAV_ITEMS.filter((i) =>
+      ["/notifications"].includes(i.href)
     ),
   },
 ];
@@ -161,13 +194,19 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/ai", "/admin/ai"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/ai"].includes(i.href)
     ),
   },
   {
     label: "Planning",
     items: ADMIN_NAV_ITEMS.filter((i) =>
       ["/admin/calendar", "/admin/booking"].includes(i.href)
+    ),
+  },
+  {
+    label: "",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/settings"].includes(i.href)
     ),
   },
 ];

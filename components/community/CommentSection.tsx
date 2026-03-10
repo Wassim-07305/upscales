@@ -68,7 +68,48 @@ export function CommentSection({
     if (error) {
       toast.error("Erreur", { description: error.message });
     } else {
+      // Notifier l'auteur du post qu'il a reçu un commentaire
+      const { data: post } = await supabase
+        .from("posts")
+        .select("author_id, title")
+        .eq("id", postId)
+        .single();
+
+      if (post && post.author_id !== currentUserId) {
+        const { data: commenter } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", currentUserId)
+          .single();
+
+        await supabase.from("notifications").insert({
+          user_id: post.author_id,
+          type: "post",
+          title: `${commenter?.full_name || "Quelqu'un"} a commenté votre post`,
+          message: post.title || content.trim().slice(0, 100),
+          link: `/community/${postId}`,
+        });
+      }
+
+      // Notifier l'auteur du commentaire parent lors d'une réponse
       if (parentId) {
+        const parentComment = comments.find((c) => c.id === parentId);
+        if (parentComment && parentComment.author_id !== currentUserId) {
+          const { data: replier } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", currentUserId)
+            .single();
+
+          await supabase.from("notifications").insert({
+            user_id: parentComment.author_id,
+            type: "post",
+            title: `${replier?.full_name || "Quelqu'un"} a répondu à votre commentaire`,
+            message: content.trim().slice(0, 100),
+            link: `/community/${postId}`,
+          });
+        }
+
         setReplyContent("");
         setReplyTo(null);
       } else {

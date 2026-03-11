@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { FormationsFilters, ViewMode } from "./FormationsFilters";
+import { useState, useMemo } from "react";
+import { FormationsFilters, ViewMode, SortOption } from "./FormationsFilters";
 import { FormationGrid, FormationData } from "@/components/formations/FormationGrid";
 
 interface FormationsViewProps {
@@ -26,6 +26,27 @@ export function FormationsView({
   categories,
 }: FormationsViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+
+  const sorted = useMemo(() => {
+    if (sortBy === "default") return formations;
+    return [...formations].sort((a, b) => {
+      switch (sortBy) {
+        case "title":
+          return a.title.localeCompare(b.title, "fr");
+        case "duration":
+          return b.totalDuration - a.totalDuration;
+        case "rating":
+          return b.averageRating - a.averageRating;
+        case "enrolled":
+          return b.enrolledCount - a.enrolledCount;
+        case "recent":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        default:
+          return 0;
+      }
+    });
+  }, [formations, sortBy]);
 
   return (
     <>
@@ -38,8 +59,10 @@ export function FormationsView({
         categories={categories}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
       />
-      <FormationGrid formations={formations} userId={userId} viewMode={viewMode} />
+      <FormationGrid formations={sorted} userId={userId} viewMode={viewMode} />
     </>
   );
 }

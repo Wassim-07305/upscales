@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X, LayoutGrid, List } from "lucide-react";
+import { Search, SlidersHorizontal, X, LayoutGrid, List, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,16 @@ const DURATION_LABELS: Record<string, string> = {
 };
 
 export type ViewMode = "grid" | "list";
+export type SortOption = "default" | "title" | "duration" | "rating" | "enrolled" | "recent";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  default: "Par défaut",
+  title: "Titre A-Z",
+  duration: "Durée",
+  rating: "Note",
+  enrolled: "Popularité",
+  recent: "Plus récentes",
+};
 
 interface FormationsFiltersProps {
   currentFilter: string;
@@ -49,6 +59,8 @@ interface FormationsFiltersProps {
   categories?: string[];
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
+  sortBy?: SortOption;
+  onSortChange?: (sort: SortOption) => void;
 }
 
 export function FormationsFilters({
@@ -60,6 +72,8 @@ export function FormationsFilters({
   categories = [],
   viewMode = "grid",
   onViewModeChange,
+  sortBy = "default",
+  onSortChange,
 }: FormationsFiltersProps) {
   const [search, setSearch] = useState(currentSearch);
   const [showAdvanced, setShowAdvanced] = useState(
@@ -217,6 +231,25 @@ export function FormationsFilters({
               ))}
             </SelectContent>
           </Select>
+
+          {onSortChange && (
+            <Select
+              value={sortBy}
+              onValueChange={(v) => onSortChange(v as SortOption)}
+            >
+              <SelectTrigger className="w-[160px] bg-[#141414] border-0 h-9">
+                <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(SORT_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           {categories.length > 0 && (
             <Select

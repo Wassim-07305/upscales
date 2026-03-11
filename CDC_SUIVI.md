@@ -23,21 +23,21 @@
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 80% | 4 roles, RLS en place |
 | 4 | Authentification & Profils | 90% | OAuth 4 providers |
-| 5 | Formations & Catalogue | 95% | Filtres OK, infinite scroll OK, vue liste |
-| 6 | Modules & Contenu | 85% | Video + Tiptap OK |
+| 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
+| 6 | Modules & Contenu | 90% | Video + Tiptap + PiP OK |
 | 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
 | 10 | Chat & Canaux | 90% | Realtime + edit/delete + reactions emoji |
-| 11 | Communaute | 80% | Feed + infinite scroll OK |
-| 12 | Notifications | 85% | Triggers + suppression + nettoyage |
+| 11 | Communaute | 85% | Feed + infinite scroll + edition posts OK |
+| 12 | Notifications | 90% | Triggers + suppression + nettoyage + tout lu |
 | 13 | CRM Administrateur | 85% | Fiches + tags + notes CRM OK |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
-| 15 | Landing Pages | 75% | Puck integre |
+| 15 | Landing Pages | 85% | Puck + 11 blocs complets |
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 95% | Dark mode complet |
 
-**Moyenne globale : ~89%**
+**Moyenne globale : ~92%**
 
 ---
 
@@ -87,7 +87,7 @@
 | F10.3 | Badges visuels | ✅ | Gratuit/Payant/Premium |
 | F10.4 | Infinite scroll catalogue | ✅ | FormationGrid + IntersectionObserver |
 | F10.5 | Vue liste alternative | ✅ | Toggle grille/liste avec FormationListItem |
-| F10.6 | Tri par colonne | ❌ | Non implemente |
+| F10.6 | Tri par colonne | ✅ | Titre, duree, note, popularite, recent |
 | F11 | Detail formation | ✅ | Description, modules, inscrits, duree |
 | F11.1 | Image couverture | ✅ | Thumbnail optimise |
 | F11.2 | Liste modules + duree | ✅ | Avec progression si inscrit |
@@ -108,7 +108,7 @@
 | F14 | Video avec lecteur | ✅ | Play/pause, volume, fullscreen, vitesse |
 | F14.1 | Upload Supabase Storage | ✅ | Via /api/upload |
 | F14.2 | URLs embed externes | ✅ | YouTube, Vimeo |
-| F14.3 | Picture-in-picture | ❌ | Non implemente |
+| F14.3 | Picture-in-picture | ✅ | Bouton PiP dans VideoPlayer |
 | F14.4 | Sauvegarde position | ❌ | Pas de resume lecture |
 | F14.5 | Auto-completion 90% | ✅ | Marque complete a 90% visionne |
 | F15 | Editeur Tiptap | ✅ | WYSIWYG complet |
@@ -229,7 +229,7 @@
 | F32.2 | Commentaires imbriques | ✅ | CommentSection |
 | F32.3 | Like/unlike posts+comments | ✅ | Avec compteur optimiste |
 | F32.4 | Suppression par auteur/modo | 🟡 | Moderation admin OK, pas cote user |
-| F32.5 | Edition post par auteur | ❌ | Non implemente |
+| F32.5 | Edition post par auteur | ✅ | Mode edition dans PostCard |
 | F33 | Detail post | ✅ | Page /community/[postId] |
 | F33.1 | Commentaires + reponses | ✅ | Thread complet |
 | F33.2 | Share buttons | ❌ | Non implemente |
@@ -249,7 +249,7 @@
 | F35.1 | Icone par type | 🟡 | Types existent, icones basiques |
 | F35.2 | Lien navigation direct | 🟡 | Pas toujours vers la ressource |
 | F36 | Marquage lu | ✅ | Toggle lu/non-lu |
-| F36.1 | Marquer tout comme lu | ❌ | Non implemente |
+| F36.1 | Marquer tout comme lu | ✅ | Bouton "Tout lu" dans panel + page notifications |
 | F36.2 | Badge header non-lues | ❌ | Pas de badge temps reel dans nav |
 | F36.3 | Surlignage non-lues | 🟡 | Style different mais subtil |
 
@@ -309,7 +309,7 @@
 | F44 | Pages personnalisees | ✅ | Page builder Puck |
 | F44.1 | URL publique slug | ✅ | /p/[slug] |
 | F44.2 | Editeur drag-and-drop | ✅ | Puck integre |
-| F44.3 | Blocs disponibles | 🟡 | Hero, Video. Manque: Pricing, FAQ, Testimonials |
+| F44.3 | Blocs disponibles | ✅ | Hero, Features, CTA, Pricing, FAQ, Testimonials, TextImage, Video, RichText, Email, Spacer |
 | F44.4 | SEO meta/og:image | ❌ | Non implemente |
 | F44.5 | Preview avant publication | ❌ | Non implemente |
 | F44.6 | Historique versions | ❌ | Non implemente |
@@ -394,12 +394,19 @@
 - [x] F38.5 : Notes CRM privees (deja implemente)
 - [x] F46.5 : Streaming reponses IA (deja implemente)
 
-### Sprint 7 (a planifier)
-- [ ] F44.3 : Blocs supplementaires landing pages (Pricing, FAQ, Testimonials)
-- [ ] F36.1 : Marquer tout comme lu
-- [ ] F10.6 : Tri par colonne formations
-- [ ] F32.5 : Edition post par auteur
-- [ ] F14.3 : Picture-in-picture video
+### Sprint 7 (complete)
+- [x] F10.6 : Tri par colonne formations (titre, duree, note, popularite, recent)
+- [x] F14.3 : Picture-in-picture video
+- [x] F44.3 : Blocs landing pages (deja implemente - 11 blocs)
+- [x] F36.1 : Marquer tout comme lu (deja implemente)
+- [x] F32.5 : Edition post par auteur (deja implemente)
+
+### Sprint 8 (a planifier)
+- [ ] F14.4 : Sauvegarde position video (resume lecture)
+- [ ] F3.6 : Audit trail admin
+- [ ] F8.2 : Visibilite profil (toggle prive/public)
+- [ ] F29.4 : Pin messages chat
+- [ ] F33.2 : Share buttons posts communaute
 
 ---
 
@@ -413,3 +420,4 @@
 | Sprint 4 | 2026-03-11 | Vues calendrier mois/semaine/jour, filtres sessions, infinite scroll formations | main |
 | Sprint 5 | 2026-03-11 | OAuth FB/Discord, reactions emoji chat, partage certificats, suppression notifs | main |
 | Sprint 6 | 2026-03-11 | Shuffle quiz, vue liste formations, validation UI IA/CRM/streaming | main |
+| Sprint 7 | 2026-03-11 | Tri formations, PiP video, validation blocs landing/notifs/posts | main |

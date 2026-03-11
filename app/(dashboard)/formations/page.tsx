@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { FormationGrid } from "@/components/formations/FormationGrid";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { isAdmin } from "@/lib/utils/roles";
-import { FormationsFilters } from "./FormationsFilters";
+import { FormationsView } from "./FormationsView";
 
 export default async function FormationsPage({
   searchParams,
@@ -155,7 +154,9 @@ export default async function FormationsPage({
         )}
       </div>
 
-      <FormationsFilters
+      <FormationsView
+        formations={filtered}
+        userId={user.id}
         currentFilter={filter}
         currentSearch={searchQuery}
         currentDifficulty={difficultyFilter}
@@ -163,8 +164,6 @@ export default async function FormationsPage({
         currentCategory={categoryFilter}
         categories={categories}
       />
-
-      <FormationGrid formations={filtered} userId={user.id} />
     </div>
   );
 }

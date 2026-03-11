@@ -11,13 +11,28 @@ import { cn } from "@/lib/utils";
 import { Quiz, QuizQuestion, QuizOption, QuizAttempt } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
 
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 interface QuizComponentProps {
   quiz: Quiz;
   questions: (QuizQuestion & { options: QuizOption[] })[];
   onComplete?: (passed: boolean) => void;
 }
 
-export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProps) {
+export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: QuizComponentProps) {
+  const [questions, setQuestions] = useState(() =>
+    shuffleArray(rawQuestions).map((q) => ({
+      ...q,
+      options: q.question_type === "multiple_choice" ? shuffleArray(q.options) : q.options,
+    }))
+  );
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
@@ -344,6 +359,13 @@ export function QuizComponent({ quiz, questions, onComplete }: QuizComponentProp
             setSubmitted(false);
             setScore(0);
             setPassed(false);
+            // Re-shuffle questions and options on retry
+            setQuestions(
+              shuffleArray(rawQuestions).map((q) => ({
+                ...q,
+                options: q.question_type === "multiple_choice" ? shuffleArray(q.options) : q.options,
+              }))
+            );
           }}
           variant="outline"
           className="w-full"

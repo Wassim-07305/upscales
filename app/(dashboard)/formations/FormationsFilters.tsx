@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,8 @@ const DURATION_LABELS: Record<string, string> = {
   long: "> 3h",
 };
 
+export type ViewMode = "grid" | "list";
+
 interface FormationsFiltersProps {
   currentFilter: string;
   currentSearch: string;
@@ -45,6 +47,8 @@ interface FormationsFiltersProps {
   currentDuration?: string;
   currentCategory?: string;
   categories?: string[];
+  viewMode?: ViewMode;
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
 export function FormationsFilters({
@@ -54,6 +58,8 @@ export function FormationsFilters({
   currentDuration = "all",
   currentCategory = "all",
   categories = [],
+  viewMode = "grid",
+  onViewModeChange,
 }: FormationsFiltersProps) {
   const [search, setSearch] = useState(currentSearch);
   const [showAdvanced, setShowAdvanced] = useState(
@@ -148,6 +154,32 @@ export function FormationsFilters({
               </span>
             )}
           </Button>
+          {onViewModeChange && (
+            <div className="flex border border-border rounded-md overflow-hidden">
+              <button
+                onClick={() => onViewModeChange("grid")}
+                className={cn(
+                  "p-1.5 transition-colors",
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => onViewModeChange("list")}
+                className={cn(
+                  "p-1.5 transition-colors",
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

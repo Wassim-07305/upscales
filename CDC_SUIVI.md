@@ -23,21 +23,21 @@
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 80% | 4 roles, RLS en place |
 | 4 | Authentification & Profils | 90% | OAuth 4 providers |
-| 5 | Formations & Catalogue | 90% | Filtres OK, infinite scroll OK |
+| 5 | Formations & Catalogue | 95% | Filtres OK, infinite scroll OK, vue liste |
 | 6 | Modules & Contenu | 85% | Video + Tiptap OK |
-| 7 | Quiz & Evaluations | 70% | 3 types, historique OK |
+| 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
 | 10 | Chat & Canaux | 90% | Realtime + edit/delete + reactions emoji |
 | 11 | Communaute | 80% | Feed + infinite scroll OK |
 | 12 | Notifications | 85% | Triggers + suppression + nettoyage |
-| 13 | CRM Administrateur | 80% | Fiches + tags OK |
+| 13 | CRM Administrateur | 85% | Fiches + tags + notes CRM OK |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
 | 15 | Landing Pages | 75% | Puck integre |
-| 16 | Intelligence Artificielle | 70% | RAG + Claude OK |
+| 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 95% | Dark mode complet |
 
-**Moyenne globale : ~86%**
+**Moyenne globale : ~89%**
 
 ---
 
@@ -86,7 +86,7 @@
 | F10.2 | Filtres avances | ✅ | Difficulte, duree, categorie, statut |
 | F10.3 | Badges visuels | ✅ | Gratuit/Payant/Premium |
 | F10.4 | Infinite scroll catalogue | ✅ | FormationGrid + IntersectionObserver |
-| F10.5 | Vue liste alternative | ❌ | Grille seulement |
+| F10.5 | Vue liste alternative | ✅ | Toggle grille/liste avec FormationListItem |
 | F10.6 | Tri par colonne | ❌ | Non implemente |
 | F11 | Detail formation | ✅ | Description, modules, inscrits, duree |
 | F11.1 | Image couverture | ✅ | Thumbnail optimise |
@@ -133,7 +133,7 @@
 | ID | Fonctionnalite | Statut | Notes |
 |----|---------------|--------|-------|
 | F19 | Types questions | ✅ | multiple_choice, true_false, free_response |
-| F19.1 | Options aleatoires | ❌ | Pas de shuffle |
+| F19.1 | Options aleatoires | ✅ | Fisher-Yates shuffle questions + options, re-shuffle au retry |
 | F19.2 | Support multimedia options | ❌ | Texte seulement |
 | F19.3 | Validation Zod reponses | ❌ | Validation client seulement |
 | F20 | Notation automatique | ✅ | Score % + pass/fail |
@@ -268,7 +268,7 @@
 | F38.2 | Formations en cours | ✅ | Avec progression visuelle |
 | F38.3 | Certificats obtenus | ✅ | Avec dates |
 | F38.4 | Sessions | 🟡 | Pas distingue prochaines/passees |
-| F38.5 | Notes CRM | ❌ | Pas d'onglet notes |
+| F38.5 | Notes CRM | ✅ | Section Notes CRM dans StudentDetail |
 | F38.6 | Tags colores | ✅ | Assignation + badges |
 | F39 | Suivi progression | ✅ | Par formation, modules, quiz |
 | F39.1 | Barre progression % | ✅ | Par formation |
@@ -279,7 +279,7 @@
 | F40.1 | Modifier role | ✅ | admin, moderator, member, prospect |
 | F40.2 | Reset mot de passe | ❌ | Non implemente |
 | F40.3 | Tags personnalises | ✅ | CRUD complet |
-| F40.4 | Notes CRM privees | ❌ | Non implemente |
+| F40.4 | Notes CRM privees | ✅ | crm_notes table + UI StudentDetail |
 | F40.5 | Suspendre compte | ✅ | Page /suspended |
 | F40.6 | Exporter donnees user | ❌ | Non implemente |
 
@@ -327,13 +327,13 @@
 | F46.2 | Historique conversations | ✅ | Persistant en DB |
 | F46.3 | Reponses contextuelles RAG | ✅ | pgvector + embeddings |
 | F46.4 | Sources affichees | ✅ | Documents references |
-| F46.5 | Streaming | ❌ | Reponse complete seulement |
+| F46.5 | Streaming | ✅ | streamText() + toUIMessageStreamResponse() |
 | F46.6 | Acces member+ seulement | ✅ | Restriction role |
-| F47 | Knowledge base admin | 🟡 | API existe, pas de UI |
-| F47.1 | Upload PDF/TXT | 🟡 | API /api/ai/documents, pas de frontend |
+| F47 | Knowledge base admin | ✅ | UI complete /admin/ai avec AIAdminClient |
+| F47.1 | Upload PDF/TXT | ✅ | Upload + traitement auto en arriere-plan |
 | F47.2 | Import formations | ✅ | API import-formation |
 | F47.3 | Vectorisation auto | ✅ | Pipeline pgvector |
-| F47.4 | Indicateur statut | ❌ | Non implemente (UI) |
+| F47.4 | Indicateur statut | ✅ | Badges processing/ready/error avec icones |
 | F47.5 | Suppression + cleanup | ✅ | API DELETE |
 | F48 | Reponses contextuelles | ✅ | Cosine similarity search |
 | F48.1 | Top 5 chunks | ✅ | Algorithme en place |
@@ -387,12 +387,19 @@
 - [x] F24.2 : Partage certificats LinkedIn/Twitter
 - [x] F34.4 : Suppression individuelle + nettoyage en masse notifications
 
-### Sprint 6 (a planifier)
-- [ ] F19.1 : Shuffle questions quiz
-- [ ] F38.5 : Notes CRM privees
-- [ ] F44.3 : Blocs supplementaires landing pages
-- [ ] F46.5 : Streaming reponses IA
+### Sprint 6 (complete)
+- [x] F19.1 : Shuffle questions + options quiz (Fisher-Yates)
+- [x] F10.5 : Vue liste formations (toggle grille/liste)
+- [x] F47 : UI knowledge base admin (deja implemente)
+- [x] F38.5 : Notes CRM privees (deja implemente)
+- [x] F46.5 : Streaming reponses IA (deja implemente)
+
+### Sprint 7 (a planifier)
+- [ ] F44.3 : Blocs supplementaires landing pages (Pricing, FAQ, Testimonials)
 - [ ] F36.1 : Marquer tout comme lu
+- [ ] F10.6 : Tri par colonne formations
+- [ ] F32.5 : Edition post par auteur
+- [ ] F14.3 : Picture-in-picture video
 
 ---
 
@@ -405,3 +412,4 @@
 | Sprint 3 | 2026-03-11 | Upload images posts, chat edit/delete/typing, infinite scroll communaute | dev → main |
 | Sprint 4 | 2026-03-11 | Vues calendrier mois/semaine/jour, filtres sessions, infinite scroll formations | main |
 | Sprint 5 | 2026-03-11 | OAuth FB/Discord, reactions emoji chat, partage certificats, suppression notifs | main |
+| Sprint 6 | 2026-03-11 | Shuffle quiz, vue liste formations, validation UI IA/CRM/streaming | main |

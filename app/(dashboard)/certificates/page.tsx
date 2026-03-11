@@ -66,7 +66,7 @@ export default async function CertificatesPage() {
                     </div>
                   </div>
                   <div className="flex gap-1.5 shrink-0">
-                    <ShareButton certificateNumber={cert.certificate_number} />
+                    <ShareButton certificateNumber={cert.certificate_number} formationTitle={(cert.formation as any)?.title} />
                     <Link href={`/api/certificates/${cert.id}`} target="_blank">
                       <Button variant="outline" size="sm">
                         <Download className="mr-2 h-4 w-4" />

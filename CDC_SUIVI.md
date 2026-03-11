@@ -23,11 +23,11 @@
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 80% | 4 roles, RLS en place |
 | 4 | Authentification & Profils | 80% | OAuth partiel |
-| 5 | Formations & Catalogue | 85% | Filtres OK, infinite scroll manquant |
+| 5 | Formations & Catalogue | 90% | Filtres OK, infinite scroll OK |
 | 6 | Modules & Contenu | 85% | Video + Tiptap OK |
 | 7 | Quiz & Evaluations | 70% | 3 types, historique OK |
 | 8 | Certificats | 90% | PDF + QR code OK |
-| 9 | Calendrier & Sessions | 60% | Liste seulement |
+| 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
 | 10 | Chat & Canaux | 85% | Realtime + edit/delete OK |
 | 11 | Communaute | 80% | Feed + infinite scroll OK |
 | 12 | Notifications | 70% | Triggers DB OK |
@@ -37,7 +37,7 @@
 | 16 | Intelligence Artificielle | 70% | RAG + Claude OK |
 | 17 | Design System | 95% | Dark mode complet |
 
-**Moyenne globale : ~80%**
+**Moyenne globale : ~83%**
 
 ---
 
@@ -85,7 +85,7 @@
 | F10.1 | Grille responsive | ✅ | Cards avec stats |
 | F10.2 | Filtres avances | ✅ | Difficulte, duree, categorie, statut |
 | F10.3 | Badges visuels | ✅ | Gratuit/Payant/Premium |
-| F10.4 | Infinite scroll catalogue | ❌ | Charge tout d'un coup |
+| F10.4 | Infinite scroll catalogue | ✅ | FormationGrid + IntersectionObserver |
 | F10.5 | Vue liste alternative | ❌ | Grille seulement |
 | F10.6 | Tri par colonne | ❌ | Non implemente |
 | F11 | Detail formation | ✅ | Description, modules, inscrits, duree |
@@ -168,13 +168,13 @@
 
 | ID | Fonctionnalite | Statut | Notes |
 |----|---------------|--------|-------|
-| F25 | Calendrier interactif | 🟡 | Vue liste seulement |
-| F25.1 | Vue mois | ❌ | Non implemente |
-| F25.2 | Vue semaine | ❌ | Non implemente |
-| F25.3 | Vue jour | ❌ | Non implemente |
-| F25.4 | Multi-couleur sessions | ❌ | Pas de distinction visuelle |
+| F25 | Calendrier interactif | ✅ | 3 vues avec toggle |
+| F25.1 | Vue mois | ✅ | Grille avec sessions, clic pour drill down |
+| F25.2 | Vue semaine | ✅ | Grille horaire 7h-22h, 7 colonnes |
+| F25.3 | Vue jour | ✅ | Grille horaire detaillee |
+| F25.4 | Multi-couleur sessions | ✅ | Couleur par session |
 | F25.5 | Places restantes | ✅ | Affiche dans les cards |
-| F25.6 | Navigation mois | ❌ | Pas de calendrier visuel |
+| F25.6 | Navigation mois | ✅ | Prev/next + bouton Aujourd'hui |
 | F25.7 | Drag-and-drop admin | ❌ | Non implemente |
 | F26 | Sessions live | ✅ | Creation, inscription, details |
 | F26.1 | Lieu physique/visio | ✅ | Support Zoom/Meet |
@@ -182,11 +182,11 @@
 | F26.3 | Statut scheduled/completed | ✅ | Gestion statut |
 | F26.4 | Notification modif session | ✅ | Trigger DB |
 | F26.5 | Desistement | 🟡 | Possible mais pas de delai N heures |
-| F27 | Filtres sessions | 🟡 | Basique, pas de persistence localStorage |
-| F27.1 | Filtre statut | ❌ | Non implemente |
-| F27.2 | Filtre type | ❌ | Non implemente |
-| F27.3 | Filtre lieu | ❌ | Non implemente |
-| F27.4 | Badge filtres actifs | ❌ | Non implemente |
+| F27 | Filtres sessions | ✅ | Panel filtres avec badge compteur |
+| F27.1 | Filtre statut | ✅ | A venir, passees, annulees |
+| F27.2 | Filtre type | ✅ | En ligne, physique, hybride |
+| F27.3 | Filtre lieu | ✅ | Via filtre type online/physical |
+| F27.4 | Badge filtres actifs | ✅ | Compteur sur bouton Filtres |
 
 ### 10. CHAT & CANAUX
 
@@ -374,12 +374,12 @@
 
 ## Prochaines priorites
 
-### Sprint 4 (a planifier)
-- [ ] F25 : Vues calendrier mois/semaine/jour
-- [ ] F37.4 : Export CSV CRM
-- [ ] F10.4 : Infinite scroll catalogue formations
-- [ ] F32.5 : Edition de posts par l'auteur
-- [ ] F36.2 : Badge notifications temps reel dans header
+### Sprint 4 (complete)
+- [x] F25 : Vues calendrier mois/semaine/jour + filtres
+- [x] F37.4 : Export CSV CRM (deja implemente)
+- [x] F10.4 : Infinite scroll catalogue formations
+- [x] F32.5 : Edition de posts par l'auteur (deja implemente)
+- [x] F36.2 : Badge notifications temps reel (deja implemente)
 
 ### Sprint 5 (a planifier)
 - [ ] F5 : OAuth Facebook + Discord
@@ -404,3 +404,4 @@
 | Sprint 1 | 2026-03-10 | Recherche globale, triggers notifications, OAuth Google/GitHub | dev → main |
 | Sprint 2 | 2026-03-10 | Quiz multi-types, historique tentatives, certificats PDF | dev → main |
 | Sprint 3 | 2026-03-11 | Upload images posts, chat edit/delete/typing, infinite scroll communaute | dev → main |
+| Sprint 4 | 2026-03-11 | Vues calendrier mois/semaine/jour, filtres sessions, infinite scroll formations | main |

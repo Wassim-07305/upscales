@@ -25,3 +25,27 @@ export async function markAllNotificationsRead() {
     .eq("user_id", user.id)
     .eq("is_read", false);
 }
+
+export async function deleteNotification(notificationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId)
+    .eq("user_id", user.id);
+}
+
+export async function deleteAllReadNotifications() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("is_read", true);
+}

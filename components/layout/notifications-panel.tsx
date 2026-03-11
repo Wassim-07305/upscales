@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -17,6 +17,8 @@ import { createClient } from "@/lib/supabase/client";
 import {
   markNotificationRead,
   markAllNotificationsRead,
+  deleteNotification,
+  deleteAllReadNotifications,
 } from "@/lib/actions/notifications";
 import { toast } from "sonner";
 import type { Notification } from "@/lib/types/database";
@@ -138,6 +140,25 @@ export function NotificationsPanel({
     onUnreadCountChange(0);
   }
 
+  async function handleDelete(id: string, wasRead: boolean) {
+    await deleteNotification(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if (!wasRead) {
+      setUnreadCount((prev) => {
+        const next = Math.max(0, prev - 1);
+        onUnreadCountChange(next);
+        return next;
+      });
+    }
+  }
+
+  async function handleClearRead() {
+    await deleteAllReadNotifications();
+    const remaining = notifications.filter((n) => !n.is_read);
+    setNotifications(remaining);
+    toast.success("Notifications lues supprimees");
+  }
+
   return (
     <Sheet
       open={notificationsPanelOpen}
@@ -147,17 +168,30 @@ export function NotificationsPanel({
         <SheetHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg">Notifications</SheetTitle>
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-7"
-                onClick={handleMarkAllRead}
-              >
-                <Check className="mr-1 h-3 w-3" />
-                Tout marquer lu
-              </Button>
-            )}
+            <div className="flex items-center gap-1">
+              {notifications.some((n) => n.is_read) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-7 text-muted-foreground"
+                  onClick={handleClearRead}
+                >
+                  <Trash2 className="mr-1 h-3 w-3" />
+                  Nettoyer
+                </Button>
+              )}
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={handleMarkAllRead}
+                >
+                  <Check className="mr-1 h-3 w-3" />
+                  Tout lu
+                </Button>
+              )}
+            </div>
           </div>
           {unreadCount > 0 && (
             <p className="text-sm text-muted-foreground">
@@ -177,51 +211,62 @@ export function NotificationsPanel({
           ) : (
             <div className="space-y-1">
               {notifications.map((n) => (
-                <button
-                  key={n.id}
-                  onClick={() => {
-                    if (!n.is_read) handleMarkRead(n.id);
-                    if (n.link) window.location.href = n.link;
-                  }}
-                  className={cn(
-                    "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
-                    !n.is_read
-                      ? "bg-brand/5 hover:bg-brand/10"
-                      : "hover:bg-muted/50"
-                  )}
-                >
-                  <span className="mt-0.5 text-lg shrink-0">
-                    {icons[n.type || ""] || "\u{1F514}"}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start gap-2">
-                      <p
-                        className={cn(
-                          "text-sm",
-                          !n.is_read
-                            ? "font-semibold text-foreground"
-                            : "text-foreground"
-                        )}
-                      >
-                        {n.title}
-                      </p>
-                      {!n.is_read && (
-                        <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand" />
-                      )}
-                    </div>
-                    {n.message && (
-                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-                        {n.message}
-                      </p>
+                <div key={n.id} className="group relative">
+                  <button
+                    onClick={() => {
+                      if (!n.is_read) handleMarkRead(n.id);
+                      if (n.link) window.location.href = n.link;
+                    }}
+                    className={cn(
+                      "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
+                      !n.is_read
+                        ? "bg-brand/5 hover:bg-brand/10"
+                        : "hover:bg-muted/50"
                     )}
-                    <p className="mt-1 text-[11px] text-muted-foreground/60">
-                      {formatDistanceToNow(new Date(n.created_at), {
-                        addSuffix: true,
-                        locale: fr,
-                      })}
-                    </p>
-                  </div>
-                </button>
+                  >
+                    <span className="mt-0.5 text-lg shrink-0">
+                      {icons[n.type || ""] || "\u{1F514}"}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start gap-2">
+                        <p
+                          className={cn(
+                            "text-sm",
+                            !n.is_read
+                              ? "font-semibold text-foreground"
+                              : "text-foreground"
+                          )}
+                        >
+                          {n.title}
+                        </p>
+                        {!n.is_read && (
+                          <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand" />
+                        )}
+                      </div>
+                      {n.message && (
+                        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                          {n.message}
+                        </p>
+                      )}
+                      <p className="mt-1 text-[11px] text-muted-foreground/60">
+                        {formatDistanceToNow(new Date(n.created_at), {
+                          addSuffix: true,
+                          locale: fr,
+                        })}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(n.id, n.is_read);
+                    }}
+                    className="absolute top-2 right-2 hidden group-hover:flex h-6 w-6 items-center justify-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
               ))}
             </div>
           )}

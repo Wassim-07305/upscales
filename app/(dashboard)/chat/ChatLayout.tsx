@@ -24,6 +24,7 @@ import {
   ImageIcon,
   Loader2,
   FileIcon,
+  Smile,
 } from "lucide-react";
 import {
   Dialog,
@@ -69,6 +70,8 @@ export function ChatLayout({
   const lastTypingRef = useRef<number>(0);
   const [replyTo, setReplyTo] = useState<(Message & { sender?: Profile }) | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [reactions, setReactions] = useState<Record<string, { emoji: string; user_id: string }[]>>({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +104,7 @@ export function ChatLayout({
       setMessages(data || []);
       setLoading(false);
       setTimeout(scrollToBottom, 100);
+      fetchReactions(activeChannel.id);
     };
 
     fetchMessages();
@@ -227,6 +231,66 @@ export function ChatLayout({
   const handleDeleteMessage = async (messageId: string) => {
     await supabase.from("messages").delete().eq("id", messageId);
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
+
+  const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👀"];
+
+  const fetchReactions = async (channelId: string) => {
+    const { data: msgs } = await supabase
+      .from("messages")
+      .select("id")
+      .eq("channel_id", channelId)
+      .limit(100);
+    if (!msgs || msgs.length === 0) return;
+    const msgIds = msgs.map((m) => m.id);
+    const { data: rxns } = await supabase
+      .from("message_reactions")
+      .select("message_id, emoji, user_id")
+      .in("message_id", msgIds);
+    if (rxns) {
+      const grouped: Record<string, { emoji: string; user_id: string }[]> = {};
+      rxns.forEach((r) => {
+        if (!grouped[r.message_id]) grouped[r.message_id] = [];
+        grouped[r.message_id].push({ emoji: r.emoji, user_id: r.user_id });
+      });
+      setReactions(grouped);
+    }
+  };
+
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    const msgReactions = reactions[messageId] || [];
+    const existing = msgReactions.find(
+      (r) => r.emoji === emoji && r.user_id === user.id
+    );
+
+    if (existing) {
+      await supabase
+        .from("message_reactions")
+        .delete()
+        .eq("message_id", messageId)
+        .eq("user_id", user.id)
+        .eq("emoji", emoji);
+      setReactions((prev) => ({
+        ...prev,
+        [messageId]: (prev[messageId] || []).filter(
+          (r) => !(r.emoji === emoji && r.user_id === user.id)
+        ),
+      }));
+    } else {
+      await supabase.from("message_reactions").insert({
+        message_id: messageId,
+        user_id: user.id,
+        emoji,
+      });
+      setReactions((prev) => ({
+        ...prev,
+        [messageId]: [
+          ...(prev[messageId] || []),
+          { emoji, user_id: user.id },
+        ],
+      }));
+    }
+    setShowEmojiPicker(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -594,26 +658,88 @@ export function ChatLayout({
                                 )}
                               </div>
 
-                              {/* Edit/Delete actions on hover (own messages only) */}
-                              {isOwn && !msg.id.startsWith("temp-") && (
-                                <div className="hidden group-hover:flex items-center gap-0.5 absolute -left-16 top-1/2 -translate-y-1/2">
+                              {/* Actions on hover */}
+                              {!msg.id.startsWith("temp-") && (
+                                <div className={cn(
+                                  "hidden group-hover:flex items-center gap-0.5 absolute top-1/2 -translate-y-1/2",
+                                  isOwn ? "-left-20" : "-right-20"
+                                )}>
                                   <button
-                                    onClick={() => {
-                                      setEditingMessageId(msg.id);
-                                      setEditContent(msg.content);
-                                    }}
+                                    onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
                                     className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Modifier"
+                                    title="Reagir"
                                   >
-                                    <Pencil className="h-3 w-3" />
+                                    <Smile className="h-3 w-3" />
                                   </button>
-                                  <button
-                                    onClick={() => handleDeleteMessage(msg.id)}
-                                    className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
+                                  {isOwn && (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          setEditingMessageId(msg.id);
+                                          setEditContent(msg.content);
+                                        }}
+                                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                        title="Modifier"
+                                      >
+                                        <Pencil className="h-3 w-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteMessage(msg.id)}
+                                        className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                        title="Supprimer"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Emoji picker */}
+                              {showEmojiPicker === msg.id && (
+                                <div className={cn(
+                                  "absolute z-20 mt-1 flex gap-1 bg-card border border-border rounded-full px-2 py-1 shadow-lg",
+                                  isOwn ? "right-0" : "left-0"
+                                )} style={{ top: "100%" }}>
+                                  {QUICK_EMOJIS.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleToggleReaction(msg.id, emoji)}
+                                      className="text-base hover:scale-125 transition-transform p-0.5"
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Reactions display */}
+                              {reactions[msg.id] && reactions[msg.id].length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {Object.entries(
+                                    reactions[msg.id].reduce<Record<string, string[]>>(
+                                      (acc, r) => {
+                                        if (!acc[r.emoji]) acc[r.emoji] = [];
+                                        acc[r.emoji].push(r.user_id);
+                                        return acc;
+                                      },
+                                      {}
+                                    )
+                                  ).map(([emoji, userIds]) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleToggleReaction(msg.id, emoji)}
+                                      className={cn(
+                                        "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] border transition-colors",
+                                        userIds.includes(user.id)
+                                          ? "border-primary/40 bg-primary/10"
+                                          : "border-border hover:border-primary/30"
+                                      )}
+                                    >
+                                      <span>{emoji}</span>
+                                      <span className="text-muted-foreground">{userIds.length}</span>
+                                    </button>
+                                  ))}
                                 </div>
                               )}
                             </div>

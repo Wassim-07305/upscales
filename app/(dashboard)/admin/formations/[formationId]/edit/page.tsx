@@ -32,11 +32,24 @@ export default async function EditFormationPage({
 
   if (!formation) notFound();
 
-  const { data: modules } = await supabase
-    .from("modules")
-    .select("*")
-    .eq("formation_id", formationId)
-    .order("order");
+  const [modulesRes, prerequisitesRes] = await Promise.all([
+    supabase.from("modules").select("*").eq("formation_id", formationId).order("order"),
+    supabase
+      .from("module_prerequisites")
+      .select("*")
+      .in(
+        "module_id",
+        (
+          await supabase.from("modules").select("id").eq("formation_id", formationId)
+        ).data?.map((m) => m.id) || []
+      ),
+  ]);
 
-  return <FormationEditor formation={formation} initialModules={modules || []} />;
+  return (
+    <FormationEditor
+      formation={formation}
+      initialModules={modulesRes.data || []}
+      initialPrerequisites={prerequisitesRes.data || []}
+    />
+  );
 }

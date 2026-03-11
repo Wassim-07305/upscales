@@ -36,6 +36,12 @@ export default function NotFound() {
             <ArrowLeft className="w-4 h-4" />
             Dashboard
           </Link>
+          <Link
+            href="/formations"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[#333] text-[#999] text-sm hover:border-[#555] hover:text-white transition-colors"
+          >
+            Voir les formations
+          </Link>
         </div>
 
         {/* Decorative */}

@@ -4,10 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
-export function EnrollButton({ formationId }: { formationId: string }) {
+interface EnrollButtonProps {
+  formationId: string;
+  isFree?: boolean;
+  price?: number | null;
+}
+
+export function EnrollButton({ formationId, isFree = true, price }: EnrollButtonProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -24,16 +30,45 @@ export function EnrollButton({ formationId }: { formationId: string }) {
       return;
     }
 
-    const { error } = await supabase.from("formation_enrollments").insert({
-      user_id: user.id,
-      formation_id: formationId,
-    });
+    if (!isFree && price) {
+      // Paid formation — redirect to Stripe Checkout
+      try {
+        const res = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ formationId }),
+        });
 
-    if (error) {
-      toast.error("Erreur lors de l'inscription", { description: error.message });
+        const data = await res.json();
+
+        if (!res.ok) {
+          toast.error(data.error || "Erreur lors du paiement");
+          setLoading(false);
+          return;
+        }
+
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+      } catch {
+        toast.error("Erreur de connexion au service de paiement");
+        setLoading(false);
+        return;
+      }
     } else {
-      toast.success("Inscription réussie !");
-      router.refresh();
+      // Free formation — direct enrollment
+      const { error } = await supabase.from("formation_enrollments").insert({
+        user_id: user.id,
+        formation_id: formationId,
+      });
+
+      if (error) {
+        toast.error("Erreur lors de l'inscription", { description: error.message });
+      } else {
+        toast.success("Inscription réussie !");
+        router.refresh();
+      }
     }
     setLoading(false);
   };
@@ -41,7 +76,14 @@ export function EnrollButton({ formationId }: { formationId: string }) {
   return (
     <Button onClick={handleEnroll} disabled={loading} className="w-full">
       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      S&apos;inscrire à la formation
+      {!isFree && price ? (
+        <>
+          <CreditCard className="mr-2 h-4 w-4" />
+          Acheter la formation
+        </>
+      ) : (
+        "S'inscrire gratuitement"
+      )}
     </Button>
   );
 }

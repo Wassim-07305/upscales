@@ -8,7 +8,7 @@ import { CommunityFilters } from "./CommunityFilters";
 export default async function CommunityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -19,11 +19,16 @@ export default async function CommunityPage({
   if (!user) redirect("/login");
 
   const filter = params?.filter || "recent";
+  const searchQuery = params?.q || "";
 
   let query = supabase
     .from("posts")
     .select("*, author:profiles(*)")
     .limit(10);
+
+  if (searchQuery) {
+    query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+  }
 
   if (filter === "popular") {
     query = query.order("likes_count", { ascending: false });
@@ -71,7 +76,7 @@ export default async function CommunityPage({
 
       {canPost && <CreatePost user={profile} />}
 
-      <CommunityFilters currentFilter={filter} />
+      <CommunityFilters currentFilter={filter} currentSearch={searchQuery} />
 
       <PostFeed
         initialPosts={allPosts.map((p) => ({ ...p, user_has_liked: likedPostIds.has(p.id) }))}

@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CalendarDays, MessageCircle, Award } from "lucide-react";
+import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy, Play, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
 import { WelcomeConfetti } from "./WelcomeConfetti";
@@ -24,6 +25,8 @@ export default async function DashboardPage() {
     { data: upcomingSessions },
     { count: certCount },
     { data: recentNotifs },
+    { data: userXp },
+    { data: userBadges },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
@@ -31,7 +34,7 @@ export default async function DashboardPage() {
       .select("*, formation:formations(*)")
       .eq("user_id", user.id)
       .order("enrolled_at", { ascending: false }),
-    supabase.from("module_progress").select("*").eq("user_id", user.id),
+    supabase.from("module_progress").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }),
     supabase
       .from("sessions")
       .select("*, host:profiles(full_name)")
@@ -49,6 +52,17 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .eq("is_read", false)
       .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("user_xp")
+      .select("total_xp, level")
+      .eq("user_id", user.id)
+      .single(),
+    supabase
+      .from("user_badges")
+      .select("*, badge:badges(name, icon, description)")
+      .eq("user_id", user.id)
+      .order("earned_at", { ascending: false })
       .limit(5),
   ]);
 
@@ -86,6 +100,53 @@ export default async function DashboardPage() {
       };
     }) || [];
 
+  // Trouver le dernier module consulté pour "Reprendre"
+  const lastProgress = progress?.find((p) => !p.completed) || progress?.[0];
+  const lastFormation = lastProgress
+    ? enrollments?.find((e) => e.formation_id === lastProgress.formation_id)
+    : null;
+  const lastModuleId = lastProgress?.module_id;
+  const lastFormationId = lastProgress?.formation_id;
+  const lastFormationTitle = lastFormation
+    ? (lastFormation as { formation?: { title: string } }).formation?.title
+    : null;
+
+  // Trouver le prochain module non complété
+  const nextUncompletedModule = lastFormationId
+    ? modules?.find(
+        (m) =>
+          m.formation_id === lastFormationId &&
+          !progress?.find((p) => p.module_id === m.id && p.completed)
+      )
+    : null;
+
+  const continueModuleId = nextUncompletedModule?.id || lastModuleId;
+
+  // Calculate streak (consecutive days with completed modules)
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const completedDates = new Set(
+    progress
+      ?.filter((p) => p.completed && p.completed_at)
+      .map((p) => {
+        const d = new Date(p.completed_at);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      }) || []
+  );
+  for (let i = 0; i < 365; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(checkDate.getDate() - i);
+    if (completedDates.has(checkDate.getTime())) {
+      streak++;
+    } else if (i > 0) {
+      break;
+    }
+  }
+
+  const totalModulesCompleted = progress?.filter((p) => p.completed).length || 0;
+
   const firstName = profile.full_name?.split(" ")[0] || "vous";
 
   return (
@@ -99,6 +160,90 @@ export default async function DashboardPage() {
           Voici un résumé de votre activité
         </p>
       </div>
+
+      {/* Reprendre la dernière formation */}
+      {continueModuleId && lastFormationId && lastFormationTitle && (
+        <Link href={`/formations/${lastFormationId}/${continueModuleId}`}>
+          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer bg-gradient-to-r from-primary/5 to-transparent">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Play className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Reprendre où vous en étiez</p>
+                    <p className="font-medium">{lastFormationTitle}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="default">
+                  Continuer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
+
+      {/* XP Banner */}
+      {(userXp || userBadges?.length) ? (
+        <Link href="/leaderboard">
+          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold">{userXp?.total_xp || 0} XP</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                        Niveau {userXp?.level || 1}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {userBadges?.length || 0} badge{(userBadges?.length || 0) > 1 ? "s" : ""} obtenu{(userBadges?.length || 0) > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  {userBadges?.slice(0, 3).map((ub) => (
+                    <div key={ub.id} className="p-1.5 rounded-lg bg-muted/50" title={(ub.badge as unknown as { name: string })?.name}>
+                      <Trophy className="h-4 w-4 text-neon" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ) : null}
+
+      {/* Streak */}
+      {streak > 0 && (
+        <Link href="/progress">
+          <Card className="animate-fade-up delay-1 hover:border-[#FF6B35]/30 transition-colors cursor-pointer bg-gradient-to-r from-[#FF6B35]/5 to-transparent">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-[#FF6B35]/10">
+                    <Flame className="h-5 w-5 text-[#FF6B35]" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold">{streak} jour{streak > 1 ? "s" : ""}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Série d&apos;apprentissage en cours · {totalModulesCompleted} module{totalModulesCompleted > 1 ? "s" : ""} terminé{totalModulesCompleted > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -169,10 +314,18 @@ export default async function DashboardPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Formations en cours */}
         <Card className="animate-fade-up delay-5">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
               Mes formations en cours
             </CardTitle>
+            {formationProgress.length > 0 && (
+              <Link
+                href="/formations"
+                className="text-xs text-primary hover:underline"
+              >
+                Voir tout ({formationProgress.length})
+              </Link>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {formationProgress.length === 0 ? (
@@ -186,7 +339,7 @@ export default async function DashboardPage() {
                 </Link>
               </p>
             ) : (
-              formationProgress.slice(0, 4).map((fp) => (
+              formationProgress.slice(0, 6).map((fp) => (
                 <Link
                   key={fp.id}
                   href={`/formations/${fp.formation_id}`}

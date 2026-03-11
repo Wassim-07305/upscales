@@ -18,8 +18,12 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
+  Reply,
   X,
   Check,
+  ImageIcon,
+  Loader2,
+  FileIcon,
 } from "lucide-react";
 import {
   Dialog,
@@ -63,7 +67,11 @@ export function ChatLayout({
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingRef = useRef<number>(0);
+  const [replyTo, setReplyTo] = useState<(Message & { sender?: Profile }) | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   const scrollToBottom = () => {
@@ -178,26 +186,31 @@ export function ChatLayout({
     const content = newMessage.trim();
     setNewMessage("");
 
+    const parentId = replyTo?.id?.startsWith("temp-") ? null : replyTo?.id || null;
+
     // Optimistic update
-    const optimisticMsg: Message & { sender?: Profile } = {
+    const optimisticMsg: Message & { sender?: Profile; reply_to?: Message & { sender?: Profile } } = {
       id: `temp-${Date.now()}`,
       channel_id: activeChannel.id,
       sender_id: user.id,
       content,
       media_url: null,
       is_edited: false,
-      parent_id: null,
+      parent_id: parentId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       sender: user,
+      reply_to: replyTo || undefined,
     };
     setMessages((prev) => [...prev, optimisticMsg]);
+    setReplyTo(null);
     setTimeout(scrollToBottom, 50);
 
     await supabase.from("messages").insert({
       channel_id: activeChannel.id,
       sender_id: user.id,
       content,
+      parent_id: parentId,
     });
   };
 
@@ -226,6 +239,43 @@ export function ChatLayout({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
     broadcastTyping();
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!activeChannel) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (max 10 Mo)");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", "media");
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Erreur d'upload");
+      const { url } = await res.json();
+
+      const isImage = file.type.startsWith("image/");
+      const content = isImage ? "" : `📎 ${file.name}`;
+
+      await supabase.from("messages").insert({
+        channel_id: activeChannel.id,
+        sender_id: user.id,
+        content: content || "📷 Image",
+        media_url: url,
+        parent_id: replyTo?.id?.startsWith("temp-") ? null : replyTo?.id || null,
+      });
+
+      setReplyTo(null);
+    } catch {
+      toast.error("Erreur lors de l'envoi du fichier");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const createDM = async (otherUserId: string) => {
@@ -437,103 +487,166 @@ export function ChatLayout({
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((msg) => {
+                {messages.filter((m) => !m.parent_id).map((msg) => {
                   const isOwn = msg.sender_id === user.id;
                   const isEditing = editingMessageId === msg.id;
+                  const replies = messages.filter((m) => m.parent_id === msg.id);
 
                   return (
-                    <div
-                      key={msg.id}
-                      className="group flex items-start gap-3"
-                    >
-                      {!isOwn && (
-                        <Avatar className="h-8 w-8 flex-shrink-0">
-                          <AvatarImage src={msg.sender?.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs bg-primary/20 text-primary">
-                            {getInitials(msg.sender?.full_name || "")}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div className={cn("flex-1", isOwn && "flex flex-col items-end")}>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-medium">
-                            {isOwn ? "Vous" : msg.sender?.full_name}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatMessageDate(msg.created_at)}
-                          </span>
-                          {msg.is_edited && (
-                            <span className="text-[10px] text-muted-foreground italic">(modifié)</span>
+                    <div key={msg.id}>
+                      <div className="group flex items-start gap-3">
+                        {!isOwn && (
+                          <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={msg.sender?.avatar_url || undefined} />
+                            <AvatarFallback className="text-xs bg-primary/20 text-primary">
+                              {getInitials(msg.sender?.full_name || "")}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={cn("flex-1", isOwn && "flex flex-col items-end")}>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-medium">
+                              {isOwn ? "Vous" : msg.sender?.full_name}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatMessageDate(msg.created_at)}
+                            </span>
+                            {msg.is_edited && (
+                              <span className="text-[10px] text-muted-foreground italic">(modifié)</span>
+                            )}
+                            <button
+                              onClick={() => {
+                                setReplyTo(msg);
+                                inputRef.current?.focus();
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                              title="Répondre"
+                            >
+                              <Reply className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          {isEditing ? (
+                            <div className="flex items-center gap-2 max-w-[80%]">
+                              <Input
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleEditMessage(msg.id);
+                                  if (e.key === "Escape") setEditingMessageId(null);
+                                }}
+                                className="text-sm bg-muted border-0 h-8"
+                                autoFocus
+                              />
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => handleEditMessage(msg.id)}
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => setEditingMessageId(null)}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative inline-block">
+                              <div
+                                className={cn(
+                                  "inline-block rounded-2xl text-sm max-w-[80%] overflow-hidden",
+                                  isOwn
+                                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                                    : "bg-muted rounded-bl-sm",
+                                  msg.media_url ? "p-1" : "px-3 py-2"
+                                )}
+                              >
+                                {msg.media_url && /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(msg.media_url) ? (
+                                  <div>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={msg.media_url}
+                                      alt=""
+                                      className="max-w-[300px] max-h-[200px] rounded-xl object-cover cursor-pointer"
+                                      onClick={() => window.open(msg.media_url!, "_blank")}
+                                    />
+                                    {msg.content && msg.content !== "📷 Image" && (
+                                      <p className="px-2 py-1 text-xs">{msg.content}</p>
+                                    )}
+                                  </div>
+                                ) : msg.media_url ? (
+                                  <a
+                                    href={msg.media_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-2 py-1 hover:underline"
+                                  >
+                                    <FileIcon className="h-4 w-4 flex-shrink-0" />
+                                    <span>{msg.content}</span>
+                                  </a>
+                                ) : (
+                                  msg.content
+                                )}
+                              </div>
+
+                              {/* Edit/Delete actions on hover (own messages only) */}
+                              {isOwn && !msg.id.startsWith("temp-") && (
+                                <div className="hidden group-hover:flex items-center gap-0.5 absolute -left-16 top-1/2 -translate-y-1/2">
+                                  <button
+                                    onClick={() => {
+                                      setEditingMessageId(msg.id);
+                                      setEditContent(msg.content);
+                                    }}
+                                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Modifier"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                    className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
-
-                        {isEditing ? (
-                          <div className="flex items-center gap-2 max-w-[80%]">
-                            <Input
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") handleEditMessage(msg.id);
-                                if (e.key === "Escape") setEditingMessageId(null);
-                              }}
-                              className="text-sm bg-muted border-0 h-8"
-                              autoFocus
-                            />
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-7 w-7"
-                              onClick={() => handleEditMessage(msg.id)}
-                            >
-                              <Check className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-7 w-7"
-                              onClick={() => setEditingMessageId(null)}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="relative inline-block">
-                            <div
-                              className={cn(
-                                "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
-                                isOwn
-                                  ? "bg-primary text-primary-foreground rounded-br-sm"
-                                  : "bg-muted rounded-bl-sm"
-                              )}
-                            >
-                              {msg.content}
-                            </div>
-
-                            {/* Edit/Delete actions on hover (own messages only) */}
-                            {isOwn && !msg.id.startsWith("temp-") && (
-                              <div className="hidden group-hover:flex items-center gap-0.5 absolute -left-16 top-1/2 -translate-y-1/2">
-                                <button
-                                  onClick={() => {
-                                    setEditingMessageId(msg.id);
-                                    setEditContent(msg.content);
-                                  }}
-                                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteMessage(msg.id)}
-                                  className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
+
+                      {/* Thread replies */}
+                      {replies.length > 0 && (
+                        <div className="ml-11 mt-1 space-y-1 border-l-2 border-border/50 pl-3">
+                          {replies.map((reply) => {
+                            const isReplyOwn = reply.sender_id === user.id;
+                            return (
+                              <div key={reply.id} className="flex items-start gap-2">
+                                <Avatar className="h-5 w-5 flex-shrink-0">
+                                  <AvatarImage src={reply.sender?.avatar_url || undefined} />
+                                  <AvatarFallback className="text-[8px] bg-primary/20 text-primary">
+                                    {getInitials(reply.sender?.full_name || "")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <span className="text-[10px] font-medium mr-1.5">
+                                    {isReplyOwn ? "Vous" : reply.sender?.full_name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {reply.content}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -551,19 +664,56 @@ export function ChatLayout({
             )}
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
-              <div className="flex gap-2">
+            <div className="border-t border-border">
+              {replyTo && (
+                <div className="px-3 pt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Reply className="h-3 w-3" />
+                  <span>
+                    Réponse à <span className="font-medium text-foreground">{replyTo.sender_id === user.id ? "vous" : replyTo.sender?.full_name}</span>
+                    {" : "}
+                    <span className="truncate max-w-[200px] inline-block align-bottom">{replyTo.content.slice(0, 50)}{replyTo.content.length > 50 ? "…" : ""}</span>
+                  </span>
+                  <button onClick={() => setReplyTo(null)} className="ml-auto hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+              <div className="p-3 flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file);
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex-shrink-0"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-4 w-4" />
+                  )}
+                </Button>
                 <Input
+                  ref={inputRef}
                   value={newMessage}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder="Écrire un message..."
+                  placeholder={replyTo ? "Écrire une réponse..." : "Écrire un message..."}
                   className="bg-[#141414] border-0"
                 />
                 <Button
                   size="icon"
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() || uploading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>

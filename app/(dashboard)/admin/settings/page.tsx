@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,7 +23,37 @@ export default function SettingsPage() {
   const [allowRegistration, setAllowRegistration] = useState(true);
   const [defaultRole, setDefaultRole] = useState("prospect");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const supabase = createClient();
+
+  // Charger les paramètres existants depuis la base de données
+  useEffect(() => {
+    async function loadSettings() {
+      const { data } = await supabase
+        .from("platform_settings")
+        .select("key, value");
+
+      if (data) {
+        for (const setting of data) {
+          const val = setting.value as Record<string, unknown>;
+          switch (setting.key) {
+            case "platform_name":
+              if (val.name) setPlatformName(val.name as string);
+              break;
+            case "allow_registration":
+              if (val.enabled !== undefined) setAllowRegistration(val.enabled as boolean);
+              break;
+            case "default_role":
+              if (val.role) setDefaultRole(val.role as string);
+              break;
+          }
+        }
+      }
+      setLoading(false);
+    }
+    loadSettings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -37,6 +74,14 @@ export default function SettingsPage() {
     toast.success("Paramètres sauvegardés");
     setSaving(false);
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -80,14 +125,15 @@ export default function SettingsPage() {
 
           <div className="space-y-2">
             <Label>Rôle par défaut</Label>
-            <select
-              value={defaultRole}
-              onChange={(e) => setDefaultRole(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-[#141414] px-3 py-2 text-sm"
-            >
-              <option value="prospect">Prospect</option>
-              <option value="member">Membre</option>
-            </select>
+            <Select value={defaultRole} onValueChange={setDefaultRole}>
+              <SelectTrigger className="bg-[#141414]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="prospect">Prospect</SelectItem>
+                <SelectItem value="member">Membre</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>

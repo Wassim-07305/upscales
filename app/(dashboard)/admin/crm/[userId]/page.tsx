@@ -39,6 +39,7 @@ export default async function StudentDetailPage({
     { data: progress },
     { data: certificates },
     { data: notes },
+    { data: warnings },
     { data: userTags },
     { data: allTags },
     { count: messageCount },
@@ -48,6 +49,7 @@ export default async function StudentDetailPage({
     supabase.from("module_progress").select("*").eq("user_id", userId),
     supabase.from("certificates").select("*, formation:formations(title)").eq("user_id", userId),
     supabase.from("crm_notes").select("*, author:profiles(full_name)").eq("student_id", userId).order("created_at", { ascending: false }),
+    supabase.from("user_warnings").select("*, issuer:profiles!user_warnings_issued_by_fkey(full_name)").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("user_tags").select("*, tag:tags(*)").eq("user_id", userId),
     supabase.from("tags").select("*").order("name"),
     supabase.from("messages").select("*", { count: "exact", head: true }).eq("sender_id", userId),
@@ -80,6 +82,7 @@ export default async function StudentDetailPage({
       enrollments={enrollmentProgress}
       certificates={certificates || []}
       notes={notes || []}
+      warnings={warnings || []}
       userTags={userTags?.map((ut) => ut.tag).filter(Boolean) || []}
       allTags={allTags || []}
       messageCount={messageCount || 0}

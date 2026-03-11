@@ -10,6 +10,17 @@ import {
   FileText,
   CalendarCheck,
   Brain,
+  Globe,
+  Settings,
+  Bell,
+  BarChart3,
+  Trophy,
+  Gift,
+  TrendingUp,
+  Shield,
+  Hash,
+  Megaphone,
+  StickyNote,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -48,9 +59,33 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: ALL_ROLES,
   },
   {
+    label: "Classement",
+    href: "/leaderboard",
+    icon: Trophy,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Ma progression",
+    href: "/progress",
+    icon: TrendingUp,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Mes notes",
+    href: "/notes",
+    icon: StickyNote,
+    roles: ALL_ROLES,
+  },
+  {
     label: "Chat",
     href: "/chat",
     icon: MessageCircle,
+    roles: MEMBERS_UP,
+  },
+  {
+    label: "Communauté",
+    href: "/community",
+    icon: Globe,
     roles: MEMBERS_UP,
   },
   {
@@ -58,6 +93,24 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     href: "/ai",
     icon: Sparkles,
     roles: MEMBERS_UP,
+  },
+  {
+    label: "Parrainage",
+    href: "/referral",
+    icon: Gift,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Notifications",
+    href: "/notifications",
+    icon: Bell,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Paramètres",
+    href: "/settings",
+    icon: Settings,
+    roles: ALL_ROLES,
   },
 ];
 
@@ -68,6 +121,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     href: "/admin",
     icon: LayoutDashboard,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
     roles: ADMIN_ROLES,
   },
   {
@@ -118,6 +177,36 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     icon: CalendarCheck,
     roles: ADMIN_ROLES,
   },
+  {
+    label: "Communauté",
+    href: "/community",
+    icon: Globe,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Annonces",
+    href: "/admin/broadcast",
+    icon: Megaphone,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Channels",
+    href: "/admin/channels",
+    icon: Hash,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Modération",
+    href: "/admin/moderation",
+    icon: Shield,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Paramètres",
+    href: "/admin/settings",
+    icon: Settings,
+    roles: ADMIN_ROLES,
+  },
 ];
 
 // ─── Liste plate combinee (mobile nav) ──────────────────────
@@ -135,13 +224,19 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "Apprendre",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/formations", "/calendar", "/certificates"].includes(i.href)
+      ["/formations", "/calendar", "/certificates", "/leaderboard", "/progress", "/notes"].includes(i.href)
     ),
   },
   {
-    label: "Communication",
+    label: "Social",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/chat", "/ai"].includes(i.href)
+      ["/chat", "/community", "/ai"].includes(i.href)
+    ),
+  },
+  {
+    label: "",
+    items: STUDENT_NAV_ITEMS.filter((i) =>
+      ["/referral", "/notifications", "/settings"].includes(i.href)
     ),
   },
 ];
@@ -155,19 +250,25 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/formations", "/admin/pages"].includes(i.href)
+      ["/admin/crm", "/admin/formations", "/admin/pages", "/admin/analytics"].includes(i.href)
     ),
   },
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/ai", "/admin/ai"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation"].includes(i.href)
     ),
   },
   {
     label: "Planning",
     items: ADMIN_NAV_ITEMS.filter((i) =>
       ["/admin/calendar", "/admin/booking"].includes(i.href)
+    ),
+  },
+  {
+    label: "",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/settings"].includes(i.href)
     ),
   },
 ];
@@ -181,13 +282,22 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   calendar: "Calendrier",
   notifications: "Notifications",
   certificates: "Certificats",
+  leaderboard: "Classement",
+  progress: "Ma progression",
+  notes: "Mes notes",
+  referral: "Parrainage",
   profile: "Profil",
   admin: "Administration",
   crm: "CRM",
   pages: "Pages",
   booking: "Booking",
   ai: "MateuzsIA",
-  settings: "Parametres",
+  analytics: "Analytics",
+  members: "Membres",
+  broadcast: "Annonces",
+  channels: "Channels",
+  moderation: "Modération",
+  settings: "Paramètres",
   edit: "Modifier",
 };
 
@@ -200,5 +310,8 @@ export const QUICK_LINKS = [
   { label: "MateuzsIA", href: "/ai", icon: Sparkles },
   { label: "Calendrier", href: "/calendar", icon: CalendarDays },
   { label: "Certificats", href: "/certificates", icon: Award },
+  { label: "Classement", href: "/leaderboard", icon: Trophy },
+  { label: "Ma progression", href: "/progress", icon: TrendingUp },
   { label: "Profil", href: "/profile", icon: User },
+  { label: "Paramètres", href: "/settings", icon: Settings },
 ];

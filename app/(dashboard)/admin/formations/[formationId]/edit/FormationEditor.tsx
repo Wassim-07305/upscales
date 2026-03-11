@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -34,8 +34,30 @@ import {
   Pencil,
   Loader2,
   Save,
+  ImageIcon,
+  Upload,
+  Link2,
 } from "lucide-react";
-import { Formation, Module, ModuleType } from "@/lib/types/database";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Formation, Module, ModuleType, ModulePrerequisite } from "@/lib/types/database";
+import { QuizEditor } from "@/components/admin/QuizEditor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -56,11 +78,14 @@ const typeLabels: Record<ModuleType, string> = {
 export function FormationEditor({
   formation,
   initialModules,
+  initialPrerequisites = [],
 }: {
   formation: Formation;
   initialModules: Module[];
+  initialPrerequisites?: ModulePrerequisite[];
 }) {
   const [modules, setModules] = useState(initialModules);
+  const [prerequisites, setPrerequisites] = useState<ModulePrerequisite[]>(initialPrerequisites);
   const [moduleDialogOpen, setModuleDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [moduleTitle, setModuleTitle] = useState("");
@@ -70,9 +95,51 @@ export function FormationEditor({
   const [moduleContent, setModuleContent] = useState("");
   const [moduleDuration, setModuleDuration] = useState("");
   const [moduleIsPreview, setModuleIsPreview] = useState(false);
+  const [modulePrerequisiteIds, setModulePrerequisiteIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [quizEditorModuleId, setQuizEditorModuleId] = useState<string | null>(null);
+  const [quizEditorModuleTitle, setQuizEditorModuleTitle] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState(formation.thumbnail_url);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  // Get prerequisites for a specific module
+  const getPrerequisitesForModule = (moduleId: string) =>
+    prerequisites.filter((p) => p.module_id === moduleId).map((p) => p.prerequisite_module_id);
+
+  const handleThumbnailUpload = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 5 Mo)");
+      return;
+    }
+
+    setUploadingThumbnail(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("bucket", "media");
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Erreur d'upload");
+      const { url } = await res.json();
+
+      const { error } = await supabase
+        .from("formations")
+        .update({ thumbnail_url: url })
+        .eq("id", formation.id);
+
+      if (error) throw error;
+
+      setThumbnailUrl(url);
+      toast.success("Thumbnail mise à jour");
+    } catch {
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
 
   const openAddModule = () => {
     setEditingModule(null);
@@ -83,6 +150,7 @@ export function FormationEditor({
     setModuleContent("");
     setModuleDuration("");
     setModuleIsPreview(false);
+    setModulePrerequisiteIds([]);
     setModuleDialogOpen(true);
   };
 
@@ -95,6 +163,7 @@ export function FormationEditor({
     setModuleContent(mod.content || "");
     setModuleDuration(String(mod.duration_minutes || ""));
     setModuleIsPreview(mod.is_preview);
+    setModulePrerequisiteIds(getPrerequisitesForModule(mod.id));
     setModuleDialogOpen(true);
   };
 
@@ -114,6 +183,8 @@ export function FormationEditor({
       order: editingModule ? editingModule.order : modules.length,
     };
 
+    let savedModuleId: string | null = null;
+
     if (editingModule) {
       const { data: updated, error } = await supabase
         .from("modules")
@@ -124,9 +195,11 @@ export function FormationEditor({
 
       if (error) {
         toast.error("Erreur", { description: error.message });
+        setSaving(false);
+        return;
       } else if (updated) {
         setModules((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
-        toast.success("Module mis à jour");
+        savedModuleId = updated.id;
       }
     } else {
       const { data: created, error } = await supabase
@@ -137,10 +210,44 @@ export function FormationEditor({
 
       if (error) {
         toast.error("Erreur", { description: error.message });
+        setSaving(false);
+        return;
       } else if (created) {
         setModules((prev) => [...prev, created]);
-        toast.success("Module ajouté");
+        savedModuleId = created.id;
       }
+    }
+
+    // Save prerequisites
+    if (savedModuleId) {
+      // Delete existing prerequisites for this module
+      await supabase.from("module_prerequisites").delete().eq("module_id", savedModuleId);
+
+      // Insert new prerequisites
+      if (modulePrerequisiteIds.length > 0) {
+        const prereqData = modulePrerequisiteIds.map((prereqId) => ({
+          module_id: savedModuleId!,
+          prerequisite_module_id: prereqId,
+        }));
+        const { error: prereqError } = await supabase.from("module_prerequisites").insert(prereqData);
+        if (prereqError) {
+          toast.error("Erreur prérequis", { description: prereqError.message });
+        }
+      }
+
+      // Update local prerequisites state
+      setPrerequisites((prev) => {
+        const filtered = prev.filter((p) => p.module_id !== savedModuleId);
+        const newPrereqs = modulePrerequisiteIds.map((prereqId) => ({
+          id: crypto.randomUUID(),
+          module_id: savedModuleId!,
+          prerequisite_module_id: prereqId,
+          created_at: new Date().toISOString(),
+        }));
+        return [...filtered, ...newPrereqs];
+      });
+
+      toast.success(editingModule ? "Module mis à jour" : "Module ajouté");
     }
 
     setSaving(false);
@@ -151,6 +258,32 @@ export function FormationEditor({
     await supabase.from("modules").delete().eq("id", moduleId);
     setModules((prev) => prev.filter((m) => m.id !== moduleId));
     toast.success("Module supprimé");
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = modules.findIndex((m) => m.id === active.id);
+    const newIndex = modules.findIndex((m) => m.id === over.id);
+    const reordered = arrayMove(modules, oldIndex, newIndex).map((m, i) => ({
+      ...m,
+      order: i,
+    }));
+    setModules(reordered);
+
+    // Persist new order
+    await Promise.all(
+      reordered.map((m, i) =>
+        supabase.from("modules").update({ order: i }).eq("id", m.id)
+      )
+    );
+    toast.success("Ordre mis à jour");
   };
 
   return (
@@ -168,6 +301,55 @@ export function FormationEditor({
         <p className="text-muted-foreground">Gérer les modules de cette formation</p>
       </div>
 
+      {/* Thumbnail */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Thumbnail</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-4">
+            <div className="relative w-48 h-28 rounded-lg overflow-hidden bg-[#1C1C1C] flex-shrink-0">
+              {thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumbnailUrl} alt={formation.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Image affichée sur la carte de formation. Ratio 16:9 recommandé.
+              </p>
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleThumbnailUpload(file);
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => thumbnailInputRef.current?.click()}
+                disabled={uploadingThumbnail}
+              >
+                {uploadingThumbnail ? (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-3.5 w-3.5" />
+                )}
+                {thumbnailUrl ? "Changer" : "Uploader"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Modules list */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -183,59 +365,26 @@ export function FormationEditor({
               <p>Aucun module. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {modules.map((mod, index) => {
-                const Icon = typeIcons[mod.type];
-                return (
-                  <div
-                    key={mod.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-[#1C1C1C] hover:bg-[#141414] transition-colors"
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                    <div className="flex items-center justify-center w-7 h-7 rounded bg-secondary text-xs font-medium">
-                      {index + 1}
-                    </div>
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{mod.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-[10px]">
-                          {typeLabels[mod.type]}
-                        </Badge>
-                        {mod.is_preview && (
-                          <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
-                            Aperçu
-                          </Badge>
-                        )}
-                        {mod.duration_minutes > 0 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {mod.duration_minutes} min
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => openEditModule(mod)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => handleDeleteModule(mod.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {modules.map((mod, index) => (
+                    <SortableModuleItem
+                      key={mod.id}
+                      mod={mod}
+                      index={index}
+                      prerequisiteCount={getPrerequisitesForModule(mod.id).length}
+                      onEdit={() => openEditModule(mod)}
+                      onDelete={() => handleDeleteModule(mod.id)}
+                      onQuiz={() => {
+                        setQuizEditorModuleId(mod.id);
+                        setQuizEditorModuleTitle(mod.title);
+                      }}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
         </CardContent>
       </Card>
@@ -291,11 +440,11 @@ export function FormationEditor({
             {moduleType === "text" && (
               <div className="space-y-2">
                 <Label>Contenu</Label>
-                <Textarea
-                  value={moduleContent}
-                  onChange={(e) => setModuleContent(e.target.value)}
-                  className="bg-[#141414] min-h-[120px]"
-                  placeholder="Contenu du module (supporte le HTML)"
+                <RichTextEditor
+                  content={moduleContent}
+                  onChange={setModuleContent}
+                  placeholder="Rédigez le contenu du module..."
+                  minHeight="200px"
                 />
               </div>
             )}
@@ -320,6 +469,42 @@ export function FormationEditor({
               />
             </div>
 
+            {/* Prerequisites selection */}
+            {modules.length > 0 && (
+              <div className="space-y-2">
+                <Label>Prérequis (modules à compléter avant)</Label>
+                <div className="space-y-1 max-h-32 overflow-y-auto rounded-md border border-border p-2 bg-[#141414]">
+                  {modules
+                    .filter((m) => m.id !== editingModule?.id)
+                    .map((m) => (
+                      <label
+                        key={m.id}
+                        className="flex items-center gap-2 py-1 px-1 rounded hover:bg-accent/30 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={modulePrerequisiteIds.includes(m.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setModulePrerequisiteIds((prev) => [...prev, m.id]);
+                            } else {
+                              setModulePrerequisiteIds((prev) => prev.filter((id) => id !== m.id));
+                            }
+                          }}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span className="text-sm truncate">{m.title}</span>
+                      </label>
+                    ))}
+                  {modules.filter((m) => m.id !== editingModule?.id).length === 0 && (
+                    <p className="text-xs text-muted-foreground py-1">
+                      Ajoutez d'autres modules pour définir des prérequis
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             <Button
               onClick={handleSaveModule}
               disabled={!moduleTitle.trim() || saving}
@@ -331,6 +516,108 @@ export function FormationEditor({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quiz Editor */}
+      {quizEditorModuleId && (
+        <QuizEditor
+          moduleId={quizEditorModuleId}
+          moduleTitle={quizEditorModuleTitle}
+          open={!!quizEditorModuleId}
+          onOpenChange={(open) => {
+            if (!open) setQuizEditorModuleId(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Sortable Module Item ─────────────────────────────────
+
+function SortableModuleItem({
+  mod,
+  index,
+  prerequisiteCount,
+  onEdit,
+  onDelete,
+  onQuiz,
+}: {
+  mod: Module;
+  index: number;
+  prerequisiteCount: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  onQuiz: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: mod.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const Icon = typeIcons[mod.type];
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-lg bg-[#1C1C1C] hover:bg-[#141414] transition-colors",
+        isDragging && "opacity-50 shadow-lg ring-2 ring-primary/30"
+      )}
+    >
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none">
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </button>
+      <div className="flex items-center justify-center w-7 h-7 rounded bg-secondary text-xs font-medium">
+        {index + 1}
+      </div>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{mod.title}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <Badge variant="outline" className="text-[10px]">
+            {typeLabels[mod.type]}
+          </Badge>
+          {mod.is_preview && (
+            <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
+              Aperçu
+            </Badge>
+          )}
+          {prerequisiteCount > 0 && (
+            <Badge variant="outline" className="text-[10px] text-amber-500 border-amber-500/30">
+              <Link2 className="h-2.5 w-2.5 mr-0.5" />
+              {prerequisiteCount} prérequis
+            </Badge>
+          )}
+          {mod.duration_minutes > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              {mod.duration_minutes} min
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-1">
+        {mod.type === "quiz" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-primary"
+            onClick={onQuiz}
+          >
+            <HelpCircle className="mr-1 h-3.5 w-3.5" />
+            Quiz
+          </Button>
+        )}
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onDelete}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }

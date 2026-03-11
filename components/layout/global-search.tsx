@@ -95,7 +95,7 @@ export function GlobalSearch({
         .from("formations")
         .select("id, title, description")
         .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
-        .eq("is_published", true)
+        .eq("status", "published")
         .limit(5);
 
       if (formations) {
@@ -119,8 +119,8 @@ export function GlobalSearch({
 
       if (posts) {
         posts.forEach((p) => {
-          const author = p.author as unknown as { full_name: string } | null;
-          const authorName = author?.full_name || "Anonyme";
+          const author = p.author as unknown as { full_name: string } | { full_name: string }[] | null;
+          const authorName = (Array.isArray(author) ? author[0]?.full_name : author?.full_name) || "Anonyme";
           allResults.push({
             id: p.id,
             title: p.content.slice(0, 60) + (p.content.length > 60 ? "..." : ""),

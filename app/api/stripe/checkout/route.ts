@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   // Get formation details
   const { data: formation, error: formationError } = await admin
     .from("formations")
-    .select("id, title, price, is_free, status")
+    .select("id, title, price, is_free, status, thumbnail_url")
     .eq("id", formation_id)
     .eq("status", "published")
     .single();
@@ -111,6 +111,7 @@ export async function POST(request: Request) {
 
   // Create Checkout Session
   const amountCents = Math.round(formation.price * 100);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const session = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
@@ -123,6 +124,7 @@ export async function POST(request: Request) {
           product_data: {
             name: formation.title,
             description: `Accès à la formation "${formation.title}" sur UPSCALE`,
+            ...(formation.thumbnail_url ? { images: [formation.thumbnail_url] } : {}),
           },
           unit_amount: amountCents,
         },
@@ -133,8 +135,8 @@ export async function POST(request: Request) {
       formation_id,
       user_id: user.id,
     },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/formations/${formation_id}?payment=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/formations/${formation_id}?payment=cancel`,
+    success_url: `${siteUrl}/formations/${formation_id}?payment=success`,
+    cancel_url: `${siteUrl}/formations/${formation_id}?payment=cancel`,
   });
 
   // Record pending payment

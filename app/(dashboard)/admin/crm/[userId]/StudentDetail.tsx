@@ -18,6 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
   ChevronLeft,
   Send,
   Plus,
@@ -27,8 +35,12 @@ import {
   Newspaper,
   Award,
   Loader2,
+  ShieldAlert,
+  ShieldCheck,
+  AlertTriangle,
+  Trash2,
 } from "lucide-react";
-import { Profile, Tag, Certificate, CrmNote, UserRole } from "@/lib/types/database";
+import { Profile, Tag, Certificate, CrmNote, UserRole, UserWarning } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate, timeAgo } from "@/lib/utils/dates";
 import { getRoleBadgeColor, getRoleLabel } from "@/lib/utils/roles";
@@ -40,6 +52,7 @@ interface StudentDetailProps {
   enrollments: any[];
   certificates: (Certificate & { formation?: { title: string } })[];
   notes: (CrmNote & { author?: { full_name: string } })[];
+  warnings: (UserWarning & { issuer?: { full_name: string } })[];
   userTags: Tag[];
   allTags: Tag[];
   messageCount: number;
@@ -52,6 +65,7 @@ export function StudentDetail({
   enrollments,
   certificates,
   notes: initialNotes,
+  warnings: initialWarnings,
   userTags: initialTags,
   allTags,
   messageCount,
@@ -59,12 +73,111 @@ export function StudentDetail({
   isAdmin,
 }: StudentDetailProps) {
   const [notes, setNotes] = useState(initialNotes);
+  const [warnings, setWarnings] = useState(initialWarnings);
   const [tags, setTags] = useState(initialTags);
   const [newNote, setNewNote] = useState("");
   const [role, setRole] = useState(student.role);
+  const [suspended, setSuspended] = useState(student.is_suspended);
   const [loading, setLoading] = useState(false);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [warningReason, setWarningReason] = useState("");
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  const handleSuspend = async () => {
+    if (!suspendReason.trim()) return;
+    setLoading(true);
+    await supabase
+      .from("profiles")
+      .update({
+        is_suspended: true,
+        suspended_at: new Date().toISOString(),
+        suspended_reason: suspendReason.trim(),
+      })
+      .eq("id", student.id);
+
+    await supabase.from("notifications").insert({
+      user_id: student.id,
+      type: "system" as const,
+      title: "Compte suspendu",
+      message: `Votre compte a été suspendu. Motif : ${suspendReason.trim()}`,
+      link: "/suspended",
+    });
+
+    setSuspended(true);
+    setSuspendReason("");
+    setSuspendDialogOpen(false);
+    toast.success("Utilisateur suspendu");
+    setLoading(false);
+  };
+
+  const handleUnsuspend = async () => {
+    setLoading(true);
+    await supabase
+      .from("profiles")
+      .update({
+        is_suspended: false,
+        suspended_at: null,
+        suspended_reason: null,
+      })
+      .eq("id", student.id);
+
+    await supabase.from("notifications").insert({
+      user_id: student.id,
+      type: "system" as const,
+      title: "Compte réactivé",
+      message: "Votre compte a été réactivé. Bienvenue !",
+      link: "/dashboard",
+    });
+
+    setSuspended(false);
+    toast.success("Utilisateur réactivé");
+    setLoading(false);
+  };
+
+  const handleAddWarning = async () => {
+    if (!warningReason.trim()) return;
+    setLoading(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from("user_warnings")
+      .insert({
+        user_id: student.id,
+        issued_by: user.id,
+        reason: warningReason.trim(),
+      })
+      .select("*, issuer:profiles!user_warnings_issued_by_fkey(full_name)")
+      .single();
+
+    if (data) {
+      setWarnings((prev) => [data, ...prev]);
+
+      await supabase.from("notifications").insert({
+        user_id: student.id,
+        type: "system" as const,
+        title: "Avertissement reçu",
+        message: `Vous avez reçu un avertissement : ${warningReason.trim()}`,
+        link: "/settings",
+      });
+
+      toast.success("Avertissement envoyé");
+    }
+
+    setWarningReason("");
+    setWarningDialogOpen(false);
+    setLoading(false);
+  };
+
+  const handleDeleteWarning = async (id: string) => {
+    await supabase.from("user_warnings").delete().eq("id", id);
+    setWarnings((prev) => prev.filter((w) => w.id !== id));
+    toast.success("Avertissement supprimé");
+  };
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -120,6 +233,25 @@ export function StudentDetail({
         Retour au CRM
       </Link>
 
+      {/* Suspension banner */}
+      {suspended && (
+        <div className="flex items-center gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+          <ShieldAlert className="h-5 w-5 text-destructive shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-destructive">Compte suspendu</p>
+            {student.suspended_reason && (
+              <p className="text-xs text-muted-foreground">{student.suspended_reason}</p>
+            )}
+          </div>
+          {isAdmin && (
+            <Button size="sm" variant="outline" onClick={handleUnsuspend} disabled={loading}>
+              <ShieldCheck className="h-4 w-4 mr-1" />
+              Réactiver
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <Card>
         <CardContent className="pt-6">
@@ -131,7 +263,12 @@ export function StudentDetail({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h1 className="text-xl font-bold">{student.full_name || student.email}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold">{student.full_name || student.email}</h1>
+                {suspended && (
+                  <Badge variant="destructive" className="text-[10px]">Suspendu</Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">{student.email}</p>
               <div className="flex items-center gap-2 mt-2">
                 {isAdmin ? (
@@ -156,6 +293,66 @@ export function StudentDetail({
                 </span>
               </div>
             </div>
+
+            {/* Admin actions: warn & suspend */}
+            {isAdmin && !suspended && (
+              <div className="flex gap-2 shrink-0">
+                <Dialog open={warningDialogOpen} onOpenChange={setWarningDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Avertir
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Envoyer un avertissement</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <Textarea
+                        value={warningReason}
+                        onChange={(e) => setWarningReason(e.target.value)}
+                        placeholder="Motif de l'avertissement..."
+                        className="min-h-[80px]"
+                      />
+                      <Button onClick={handleAddWarning} disabled={!warningReason.trim() || loading} className="w-full">
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
+                        Envoyer l&apos;avertissement
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10">
+                      <ShieldAlert className="h-4 w-4 mr-1" />
+                      Suspendre
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Suspendre l&apos;utilisateur</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        L&apos;utilisateur ne pourra plus accéder à la plateforme tant que son compte est suspendu.
+                      </p>
+                      <Textarea
+                        value={suspendReason}
+                        onChange={(e) => setSuspendReason(e.target.value)}
+                        placeholder="Motif de la suspension..."
+                        className="min-h-[80px]"
+                      />
+                      <Button variant="destructive" onClick={handleSuspend} disabled={!suspendReason.trim() || loading} className="w-full">
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldAlert className="h-4 w-4 mr-2" />}
+                        Confirmer la suspension
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
           </div>
 
           {/* Tags */}
@@ -257,6 +454,50 @@ export function StudentDetail({
           </CardContent>
         </Card>
       </div>
+
+      {/* Warnings */}
+      {(isAdmin || warnings.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              Avertissements
+              {warnings.length > 0 && (
+                <Badge variant="outline" className="text-amber-500 border-amber-500/30 text-[10px]">
+                  {warnings.length}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {warnings.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucun avertissement</p>
+            ) : (
+              warnings.map((warning) => (
+                <div key={warning.id} className="flex items-start gap-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">{warning.reason}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Par {(warning as any).issuer?.full_name || "Inconnu"} • {timeAgo(warning.created_at)}
+                    </p>
+                  </div>
+                  {isAdmin && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDeleteWarning(warning.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* CRM Notes */}
       <Card>

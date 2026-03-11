@@ -10,7 +10,13 @@ import { FormationsFilters } from "./FormationsFilters";
 export default async function FormationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{
+    filter?: string;
+    q?: string;
+    difficulty?: string;
+    duration?: string;
+    category?: string;
+  }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -21,19 +27,31 @@ export default async function FormationsPage({
   if (!user) redirect("/login");
 
   // Parallelize independent queries
-  const [{ data: profile }, { data: formations }, { data: enrollments }, { data: progress }] =
+  const [{ data: profile }, { data: formations }, { data: enrollments }, { data: progress }, { data: favorites }] =
     await Promise.all([
       supabase.from("profiles").select("role").eq("id", user.id).single(),
       supabase.from("formations").select("*").eq("status", "published").order("order"),
       supabase.from("formation_enrollments").select("*").eq("user_id", user.id),
       supabase.from("module_progress").select("*").eq("user_id", user.id),
+      supabase.from("formation_favorites").select("formation_id").eq("user_id", user.id),
     ]);
 
-  // Fetch modules for counts (depends on formations result)
+  // Fetch modules and enrollment counts (depends on formations result)
   const formationIds = formations?.map((f) => f.id) || [];
-  const { data: modules } = formationIds.length > 0
-    ? await supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
-    : { data: [] };
+  const [{ data: modules }, { data: allEnrollments }, { data: allReviews }] = await Promise.all([
+    formationIds.length > 0
+      ? supabase.from("modules").select("id, formation_id, duration_minutes").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { id: string; formation_id: string; duration_minutes: number }[] }),
+    formationIds.length > 0
+      ? supabase.from("formation_enrollments").select("formation_id").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { formation_id: string }[] }),
+    formationIds.length > 0
+      ? supabase.from("formation_reviews").select("formation_id, rating").in("formation_id", formationIds)
+      : Promise.resolve({ data: [] as { formation_id: string; rating: number }[] }),
+  ]);
+
+  // Set of favorite formation ids for quick lookup
+  const favoriteIds = new Set(favorites?.map((f) => f.formation_id) || []);
 
   // Process formations
   const processedFormations = formations?.map((f) => {
@@ -44,25 +62,80 @@ export default async function FormationsPage({
       ? Math.round((fProgress.length / fModules.length) * 100)
       : 0;
 
+    const fReviews = allReviews?.filter((r) => r.formation_id === f.id) || [];
+    const avgRating = fReviews.length > 0
+      ? fReviews.reduce((sum, r) => sum + r.rating, 0) / fReviews.length
+      : 0;
+
     return {
       ...f,
       moduleCount: fModules.length,
       totalDuration: fModules.reduce((sum, m) => sum + (m.duration_minutes || 0), 0),
+      enrolledCount: allEnrollments?.filter((e) => e.formation_id === f.id).length || 0,
       enrolled: !!enrollment,
       progress: progressPercent,
       completed: enrollment?.completed_at != null,
+      averageRating: avgRating,
+      reviewCount: fReviews.length,
+      isFavorite: favoriteIds.has(f.id),
     };
   }) || [];
 
+  // Extract available categories
+  const categories = [
+    ...new Set(
+      formations
+        ?.map((f) => f.category)
+        .filter((c): c is string => !!c) || []
+    ),
+  ].sort();
+
   // Filter
   const filter = params?.filter || "all";
+  const searchQuery = params?.q?.toLowerCase() || "";
+  const difficultyFilter = params?.difficulty || "all";
+  const durationFilter = params?.duration || "all";
+  const categoryFilter = params?.category || "all";
   let filtered = processedFormations;
+
+  // Text search
+  if (searchQuery) {
+    filtered = filtered.filter(
+      (f) =>
+        f.title.toLowerCase().includes(searchQuery) ||
+        f.description?.toLowerCase().includes(searchQuery)
+    );
+  }
+
+  // Status filter
   if (filter === "in_progress") {
-    filtered = processedFormations.filter((f) => f.enrolled && !f.completed && f.progress > 0);
+    filtered = filtered.filter((f) => f.enrolled && !f.completed && f.progress > 0);
   } else if (filter === "completed") {
-    filtered = processedFormations.filter((f) => f.completed);
+    filtered = filtered.filter((f) => f.completed);
   } else if (filter === "free") {
-    filtered = processedFormations.filter((f) => f.is_free);
+    filtered = filtered.filter((f) => f.is_free);
+  } else if (filter === "favorites") {
+    filtered = filtered.filter((f) => f.isFavorite);
+  }
+
+  // Difficulty filter
+  if (difficultyFilter !== "all") {
+    filtered = filtered.filter((f) => f.difficulty === difficultyFilter);
+  }
+
+  // Duration filter
+  if (durationFilter !== "all") {
+    filtered = filtered.filter((f) => {
+      if (durationFilter === "short") return f.totalDuration < 60;
+      if (durationFilter === "medium") return f.totalDuration >= 60 && f.totalDuration <= 180;
+      if (durationFilter === "long") return f.totalDuration > 180;
+      return true;
+    });
+  }
+
+  // Category filter
+  if (categoryFilter !== "all") {
+    filtered = filtered.filter((f) => f.category === categoryFilter);
   }
 
   return (
@@ -82,7 +155,14 @@ export default async function FormationsPage({
         )}
       </div>
 
-      <FormationsFilters currentFilter={filter} />
+      <FormationsFilters
+        currentFilter={filter}
+        currentSearch={searchQuery}
+        currentDifficulty={difficultyFilter}
+        currentDuration={durationFilter}
+        currentCategory={categoryFilter}
+        categories={categories}
+      />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((formation) => (
@@ -91,8 +171,14 @@ export default async function FormationsPage({
             formation={formation}
             moduleCount={formation.moduleCount}
             totalDuration={formation.totalDuration}
+            enrolledCount={formation.enrolledCount}
             progress={formation.enrolled ? formation.progress : undefined}
             enrolled={formation.enrolled}
+            averageRating={formation.averageRating}
+            reviewCount={formation.reviewCount}
+            isFavorite={formation.isFavorite}
+            userId={user.id}
+            showFavorite
           />
         ))}
       </div>

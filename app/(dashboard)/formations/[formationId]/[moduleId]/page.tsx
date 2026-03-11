@@ -63,6 +63,34 @@ export default async function ModulePage({
     .eq("user_id", user.id)
     .eq("formation_id", formationId);
 
+  // Fetch user's note and discussions for this module
+  const [{ data: moduleNote }, { data: discussions }, { data: currentProfile }] = await Promise.all([
+    supabase
+      .from("module_notes")
+      .select("content")
+      .eq("user_id", user.id)
+      .eq("module_id", moduleId)
+      .single(),
+    supabase
+      .from("module_discussions")
+      .select("*, author:profiles(full_name, avatar_url, role)")
+      .eq("module_id", moduleId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single(),
+  ]);
+
+  // Organize discussions: nest replies under parents
+  const topLevel = (discussions || []).filter((d) => !d.parent_id);
+  const replies = (discussions || []).filter((d) => d.parent_id);
+  const organizedDiscussions = topLevel.map((d) => ({
+    ...d,
+    replies: replies.filter((r) => r.parent_id === d.id),
+  }));
+
   // If quiz module, fetch quiz data
   let quizData = null;
   if (module.type === "quiz") {
@@ -114,6 +142,10 @@ export default async function ModulePage({
       quizData={quizData}
       allModules={modules}
       allProgress={allProgress || []}
+      initialNoteContent={moduleNote?.content || ""}
+      discussions={organizedDiscussions}
+      currentUserId={user.id}
+      isAdmin={currentProfile?.role === "admin" || currentProfile?.role === "moderator"}
     />
   );
 }

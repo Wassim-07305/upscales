@@ -26,6 +26,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  if (profile.is_suspended) {
+    redirect("/suspended");
+  }
+
   if (!profile.onboarding_completed) {
     redirect("/onboarding");
   }

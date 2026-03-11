@@ -3,11 +3,17 @@ import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModuleList } from "@/components/formations/ModuleList";
-import { BookOpen, Clock, Users } from "lucide-react";
+import { BookOpen, Clock, Users, UserCircle } from "lucide-react";
+import { getInitials } from "@/lib/utils/formatters";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
 import { EnrollButton } from "./EnrollButton";
+import { FormationReviews } from "./FormationReviews";
+import { Suspense } from "react";
+import { PaymentToast } from "./PaymentToast";
+import { Star } from "lucide-react";
 
 export default async function FormationDetailPage({
   params,
@@ -22,9 +28,9 @@ export default async function FormationDetailPage({
 
   if (!user) redirect("/login");
 
-  const [formationRes, modulesRes, enrollmentRes, progressRes, enrollCountRes] =
+  const [formationRes, modulesRes, enrollmentRes, progressRes, enrollCountRes, reviewsRes] =
     await Promise.all([
-      supabase.from("formations").select("*").eq("id", formationId).single(),
+      supabase.from("formations").select("*, creator:profiles!formations_created_by_fkey(full_name, avatar_url, bio)").eq("id", formationId).single(),
       supabase.from("modules").select("*").eq("formation_id", formationId).order("order"),
       supabase
         .from("formation_enrollments")
@@ -41,7 +47,18 @@ export default async function FormationDetailPage({
         .from("formation_enrollments")
         .select("*", { count: "exact", head: true })
         .eq("formation_id", formationId),
+      supabase
+        .from("formation_reviews")
+        .select("*, author:profiles!formation_reviews_user_id_fkey(full_name, avatar_url)")
+        .eq("formation_id", formationId)
+        .order("created_at", { ascending: false }),
     ]);
+
+  // Fetch prerequisites for all modules in this formation
+  const moduleIds = modulesRes.data?.map((m) => m.id) || [];
+  const { data: prerequisites } = moduleIds.length > 0
+    ? await supabase.from("module_prerequisites").select("*").in("module_id", moduleIds)
+    : { data: [] };
 
   const formation = formationRes.data;
   if (!formation) notFound();
@@ -50,6 +67,10 @@ export default async function FormationDetailPage({
   const enrollment = enrollmentRes.data;
   const progress = progressRes.data || [];
   const enrollCount = enrollCountRes.count || 0;
+  const reviews = reviewsRes.data || [];
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   const completedCount = progress.filter((p) => p.completed).length;
   const completionPercent =
@@ -58,6 +79,9 @@ export default async function FormationDetailPage({
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <Suspense>
+        <PaymentToast />
+      </Suspense>
       {/* Header */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
         {formation.thumbnail_url ? (
@@ -119,9 +143,18 @@ export default async function FormationDetailPage({
                 progress={progress}
                 formationId={formationId}
                 enrolled={!!enrollment}
+                prerequisites={prerequisites || []}
               />
             </CardContent>
           </Card>
+
+          <FormationReviews
+            formationId={formationId}
+            reviews={reviews}
+            currentUserId={user.id}
+            enrolled={!!enrollment}
+            averageRating={averageRating}
+          />
         </div>
 
         {/* Sidebar */}
@@ -140,12 +173,47 @@ export default async function FormationDetailPage({
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span>{enrollCount} inscrits</span>
               </div>
+              {reviews.length > 0 && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Star className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
+                  <span>{averageRating.toFixed(1)} ({reviews.length} avis)</span>
+                </div>
+              )}
 
               {!enrollment && (
-                <EnrollButton formationId={formationId} />
+                <EnrollButton
+                  formationId={formationId}
+                  isFree={formation.is_free ?? true}
+                  price={formation.price ? Number(formation.price) : null}
+                />
               )}
             </CardContent>
           </Card>
+
+          {/* Instructor */}
+          {formation.creator && (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Formateur</p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={(formation.creator as any)?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                      {getInitials((formation.creator as any)?.full_name || "")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{(formation.creator as any)?.full_name}</p>
+                    {(formation.creator as any)?.bio && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                        {(formation.creator as any).bio}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, Newspaper, BookOpen, CalendarDays, Award, Info } from "lucide-react";
+import { MessageCircle, Newspaper, BookOpen, CalendarDays, Award, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Notification, NotificationType } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
@@ -27,9 +27,10 @@ const colorMap: Record<NotificationType, string> = {
 interface NotificationItemProps {
   notification: Notification;
   onMarkAsRead: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps) {
+export function NotificationItem({ notification, onMarkAsRead, onDelete }: NotificationItemProps) {
   const Icon = iconMap[notification.type];
 
   const handleClick = () => {
@@ -38,10 +39,16 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
     }
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete?.(notification.id);
+  };
+
   const content = (
     <div
       className={cn(
-        "flex items-start gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer",
+        "flex items-start gap-3 px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer group relative",
         !notification.is_read && "bg-primary/5"
       )}
       onClick={handleClick}
@@ -62,9 +69,20 @@ export function NotificationItem({ notification, onMarkAsRead }: NotificationIte
           {timeAgo(notification.created_at)}
         </p>
       </div>
-      {!notification.is_read && (
-        <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-      )}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {!notification.is_read && (
+          <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+        )}
+        {onDelete && (
+          <button
+            onClick={handleDelete}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+            title="Supprimer"
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+          </button>
+        )}
+      </div>
     </div>
   );
 

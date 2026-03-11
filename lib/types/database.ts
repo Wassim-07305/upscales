@@ -5,6 +5,9 @@ export type ChannelType = "public" | "private" | "dm";
 export type NotificationType = "message" | "post" | "formation" | "session" | "certificate" | "system";
 export type SessionStatus = "scheduled" | "completed" | "cancelled";
 export type PostType = "text" | "image" | "video" | "announcement";
+export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
+
+export type NotificationPreferences = Record<NotificationType, boolean>;
 
 export interface Profile {
   id: string;
@@ -19,6 +22,18 @@ export interface Profile {
   last_seen_at: string | null;
   is_online: boolean;
   onboarding_completed: boolean;
+  notification_preferences: NotificationPreferences;
+  is_suspended: boolean;
+  suspended_at: string | null;
+  suspended_reason: string | null;
+}
+
+export interface UserWarning {
+  id: string;
+  user_id: string;
+  issued_by: string;
+  reason: string;
+  created_at: string;
 }
 
 export interface Formation {
@@ -30,6 +45,8 @@ export interface Formation {
   is_free: boolean;
   price: number | null;
   order: number;
+  difficulty: DifficultyLevel;
+  category: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -415,4 +432,24 @@ export interface AIMessageSource {
   document_id: string;
   title: string;
   chunk_preview: string;
+}
+
+// ============================================
+// Formation Favorites
+// ============================================
+export interface FormationFavorite {
+  id: string;
+  user_id: string;
+  formation_id: string;
+  created_at: string;
+}
+
+// ============================================
+// Module Prerequisites
+// ============================================
+export interface ModulePrerequisite {
+  id: string;
+  module_id: string;
+  prerequisite_module_id: string;
+  created_at: string;
 }

@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Clock, Users, Calendar, CalendarPlus } from "lucide-react";
 import { Session, UserRole } from "@/lib/types/database";
 import { formatTime, formatDateTime } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,33 @@ export function CalendarClient({ sessions, userId, userRole }: CalendarClientPro
       await supabase
         .from("session_participants")
         .insert({ session_id: session.id, user_id: userId });
+
+      // Notification de confirmation pour l'utilisateur
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        type: "session",
+        title: `Inscription confirmée : ${session.title}`,
+        message: `Vous êtes inscrit à la session du ${formatDateTime(session.start_time)}`,
+        link: "/calendar",
+      });
+
+      // Notification pour l'hôte
+      if (session.host_id && session.host_id !== userId) {
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userId)
+          .single();
+
+        await supabase.from("notifications").insert({
+          user_id: session.host_id,
+          type: "session",
+          title: `Nouvelle inscription : ${session.title}`,
+          message: `${userProfile?.full_name || "Un utilisateur"} s'est inscrit à votre session`,
+          link: "/admin/calendar",
+        });
+      }
+
       toast.success("Inscription confirmée !");
     }
     setRegistering(false);
@@ -271,14 +298,26 @@ export function CalendarClient({ sessions, userId, userRole }: CalendarClientPro
                     </div>
                   )}
                 </div>
-                <Button
-                  className="w-full"
-                  variant={selectedSession.is_registered ? "outline" : "default"}
-                  disabled={registering}
-                  onClick={() => handleRegister(selectedSession)}
-                >
-                  {selectedSession.is_registered ? "Se désinscrire" : "S'inscrire"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    variant={selectedSession.is_registered ? "outline" : "default"}
+                    disabled={registering}
+                    onClick={() => handleRegister(selectedSession)}
+                  >
+                    {selectedSession.is_registered ? "Se désinscrire" : "S'inscrire"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    asChild
+                    title="Ajouter au calendrier"
+                  >
+                    <a href={`/api/calendar/${selectedSession.id}`} download>
+                      <CalendarPlus className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
               </div>
             </>
           )}

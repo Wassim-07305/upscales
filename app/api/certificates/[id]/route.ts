@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import QRCode from "qrcode";
 
 const styles = StyleSheet.create({
   page: {
@@ -193,6 +194,17 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Générer le QR code de vérification
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://upscales-ahmanewassim6-2668s-projects.vercel.app";
+  const verificationUrl = `${siteUrl}/verify/${certificate.certificate_number}`;
+  const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
+    width: 150,
+    margin: 1,
+    color: { dark: "#C6FF00", light: "#00000000" },
+  });
+
   const studentName =
     (certificate as Record<string, unknown>).user &&
     typeof (certificate as Record<string, unknown>).user === "object"
@@ -230,11 +242,29 @@ export async function GET(
   } catch {
     // Fallback to HTML if PDF generation fails
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Certificat</title>
-    <style>body{font-family:sans-serif;margin:0;padding:40px;background:#0D0D0D;color:#EDEDED;display:flex;justify-content:center;align-items:center;min-height:100vh}.cert{background:#141414;border:2px solid #C6FF00;border-radius:24px;padding:60px;max-width:800px;width:100%;text-align:center}.logo{font-size:32px;font-weight:700;color:#C6FF00;letter-spacing:4px;margin-bottom:8px}.sub{color:#999;font-size:14px;margin-bottom:40px}.hd{font-size:18px;color:#999;margin-bottom:12px}.nm{font-size:36px;font-weight:700;margin-bottom:32px;color:#EDEDED}.fm{font-size:24px;font-weight:600;color:#C6FF00;margin-bottom:40px}.meta{display:flex;justify-content:center;gap:40px;color:#999;font-size:12px}.meta strong{display:block;color:#EDEDED;font-size:14px;margin-top:4px}</style></head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+      body{font-family:'Inter',sans-serif;margin:0;padding:40px;background:#0D0D0D;color:#EDEDED;display:flex;justify-content:center;align-items:center;min-height:100vh}
+      .cert{background:linear-gradient(135deg,#141414,#1C1C1C);border:2px solid #C6FF00;border-radius:24px;padding:60px;max-width:800px;width:100%;text-align:center;position:relative;overflow:hidden}
+      .cert::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#C6FF00,#7FFFD4,#C6FF00)}
+      .logo{font-size:32px;font-weight:700;color:#C6FF00;letter-spacing:4px;margin-bottom:8px}
+      .sub{color:#999;font-size:14px;margin-bottom:40px}
+      .hd{font-size:18px;color:#999;margin-bottom:12px}
+      .nm{font-size:36px;font-weight:700;margin-bottom:32px;background:linear-gradient(135deg,#EDEDED,#999);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+      .fm{font-size:24px;font-weight:600;color:#C6FF00;margin-bottom:40px}
+      .meta{display:flex;justify-content:center;gap:40px;color:#999;font-size:12px}
+      .meta strong{display:block;color:#EDEDED;font-size:14px;margin-top:4px}
+      .qr-section{margin-top:40px;padding-top:24px;border-top:1px solid #333}
+      @media print{body{background:white;color:black}.cert{border-color:#C6FF00;background:white}}
+    </style></head>
     <body><div class="cert"><div class="logo">UPSCALE</div><div class="sub">Plateforme de Formation</div>
     <div class="hd">Certificat de complétion délivré à</div><div class="nm">${studentName}</div>
     <div class="hd">Pour avoir complété avec succès la formation</div><div class="fm">${formationTitle}</div>
-    <div class="meta"><div>Date<strong>${issuedAt}</strong></div><div>N°<strong>${certificate.certificate_number}</strong></div></div></div></body></html>`;
+    <div class="meta"><div>Date de délivrance<strong>${issuedAt}</strong></div><div>Numéro de certificat<strong>${certificate.certificate_number}</strong></div></div>
+    <div class="qr-section">
+      <img src="${qrDataUrl}" alt="QR Code de vérification" style="width:120px;height:120px;" />
+      <p style="color:#666;font-size:11px;margin-top:8px;">Scannez pour vérifier l&apos;authenticité</p>
+    </div></div></body></html>`;
 
     return new NextResponse(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },

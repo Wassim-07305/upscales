@@ -56,17 +56,31 @@ export function NotificationsPanel({
   useEffect(() => {
     const supabase = createClient();
 
+    let notifPrefs: Record<string, boolean> | null = null;
+
     async function fetchNotifications() {
-      const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(30);
+      const [{ data }, { data: profile }] = await Promise.all([
+        supabase
+          .from("notifications")
+          .select("*")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("profiles")
+          .select("notification_preferences")
+          .eq("id", userId)
+          .single(),
+      ]);
+
+      notifPrefs = profile?.notification_preferences as Record<string, boolean> | null;
 
       if (data) {
-        setNotifications(data);
-        const count = data.filter((n: Notification) => !n.is_read).length;
+        const filtered = notifPrefs
+          ? data.filter((n: Notification) => notifPrefs![n.type] !== false)
+          : data;
+        setNotifications(filtered);
+        const count = filtered.filter((n: Notification) => !n.is_read).length;
         setUnreadCount(count);
         onUnreadCountChange(count);
       }
@@ -87,6 +101,8 @@ export function NotificationsPanel({
         },
         (payload) => {
           const newNotif = payload.new as Notification;
+          // Respecter les préférences de notification
+          if (notifPrefs && notifPrefs[newNotif.type] === false) return;
           setNotifications((prev) => [newNotif, ...prev].slice(0, 30));
           setUnreadCount((prev) => {
             const next = prev + 1;

@@ -10,12 +10,25 @@ export default async function NotificationsPage() {
 
   if (!user) redirect("/login");
 
-  const { data: notifications } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const [{ data: notifications }, { data: profile }] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("profiles")
+      .select("notification_preferences")
+      .eq("id", user.id)
+      .single(),
+  ]);
 
-  return <NotificationsClient initialNotifications={notifications || []} />;
+  // Filtrer côté serveur selon les préférences
+  const prefs = profile?.notification_preferences as Record<string, boolean> | null;
+  const filtered = prefs
+    ? (notifications || []).filter((n) => prefs[n.type] !== false)
+    : notifications || [];
+
+  return <NotificationsClient initialNotifications={filtered} />;
 }

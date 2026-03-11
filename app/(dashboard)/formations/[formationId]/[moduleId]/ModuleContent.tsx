@@ -25,6 +25,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { Module, ModuleProgress, Quiz, QuizQuestion, QuizOption } from "@/lib/types/database";
+import { showXPToast } from "@/components/gamification/XPToast";
+import { ModuleNotes } from "@/components/formations/ModuleNotes";
+import { ModuleDiscussions } from "@/components/formations/ModuleDiscussions";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
@@ -46,6 +49,27 @@ interface ModuleContentProps {
   } | null;
   allModules: { id: string; title: string; order: number; type: string; duration_minutes: number }[];
   allProgress: { module_id: string; completed: boolean }[];
+  initialNoteContent: string;
+  discussions: {
+    id: string;
+    content: string;
+    author_id: string;
+    parent_id: string | null;
+    is_resolved: boolean;
+    created_at: string;
+    author: { full_name: string; avatar_url: string | null; role: string } | null;
+    replies?: {
+      id: string;
+      content: string;
+      author_id: string;
+      parent_id: string | null;
+      is_resolved: boolean;
+      created_at: string;
+      author: { full_name: string; avatar_url: string | null; role: string } | null;
+    }[];
+  }[];
+  currentUserId: string;
+  isAdmin: boolean;
 }
 
 export function ModuleContent({
@@ -58,6 +82,10 @@ export function ModuleContent({
   quizData,
   allModules,
   allProgress,
+  initialNoteContent,
+  discussions,
+  currentUserId,
+  isAdmin,
 }: ModuleContentProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -89,6 +117,19 @@ export function ModuleContent({
       setCompleted(true);
       toast.success("Module marqué comme terminé !");
 
+      // Attribuer XP pour le module complété
+      try {
+        const xpRes = await fetch("/api/xp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "module_complete" }),
+        });
+        if (xpRes.ok) {
+          const xpData = await xpRes.json();
+          showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+        }
+      } catch { /* XP non bloquant */ }
+
       const { data: allModulesCheck } = await supabase
         .from("modules")
         .select("id")
@@ -113,6 +154,63 @@ export function ModuleContent({
         await supabase.from("formation_enrollments").update({
           completed_at: new Date().toISOString(),
         }).eq("user_id", user.id).eq("formation_id", formationId);
+
+        // Notification de formation complétée + certificat
+        await supabase.from("notifications").insert([
+          {
+            user_id: user.id,
+            type: "formation" as const,
+            title: "Formation terminée !",
+            message: `Vous avez terminé "${formationTitle}". Bravo !`,
+            link: `/formations/${formationId}`,
+          },
+          {
+            user_id: user.id,
+            type: "certificate" as const,
+            title: "Certificat obtenu",
+            message: `Votre certificat pour "${formationTitle}" est disponible.`,
+            link: "/certificates",
+          },
+        ]);
+
+        // Notifier les admins de la complétion
+        const { data: admins } = await supabase
+          .from("profiles")
+          .select("id")
+          .in("role", ["admin", "moderator"]);
+
+        if (admins && admins.length > 0) {
+          const { data: studentProfile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .single();
+
+          await supabase.from("notifications").insert(
+            admins
+              .filter((a) => a.id !== user.id)
+              .map((admin) => ({
+                user_id: admin.id,
+                type: "formation" as const,
+                title: `${studentProfile?.full_name || "Un élève"} a terminé une formation`,
+                message: `"${formationTitle}" — certificat délivré`,
+                link: `/admin/crm/${user.id}`,
+              }))
+          );
+        }
+
+        // Attribuer XP pour la formation complétée
+        try {
+          const xpRes = await fetch("/api/xp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "formation_complete" }),
+          });
+          if (xpRes.ok) {
+            const xpData = await xpRes.json();
+            showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+          }
+        } catch { /* XP non bloquant */ }
 
         confetti({
           particleCount: 150,
@@ -306,13 +404,43 @@ export function ModuleContent({
           <QuizComponent
             quiz={quizData.quiz}
             questions={quizData.questions}
-            onComplete={(passed) => {
-              if (passed && !completed) {
-                handleMarkCompleted();
+            onComplete={async (passed) => {
+              if (passed) {
+                // XP pour quiz réussi
+                try {
+                  const xpRes = await fetch("/api/xp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "quiz_pass" }),
+                  });
+                  if (xpRes.ok) {
+                    const xpData = await xpRes.json();
+                    showXPToast(xpData.xp_awarded, xpData.new_badges?.[0]?.name);
+                  }
+                } catch { /* XP non bloquant */ }
+                if (!completed) {
+                  handleMarkCompleted();
+                }
               }
             }}
           />
         )}
+
+        {/* Notes & Discussions */}
+        <div className="flex gap-2 flex-wrap">
+          <ModuleNotes
+            moduleId={module.id}
+            formationId={formationId}
+            initialContent={initialNoteContent}
+          />
+          <ModuleDiscussions
+            moduleId={module.id}
+            formationId={formationId}
+            discussions={discussions}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
+          />
+        </div>
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-border/50">

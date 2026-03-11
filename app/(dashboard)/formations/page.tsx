@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { FormationCard } from "@/components/formations/FormationCard";
+import { FormationGrid } from "@/components/formations/FormationGrid";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -164,30 +164,7 @@ export default async function FormationsPage({
         categories={categories}
       />
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((formation) => (
-          <FormationCard
-            key={formation.id}
-            formation={formation}
-            moduleCount={formation.moduleCount}
-            totalDuration={formation.totalDuration}
-            enrolledCount={formation.enrolledCount}
-            progress={formation.enrolled ? formation.progress : undefined}
-            enrolled={formation.enrolled}
-            averageRating={formation.averageRating}
-            reviewCount={formation.reviewCount}
-            isFavorite={formation.isFavorite}
-            userId={user.id}
-            showFavorite
-          />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Aucune formation trouvée</p>
-        </div>
-      )}
+      <FormationGrid formations={filtered} userId={user.id} />
     </div>
   );
 }

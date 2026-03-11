@@ -16,6 +16,10 @@ import {
   Users,
   Search,
   ArrowLeft,
+  Pencil,
+  Trash2,
+  X,
+  Check,
 } from "lucide-react";
 import {
   Dialog,
@@ -54,6 +58,11 @@ export function ChatLayout({
   const [showChannelList, setShowChannelList] = useState(true);
   const [dmSearchOpen, setDmSearchOpen] = useState(false);
   const [dmSearch, setDmSearch] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -67,7 +76,6 @@ export function ChatLayout({
 
     const fetchMessages = async () => {
       setLoading(true);
-      // Join channel if not member
       if (!memberChannelIds.includes(activeChannel.id) && activeChannel.type === "public") {
         await supabase.from("channel_members").insert({
           channel_id: activeChannel.id,
@@ -89,36 +97,80 @@ export function ChatLayout({
 
     fetchMessages();
 
-    // Subscribe to new messages
+    // Subscribe to message changes (INSERT, UPDATE, DELETE)
     const channel = supabase
       .channel(`chat:${activeChannel.id}`)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `channel_id=eq.${activeChannel.id}`,
         },
         async (payload) => {
-          const { data: newMsg } = await supabase
-            .from("messages")
-            .select("*, sender:profiles(*)")
-            .eq("id", payload.new.id)
-            .single();
-
-          if (newMsg) {
-            setMessages((prev) => [...prev, newMsg]);
-            setTimeout(scrollToBottom, 100);
+          if (payload.eventType === "INSERT") {
+            const { data: newMsg } = await supabase
+              .from("messages")
+              .select("*, sender:profiles(*)")
+              .eq("id", payload.new.id)
+              .single();
+            if (newMsg) {
+              setMessages((prev) => {
+                // Remove optimistic message if present
+                const filtered = prev.filter((m) => !m.id.startsWith("temp-"));
+                return [...filtered, newMsg];
+              });
+              setTimeout(scrollToBottom, 100);
+            }
+          } else if (payload.eventType === "UPDATE") {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === payload.new.id
+                  ? { ...m, content: payload.new.content, is_edited: payload.new.is_edited }
+                  : m
+              )
+            );
+          } else if (payload.eventType === "DELETE") {
+            setMessages((prev) => prev.filter((m) => m.id !== payload.old.id));
           }
         }
       )
       .subscribe();
 
+    // Typing indicator channel
+    const presenceChannel = supabase.channel(`typing:${activeChannel.id}`);
+    presenceChannel
+      .on("broadcast", { event: "typing" }, ({ payload: p }) => {
+        if (p.user_id === user.id) return;
+        const name = p.user_name || "Quelqu'un";
+        setTypingUsers((prev) => (prev.includes(name) ? prev : [...prev, name]));
+        // Clear after 3 seconds
+        setTimeout(() => {
+          setTypingUsers((prev) => prev.filter((n) => n !== name));
+        }, 3000);
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(presenceChannel);
     };
   }, [activeChannel?.id]);
+
+  // Broadcast typing
+  const broadcastTyping = useCallback(() => {
+    if (!activeChannel) return;
+    const now = Date.now();
+    if (now - lastTypingRef.current < 2000) return;
+    lastTypingRef.current = now;
+
+    supabase.channel(`typing:${activeChannel.id}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { user_id: user.id, user_name: user.full_name },
+    });
+  }, [activeChannel?.id, user.id, user.full_name]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeChannel) return;
@@ -149,6 +201,21 @@ export function ChatLayout({
     });
   };
 
+  const handleEditMessage = async (messageId: string) => {
+    if (!editContent.trim()) return;
+    await supabase
+      .from("messages")
+      .update({ content: editContent.trim(), is_edited: true })
+      .eq("id", messageId);
+    setEditingMessageId(null);
+    setEditContent("");
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    await supabase.from("messages").delete().eq("id", messageId);
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -156,8 +223,12 @@ export function ChatLayout({
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    broadcastTyping();
+  };
+
   const createDM = async (otherUserId: string) => {
-    // Check if DM already exists
     const otherUser = allUsers.find((u) => u.id === otherUserId);
     if (!otherUser) return;
 
@@ -182,7 +253,6 @@ export function ChatLayout({
       return;
     }
 
-    // Create new DM channel
     const { data: newChannel } = await supabase
       .from("channels")
       .insert({
@@ -369,9 +439,13 @@ export function ChatLayout({
               <div className="space-y-4">
                 {messages.map((msg) => {
                   const isOwn = msg.sender_id === user.id;
+                  const isEditing = editingMessageId === msg.id;
 
                   return (
-                    <div key={msg.id} className="flex items-start gap-3">
+                    <div
+                      key={msg.id}
+                      className="group flex items-start gap-3"
+                    >
                       {!isOwn && (
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarImage src={msg.sender?.avatar_url || undefined} />
@@ -388,17 +462,77 @@ export function ChatLayout({
                           <span className="text-[10px] text-muted-foreground">
                             {formatMessageDate(msg.created_at)}
                           </span>
-                        </div>
-                        <div
-                          className={cn(
-                            "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
-                            isOwn
-                              ? "bg-primary text-primary-foreground rounded-br-sm"
-                              : "bg-muted rounded-bl-sm"
+                          {msg.is_edited && (
+                            <span className="text-[10px] text-muted-foreground italic">(modifié)</span>
                           )}
-                        >
-                          {msg.content}
                         </div>
+
+                        {isEditing ? (
+                          <div className="flex items-center gap-2 max-w-[80%]">
+                            <Input
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleEditMessage(msg.id);
+                                if (e.key === "Escape") setEditingMessageId(null);
+                              }}
+                              className="text-sm bg-muted border-0 h-8"
+                              autoFocus
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => handleEditMessage(msg.id)}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => setEditingMessageId(null)}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="relative inline-block">
+                            <div
+                              className={cn(
+                                "inline-block px-3 py-2 rounded-2xl text-sm max-w-[80%]",
+                                isOwn
+                                  ? "bg-primary text-primary-foreground rounded-br-sm"
+                                  : "bg-muted rounded-bl-sm"
+                              )}
+                            >
+                              {msg.content}
+                            </div>
+
+                            {/* Edit/Delete actions on hover (own messages only) */}
+                            {isOwn && !msg.id.startsWith("temp-") && (
+                              <div className="hidden group-hover:flex items-center gap-0.5 absolute -left-16 top-1/2 -translate-y-1/2">
+                                <button
+                                  onClick={() => {
+                                    setEditingMessageId(msg.id);
+                                    setEditContent(msg.content);
+                                  }}
+                                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                  title="Modifier"
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteMessage(msg.id)}
+                                  className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -407,12 +541,21 @@ export function ChatLayout({
               </div>
             </ScrollArea>
 
+            {/* Typing indicator */}
+            {typingUsers.length > 0 && (
+              <div className="px-4 py-1 text-xs text-muted-foreground italic">
+                {typingUsers.length === 1
+                  ? `${typingUsers[0]} est en train d'écrire...`
+                  : `${typingUsers.join(", ")} sont en train d'écrire...`}
+              </div>
+            )}
+
             {/* Input */}
             <div className="p-3 border-t border-border">
               <div className="flex gap-2">
                 <Input
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder="Écrire un message..."
                   className="bg-[#141414] border-0"

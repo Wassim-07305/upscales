@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CreatePost } from "@/components/community/CreatePost";
-import { PostCard } from "@/components/community/PostCard";
+import { PostFeed } from "@/components/community/PostFeed";
 import { isMember } from "@/lib/utils/roles";
 import { CommunityFilters } from "./CommunityFilters";
 
@@ -23,7 +23,7 @@ export default async function CommunityPage({
   let query = supabase
     .from("posts")
     .select("*, author:profiles(*)")
-    .limit(50);
+    .limit(10);
 
   if (filter === "popular") {
     query = query.order("likes_count", { ascending: false });
@@ -73,30 +73,13 @@ export default async function CommunityPage({
 
       <CommunityFilters currentFilter={filter} />
 
-      <div className="space-y-4">
-        {pinnedPosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={{ ...post, user_has_liked: likedPostIds.has(post.id) }}
-            currentUserId={user.id}
-            currentUserRole={profile.role}
-          />
-        ))}
-        {regularPosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={{ ...post, user_has_liked: likedPostIds.has(post.id) }}
-            currentUserId={user.id}
-            currentUserRole={profile.role}
-          />
-        ))}
-      </div>
-
-      {allPosts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Aucun post pour le moment</p>
-        </div>
-      )}
+      <PostFeed
+        initialPosts={allPosts.map((p) => ({ ...p, user_has_liked: likedPostIds.has(p.id) }))}
+        currentUserId={user.id}
+        currentUserRole={profile.role}
+        filter={filter}
+        totalInitial={allPosts.length}
+      />
     </div>
   );
 }

@@ -21,15 +21,15 @@
 |---|---------|------------|--------|
 | 1 | Introduction & Vision | - | Architecture OK |
 | 2 | Architecture & Technologie | 95% | Stack conforme |
-| 3 | Roles & Securite | 80% | 4 roles, RLS en place |
-| 4 | Authentification & Profils | 90% | OAuth 4 providers |
+| 3 | Roles & Securite | 90% | 4 roles, RLS, audit trail |
+| 4 | Authentification & Profils | 95% | OAuth 4 providers, visibilite profil |
 | 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
-| 6 | Modules & Contenu | 90% | Video + Tiptap + PiP OK |
+| 6 | Modules & Contenu | 95% | Video + Tiptap + PiP + resume OK |
 | 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
-| 10 | Chat & Canaux | 90% | Realtime + edit/delete + reactions emoji |
-| 11 | Communaute | 85% | Feed + infinite scroll + edition posts OK |
+| 10 | Chat & Canaux | 95% | Realtime + edit/delete + reactions + pin messages |
+| 11 | Communaute | 90% | Feed + infinite scroll + edition + share posts |
 | 12 | Notifications | 90% | Triggers + suppression + nettoyage + tout lu |
 | 13 | CRM Administrateur | 85% | Fiches + tags + notes CRM OK |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
@@ -37,7 +37,7 @@
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 95% | Dark mode complet |
 
-**Moyenne globale : ~92%**
+**Moyenne globale : ~95%**
 
 ---
 
@@ -52,7 +52,7 @@
 | F3.3 | Role Membre | ✅ | Dashboard etudiant complet |
 | F3.4 | Role Prospect | ✅ | Acces limite, booking only |
 | F3.5 | RLS policies | ✅ | Migrations 009 + 20260310 |
-| F3.6 | Audit trail admin | ❌ | Historique actions admin non implemente |
+| F3.6 | Audit trail admin | ✅ | Table audit_logs + page /admin/audit + helper logAuditAction |
 
 ### 4. AUTHENTIFICATION & PROFILS
 
@@ -71,7 +71,7 @@
 | F7.2 | Rate limiting reset | ❌ | Non implemente |
 | F8 | Profil personnalisable | ✅ | Photo, bio, telephone, preferences |
 | F8.1 | Upload photo profil | ✅ | Compression + Supabase Storage |
-| F8.2 | Visibilite profil | ❌ | Pas de toggle prive/public |
+| F8.2 | Visibilite profil | ✅ | Toggle public/prive avec Switch dans ProfileForm |
 | F8.3 | Historique modifications | ❌ | Non implemente |
 | F9 | Flow onboarding | ✅ | 5 etapes animees, confettis, progress bar |
 | F9.1 | Sauvegarde progressive | ✅ | Apres chaque etape |
@@ -109,7 +109,7 @@
 | F14.1 | Upload Supabase Storage | ✅ | Via /api/upload |
 | F14.2 | URLs embed externes | ✅ | YouTube, Vimeo |
 | F14.3 | Picture-in-picture | ✅ | Bouton PiP dans VideoPlayer |
-| F14.4 | Sauvegarde position | ❌ | Pas de resume lecture |
+| F14.4 | Sauvegarde position | ✅ | module_progress.last_position_seconds toutes les 10s |
 | F14.5 | Auto-completion 90% | ✅ | Marque complete a 90% visionne |
 | F15 | Editeur Tiptap | ✅ | WYSIWYG complet |
 | F15.1 | Barre d'outils | ✅ | Gras, italique, listes, liens |
@@ -204,7 +204,7 @@
 | F29.1 | Canaux prives invitation | ✅ | Systeme membre canal |
 | F29.2 | Description canal | ✅ | Affichee en haut |
 | F29.3 | Liste membres en ligne | 🟡 | Membres listes, statut basique |
-| F29.4 | Pin messages | ❌ | Non implemente |
+| F29.4 | Pin messages | ✅ | Pin/unpin + barre epinglee en haut du chat |
 | F30 | DM securises | ✅ | One-to-one fonctionnel |
 | F30.1 | Creation auto DM | ✅ | Au premier message |
 | F30.2 | Liste conversations | ✅ | Avec tri recent |
@@ -232,7 +232,7 @@
 | F32.5 | Edition post par auteur | ✅ | Mode edition dans PostCard |
 | F33 | Detail post | ✅ | Page /community/[postId] |
 | F33.1 | Commentaires + reponses | ✅ | Thread complet |
-| F33.2 | Share buttons | ❌ | Non implemente |
+| F33.2 | Share buttons | ✅ | LinkedIn, X/Twitter, copier lien dans PostCard |
 
 ### 12. NOTIFICATIONS
 
@@ -401,12 +401,19 @@
 - [x] F36.1 : Marquer tout comme lu (deja implemente)
 - [x] F32.5 : Edition post par auteur (deja implemente)
 
-### Sprint 8 (a planifier)
-- [ ] F14.4 : Sauvegarde position video (resume lecture)
-- [ ] F3.6 : Audit trail admin
-- [ ] F8.2 : Visibilite profil (toggle prive/public)
-- [ ] F29.4 : Pin messages chat
-- [ ] F33.2 : Share buttons posts communaute
+### Sprint 8 (complete)
+- [x] F29.4 : Pin messages chat (pin/unpin + barre epinglee)
+- [x] F33.2 : Share buttons posts (LinkedIn, X/Twitter, copier lien)
+- [x] F8.2 : Visibilite profil (toggle public/prive)
+- [x] F3.6 : Audit trail admin (table + page + helper)
+- [x] F14.4 : Sauvegarde position video (deja implemente)
+
+### Sprint 9 (a planifier)
+- [ ] F30.4 : Bloquer utilisateur (DM)
+- [ ] F30.5 : Archivage conversations
+- [ ] F37.4 : Export CSV CRM
+- [ ] F44.4 : SEO meta/og:image landing pages
+- [ ] F49.6 : Respect prefers-reduced-motion
 
 ---
 
@@ -421,3 +428,4 @@
 | Sprint 5 | 2026-03-11 | OAuth FB/Discord, reactions emoji chat, partage certificats, suppression notifs | main |
 | Sprint 6 | 2026-03-11 | Shuffle quiz, vue liste formations, validation UI IA/CRM/streaming | main |
 | Sprint 7 | 2026-03-11 | Tri formations, PiP video, validation blocs landing/notifs/posts | main |
+| Sprint 8 | 2026-03-11 | Pin messages, share posts, visibilite profil, audit trail admin | main |

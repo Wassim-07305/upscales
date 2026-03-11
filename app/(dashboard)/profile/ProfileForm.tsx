@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Camera } from "lucide-react";
+import { Loader2, Camera, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Profile } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { getRoleBadgeColor, getRoleLabel } from "@/lib/utils/roles";
@@ -32,6 +33,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
+  const [isPublic, setIsPublic] = useState((profile as any).is_public !== false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -179,6 +181,45 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               Sauvegarder
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Visibility */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Visibilité du profil</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isPublic ? (
+                <Eye className="h-5 w-5 text-neon" />
+              ) : (
+                <EyeOff className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="text-sm font-medium">
+                  {isPublic ? "Profil public" : "Profil privé"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isPublic
+                    ? "Les autres membres peuvent voir votre profil"
+                    : "Seuls les admins peuvent voir votre profil"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isPublic}
+              onCheckedChange={async (checked) => {
+                setIsPublic(checked);
+                await supabase
+                  .from("profiles")
+                  .update({ is_public: checked })
+                  .eq("id", profile.id);
+                toast.success(checked ? "Profil rendu public" : "Profil rendu privé");
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
 

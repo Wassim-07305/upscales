@@ -25,6 +25,7 @@ import {
   Loader2,
   FileIcon,
   Smile,
+  Pin,
 } from "lucide-react";
 import {
   Dialog,
@@ -231,6 +232,22 @@ export function ChatLayout({
   const handleDeleteMessage = async (messageId: string) => {
     await supabase.from("messages").delete().eq("id", messageId);
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
+
+  const handleTogglePin = async (messageId: string) => {
+    const msg = messages.find((m) => m.id === messageId);
+    if (!msg) return;
+    const newPinned = !(msg as any).is_pinned;
+    await supabase
+      .from("messages")
+      .update({ is_pinned: newPinned })
+      .eq("id", messageId);
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, is_pinned: newPinned } : m
+      )
+    );
+    toast.success(newPinned ? "Message épinglé" : "Message désépinglé");
   };
 
   const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👀"];
@@ -548,6 +565,20 @@ export function ChatLayout({
               </div>
             </div>
 
+            {/* Pinned messages bar */}
+            {messages.some((m) => (m as any).is_pinned) && (
+              <div className="px-4 py-2 border-b border-border bg-primary/5">
+                <div className="flex items-center gap-2 text-xs">
+                  <Pin className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-primary font-medium">Épinglé :</span>
+                  <span className="text-muted-foreground truncate">
+                    {messages.find((m) => (m as any).is_pinned)?.content.slice(0, 80)}
+                    {(messages.find((m) => (m as any).is_pinned)?.content.length || 0) > 80 ? "…" : ""}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
@@ -575,6 +606,9 @@ export function ChatLayout({
                             <span className="text-[10px] text-muted-foreground">
                               {formatMessageDate(msg.created_at)}
                             </span>
+                            {(msg as any).is_pinned && (
+                              <Pin className="h-2.5 w-2.5 text-primary" />
+                            )}
                             {msg.is_edited && (
                               <span className="text-[10px] text-muted-foreground italic">(modifié)</span>
                             )}
@@ -670,6 +704,18 @@ export function ChatLayout({
                                     title="Reagir"
                                   >
                                     <Smile className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleTogglePin(msg.id)}
+                                    className={cn(
+                                      "p-1 rounded transition-colors",
+                                      (msg as any).is_pinned
+                                        ? "text-primary hover:bg-primary/10"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    )}
+                                    title={(msg as any).is_pinned ? "Désépingler" : "Épingler"}
+                                  >
+                                    <Pin className="h-3 w-3" />
                                   </button>
                                   {isOwn && (
                                     <>

@@ -22,22 +22,22 @@
 | 1 | Introduction & Vision | - | Architecture OK |
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 80% | 4 roles, RLS en place |
-| 4 | Authentification & Profils | 80% | OAuth partiel |
+| 4 | Authentification & Profils | 90% | OAuth 4 providers |
 | 5 | Formations & Catalogue | 90% | Filtres OK, infinite scroll OK |
 | 6 | Modules & Contenu | 85% | Video + Tiptap OK |
 | 7 | Quiz & Evaluations | 70% | 3 types, historique OK |
-| 8 | Certificats | 90% | PDF + QR code OK |
+| 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
-| 10 | Chat & Canaux | 85% | Realtime + edit/delete OK |
+| 10 | Chat & Canaux | 90% | Realtime + edit/delete + reactions emoji |
 | 11 | Communaute | 80% | Feed + infinite scroll OK |
-| 12 | Notifications | 70% | Triggers DB OK |
+| 12 | Notifications | 85% | Triggers + suppression + nettoyage |
 | 13 | CRM Administrateur | 80% | Fiches + tags OK |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
 | 15 | Landing Pages | 75% | Puck integre |
 | 16 | Intelligence Artificielle | 70% | RAG + Claude OK |
 | 17 | Design System | 95% | Dark mode complet |
 
-**Moyenne globale : ~83%**
+**Moyenne globale : ~86%**
 
 ---
 
@@ -58,7 +58,7 @@
 
 | ID | Fonctionnalite | Statut | Notes |
 |----|---------------|--------|-------|
-| F5 | Connexion OAuth2 | 🟡 | Google + GitHub OK. Facebook + Discord manquants |
+| F5 | Connexion OAuth2 | ✅ | Google, GitHub, Facebook, Discord |
 | F5.1 | Supabase Auth | ✅ | Middleware + cookies httpOnly |
 | F5.2 | Session refresh auto | ✅ | Middleware middleware.ts |
 | F5.3 | Rate limiting login | ❌ | Non implemente |
@@ -160,7 +160,7 @@
 | F23.2 | QR code sur certificat | ✅ | Lien verification |
 | F24 | Galerie certificats | ✅ | Page /certificates |
 | F24.1 | Telechargement PDF | ✅ | Bouton par certificat |
-| F24.2 | Partage LinkedIn/Twitter | ❌ | Bouton share basique, pas de deep link |
+| F24.2 | Partage LinkedIn/Twitter | ✅ | Dropdown LinkedIn, X/Twitter, copier lien |
 | F24.3 | Apercu vignette | ❌ | Pas de preview visuel |
 | F24.4 | Export liste complete | ❌ | Non implemente |
 
@@ -196,7 +196,7 @@
 | F28.1 | Canaux publics/prives/DM | ✅ | 3 types supportes |
 | F28.2 | Avatar + nom auteur | ✅ | Affiche sur chaque message |
 | F28.3 | Horodatage FR | ✅ | date-fns locale FR |
-| F28.4 | Reactions emoji | ❌ | Non implemente |
+| F28.4 | Reactions emoji | ✅ | 6 emojis rapides, toggle, compteur |
 | F28.5 | Edition/suppression | ✅ | Par l'auteur, label (modifie) |
 | F28.6 | Typing indicator | ✅ | Broadcast Supabase |
 | F28.7 | Notification nouveaux msg | 🟡 | Realtime mais pas de badge |
@@ -242,8 +242,8 @@
 | F34.1 | Tri anti-chronologique | ✅ | Plus recentes en haut |
 | F34.2 | Filtrage par type | ✅ | Preferences par type |
 | F34.3 | Marquage lu/non-lu | ✅ | Toggle par notification |
-| F34.4 | Suppression individuelle | ❌ | Non implemente |
-| F34.5 | Nettoyage en masse | ❌ | Non implemente |
+| F34.4 | Suppression individuelle | ✅ | Bouton X au hover |
+| F34.5 | Nettoyage en masse | ✅ | Bouton Nettoyer (supprime les lues) |
 | F34.6 | Pagination/scroll infini | ❌ | Limite a 100 |
 | F35 | Types multiples | ✅ | enrollment, completion, message, community, system |
 | F35.1 | Icone par type | 🟡 | Types existent, icones basiques |
@@ -381,12 +381,11 @@
 - [x] F32.5 : Edition de posts par l'auteur (deja implemente)
 - [x] F36.2 : Badge notifications temps reel (deja implemente)
 
-### Sprint 5 (a planifier)
-- [ ] F5 : OAuth Facebook + Discord
-- [ ] F28.4 : Reactions emoji chat
-- [ ] F47 : UI gestion knowledge base admin
-- [ ] F24.2 : Partage certificats LinkedIn/Twitter
-- [ ] F34.4 : Suppression + nettoyage notifications
+### Sprint 5 (complete)
+- [x] F5 : OAuth Facebook + Discord
+- [x] F28.4 : Reactions emoji chat (6 emojis rapides)
+- [x] F24.2 : Partage certificats LinkedIn/Twitter
+- [x] F34.4 : Suppression individuelle + nettoyage en masse notifications
 
 ### Sprint 6 (a planifier)
 - [ ] F19.1 : Shuffle questions quiz
@@ -405,3 +404,4 @@
 | Sprint 2 | 2026-03-10 | Quiz multi-types, historique tentatives, certificats PDF | dev → main |
 | Sprint 3 | 2026-03-11 | Upload images posts, chat edit/delete/typing, infinite scroll communaute | dev → main |
 | Sprint 4 | 2026-03-11 | Vues calendrier mois/semaine/jour, filtres sessions, infinite scroll formations | main |
+| Sprint 5 | 2026-03-11 | OAuth FB/Discord, reactions emoji chat, partage certificats, suppression notifs | main |

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Reply, Trash2, Send, Loader2, Pencil, Check, X } from "lucide-react";
+import { Heart, Reply, Trash2, Send, Loader2, Pencil, Check, X, Flag } from "lucide-react";
 import { Comment, Profile, UserRole } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
 import { getInitials } from "@/lib/utils/formatters";
@@ -135,6 +135,30 @@ export function CommentSection({
   const handleDelete = async (commentId: string) => {
     await supabase.from("comments").delete().eq("id", commentId);
     router.refresh();
+  };
+
+  const [reportedComments, setReportedComments] = useState<Set<string>>(new Set());
+
+  const handleReport = async (commentId: string) => {
+    if (reportedComments.has(commentId)) return;
+
+    const { error } = await supabase.from("comment_reports").insert({
+      comment_id: commentId,
+      reporter_id: currentUserId,
+      reason: "inappropriate",
+    });
+
+    if (error) {
+      if (error.code === "23505") {
+        toast.error("Vous avez déjà signalé ce commentaire");
+      } else {
+        toast.error("Erreur", { description: error.message });
+      }
+      return;
+    }
+
+    setReportedComments((prev) => new Set(prev).add(commentId));
+    toast.success("Commentaire signalé");
   };
 
   const [editingComment, setEditingComment] = useState<string | null>(null);
@@ -276,6 +300,20 @@ export function CommentSection({
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
               >
                 <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+            {comment.author_id !== currentUserId && (
+              <button
+                onClick={() => handleReport(comment.id)}
+                className={cn(
+                  "flex items-center gap-1 text-xs transition-colors",
+                  reportedComments.has(comment.id)
+                    ? "text-orange-400 cursor-default"
+                    : "text-muted-foreground hover:text-orange-400"
+                )}
+                disabled={reportedComments.has(comment.id)}
+              >
+                <Flag className="h-3 w-3" />
               </button>
             )}
           </div>

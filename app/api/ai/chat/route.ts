@@ -4,8 +4,13 @@ import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { retrieveContext } from "@/lib/ai/rag";
 import { buildSystemPrompt } from "@/lib/ai/system-prompt";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const rl = checkRateLimit(`ai-chat:${ip}`, { limit: 20, windowSeconds: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds);
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

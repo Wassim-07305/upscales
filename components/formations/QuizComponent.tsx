@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, Loader2, History, Lightbulb } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, History, Lightbulb, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Quiz, QuizQuestion, QuizOption, QuizAttempt } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
@@ -46,7 +46,21 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(
+    quiz.time_limit_minutes ? quiz.time_limit_minutes * 60 : null
+  );
   const supabase = createClient();
+
+  // Quiz timer countdown
+  useEffect(() => {
+    if (timeLeft === null || submitted) return;
+    if (timeLeft <= 0) {
+      handleSubmit();
+      return;
+    }
+    const timer = setTimeout(() => setTimeLeft((t) => (t !== null ? t - 1 : null)), 1000);
+    return () => clearTimeout(timer);
+  }, [timeLeft, submitted]);
 
   useEffect(() => {
     async function fetchAttempts() {
@@ -170,6 +184,18 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
               <History className="mr-1 h-4 w-4" />
               {attempts.length} tentative{attempts.length > 1 ? "s" : ""}
             </Button>
+          )}
+          {timeLeft !== null && !submitted && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "font-mono",
+                timeLeft <= 60 && "border-destructive text-destructive animate-pulse"
+              )}
+            >
+              <Clock className="mr-1 h-3 w-3" />
+              {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+            </Badge>
           )}
           <Badge variant="outline">Score requis : {quiz.passing_score}%</Badge>
         </div>
@@ -378,6 +404,7 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
             setSubmitted(false);
             setScore(0);
             setPassed(false);
+            setTimeLeft(quiz.time_limit_minutes ? quiz.time_limit_minutes * 60 : null);
             // Re-shuffle questions and options on retry
             setQuestions(
               shuffleArray(rawQuestions).map((q) => ({

@@ -25,11 +25,11 @@
 | 4 | Authentification & Profils | 100% | OAuth 4 providers, visibilite profil, rate limiting login+reset |
 | 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
 | 6 | Modules & Contenu | 98% | Video + Tiptap + PiP + resume + breadcrumb OK |
-| 7 | Quiz & Evaluations | 85% | 3 types, historique, shuffle, multimedia, validation Zod |
+| 7 | Quiz & Evaluations | 90% | 3 types, historique, shuffle, multimedia, Zod, timer |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 90% | Vues mois/semaine/jour + filtres + drag-and-drop |
 | 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
-| 11 | Communaute | 95% | Feed + infinite scroll + edition + share + suppression posts |
+| 11 | Communaute | 98% | Feed + infinite scroll + edition + share + suppression + signalement |
 | 12 | Notifications | 98% | Triggers + suppression + nettoyage + tout lu + infinite scroll + liens directs |
 | 13 | CRM Administrateur | 95% | Fiches + tags + notes CRM + export CSV + tri colonnes |
 | 14 | Booking & Reservations | 90% | Systeme fonctionnel + exceptions jours fermes |
@@ -37,7 +37,7 @@
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 98% | Dark mode complet + reduced-motion |
 
-**Moyenne globale : ~96%**
+**Moyenne globale : ~97%**
 
 ---
 
@@ -141,6 +141,7 @@
 | F20.2 | Notation manuelle libre | 🟡 | Reponses libres = toujours correct |
 | F20.3 | Table quiz_attempts | ✅ | Score, passed, created_at |
 | F20.4 | Stats par question | ❌ | Non implemente |
+| F20.5 | Timer quiz | ✅ | time_limit_minutes optionnel, countdown, auto-submit |
 | F21 | Feedback immediat | ✅ | Score + bonnes reponses |
 | F21.1 | Explications textuelles | ✅ | Par question avec icone |
 | F21.2 | Option refaire quiz | ✅ | Bouton retry si echoue |
@@ -233,6 +234,7 @@
 | F33 | Detail post | ✅ | Page /community/[postId] |
 | F33.1 | Commentaires + reponses | ✅ | Thread complet |
 | F33.2 | Share buttons | ✅ | LinkedIn, X/Twitter, copier lien dans PostCard |
+| F33.3 | Signalement commentaires | ✅ | Bouton Flag, table comment_reports, RLS |
 
 ### 12. NOTIFICATIONS
 
@@ -338,7 +340,7 @@
 | F48 | Reponses contextuelles | ✅ | Cosine similarity search |
 | F48.1 | Top 5 chunks | ✅ | Algorithme en place |
 | F48.2 | Prompt systeme custom | ✅ | buildSystemPrompt() |
-| F48.3 | Rate limiting | ❌ | Non implemente |
+| F48.3 | Rate limiting | ✅ | In-memory rate limiter sur upload, AI chat, booking |
 
 ### 17. DESIGN SYSTEM
 
@@ -436,7 +438,14 @@
 - [x] F35.2 : Lien navigation direct notifications (deja implemente)
 - [x] F37.3 : Tri par colonne CRM — nom, role, formations, activite, inscription asc/desc
 
-### Sprint 13 (a planifier)
+### Sprint 13 (complete)
+- [x] F48.3 : Rate limiting API — in-memory limiter sur upload, AI chat, booking
+- [x] F20.5 : Timer quiz — countdown optionnel, auto-submit a expiration
+- [x] F33.3 : Signalement commentaires — bouton Flag, table comment_reports, RLS
+- [x] F3.5 : Audit logs admin (deja implemente)
+- [x] F38.5 : Notes internes CRM (deja implemente)
+
+### Sprint 14 (a planifier)
 - [ ] A definir
 
 ---
@@ -457,3 +466,4 @@
 | Sprint 10 | 2026-03-12 | Rate limiting login, drag-drop calendar, infinite scroll notifs, preview landing pages | main |
 | Sprint 11 | 2026-03-12 | Multimedia quiz options, breadcrumb modules, validation booking/pages/notifs | main |
 | Sprint 12 | 2026-03-12 | Rate limiting reset, validation Zod quiz, suppression posts, tri CRM colonnes | main |
+| Sprint 13 | 2026-03-12 | Rate limiting API, timer quiz, signalement commentaires | main |

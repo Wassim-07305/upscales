@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for") || "anonymous";
+  const rl = checkRateLimit(`booking:${ip}`, { limit: 10, windowSeconds: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds);
   let body: Record<string, unknown>;
 
   try {

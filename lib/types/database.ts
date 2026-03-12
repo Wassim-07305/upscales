@@ -72,6 +72,7 @@ export interface Quiz {
   module_id: string;
   title: string;
   passing_score: number;
+  time_limit_minutes?: number | null;
   created_at: string;
 }
 

@@ -24,15 +24,15 @@
 | 3 | Roles & Securite | 90% | 4 roles, RLS, audit trail |
 | 4 | Authentification & Profils | 98% | OAuth 4 providers, visibilite profil, rate limiting |
 | 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
-| 6 | Modules & Contenu | 95% | Video + Tiptap + PiP + resume OK |
-| 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
+| 6 | Modules & Contenu | 98% | Video + Tiptap + PiP + resume + breadcrumb OK |
+| 7 | Quiz & Evaluations | 80% | 3 types, historique, shuffle, multimedia options |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 90% | Vues mois/semaine/jour + filtres + drag-and-drop |
 | 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
 | 11 | Communaute | 90% | Feed + infinite scroll + edition + share posts |
 | 12 | Notifications | 95% | Triggers + suppression + nettoyage + tout lu + infinite scroll |
 | 13 | CRM Administrateur | 90% | Fiches + tags + notes CRM + export CSV |
-| 14 | Booking & Reservations | 85% | Systeme fonctionnel |
+| 14 | Booking & Reservations | 90% | Systeme fonctionnel + exceptions jours fermes |
 | 15 | Landing Pages | 95% | Puck + 11 blocs + SEO meta/og + preview admin |
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 98% | Dark mode complet + reduced-motion |
@@ -126,7 +126,7 @@
 | F17.3 | Prerequis modules | ✅ | Verrouillage si prerequis non complete |
 | F18 | Navigation modules | ✅ | Sidebar + precedent/suivant |
 | F18.1 | Badges statut | ✅ | Complete, en cours, verrouille |
-| F18.2 | Breadcrumb | 🟡 | Formation > Module (basique) |
+| F18.2 | Breadcrumb | ✅ | Formations > Formation > Module (desktop + mobile) |
 
 ### 7. QUIZ & EVALUATIONS
 
@@ -134,7 +134,7 @@
 |----|---------------|--------|-------|
 | F19 | Types questions | ✅ | multiple_choice, true_false, free_response |
 | F19.1 | Options aleatoires | ✅ | Fisher-Yates shuffle questions + options, re-shuffle au retry |
-| F19.2 | Support multimedia options | ❌ | Texte seulement |
+| F19.2 | Support multimedia options | ✅ | image_url sur quiz_options + affichage dans QuizComponent |
 | F19.3 | Validation Zod reponses | ❌ | Validation client seulement |
 | F20 | Notation automatique | ✅ | Score % + pass/fail |
 | F20.1 | Score de passage 70% | ✅ | Configurable par quiz |
@@ -246,7 +246,7 @@
 | F34.5 | Nettoyage en masse | ✅ | Bouton Nettoyer (supprime les lues) |
 | F34.6 | Pagination/scroll infini | ✅ | IntersectionObserver + chargement par 30 |
 | F35 | Types multiples | ✅ | enrollment, completion, message, community, system |
-| F35.1 | Icone par type | 🟡 | Types existent, icones basiques |
+| F35.1 | Icone par type | ✅ | 6 icones distinctes + couleurs par type dans NotificationItem |
 | F35.2 | Lien navigation direct | 🟡 | Pas toujours vers la ressource |
 | F36 | Marquage lu | ✅ | Toggle lu/non-lu |
 | F36.1 | Marquer tout comme lu | ✅ | Bouton "Tout lu" dans panel + page notifications |
@@ -298,7 +298,7 @@
 | F42.1 | Config par jour semaine | ✅ | Heures debut/fin |
 | F42.2 | Duree creneaux | ✅ | 15/30/45/60 min |
 | F42.3 | Buffer entre reservations | 🟡 | Basique |
-| F42.4 | Exceptions jours fermes | ❌ | Non implemente |
+| F42.4 | Exceptions jours fermes | ✅ | ExceptionEditor avec dates bloquees et raisons |
 | F43 | Calendrier booking admin | 🟡 | Liste, pas de vue calendrier |
 | F43.1 | Sync Google Calendar | ❌ | Non implemente |
 
@@ -314,7 +314,7 @@
 | F44.5 | Preview avant publication | ✅ | ?preview=true pour admin, bandeau jaune mode preview |
 | F44.6 | Historique versions | ❌ | Non implemente |
 | F45 | URLs et gestion pages | ✅ | Slug unique |
-| F45.1 | Activation/desactivation | 🟡 | Publish OK, pas de toggle actif/inactif |
+| F45.1 | Activation/desactivation | ✅ | Toggle publier/depublier avec handleToggleActive |
 | F45.2 | Tracking visits | ❌ | Non implemente |
 | F45.3 | Analytics par page | ❌ | Non implemente |
 
@@ -422,7 +422,14 @@
 - [x] F44.5 : Preview landing pages — mode preview admin avec bandeau jaune
 - [x] F36.2 : Badge notifications header (deja implemente)
 
-### Sprint 11 (a planifier)
+### Sprint 11 (complete)
+- [x] F19.2 : Support multimedia options quiz — image_url + affichage dans QuizComponent
+- [x] F18.2 : Breadcrumb complet modules — Formations > Formation > Module (desktop)
+- [x] F42.4 : Exceptions jours fermes booking (deja implemente)
+- [x] F45.1 : Toggle actif/inactif landing pages (deja implemente)
+- [x] F35.1 : Icones par type notification (deja implemente)
+
+### Sprint 12 (a planifier)
 - [ ] A definir
 
 ---
@@ -441,3 +448,4 @@
 | Sprint 8 | 2026-03-11 | Pin messages, share posts, visibilite profil, audit trail admin | main |
 | Sprint 9 | 2026-03-11 | Block user DM, archive conversations, reduced-motion, validation CSV/SEO | main |
 | Sprint 10 | 2026-03-12 | Rate limiting login, drag-drop calendar, infinite scroll notifs, preview landing pages | main |
+| Sprint 11 | 2026-03-12 | Multimedia quiz options, breadcrumb modules, validation booking/pages/notifs | main |

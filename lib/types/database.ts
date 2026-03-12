@@ -93,6 +93,7 @@ export interface QuizOption {
   option_text: string;
   is_correct: boolean;
   order: number;
+  image_url?: string | null;
 }
 
 export interface QuizAttempt {

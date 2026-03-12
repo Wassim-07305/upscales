@@ -15,6 +15,7 @@ import {
   ArrowRight,
   CheckCircle,
   ChevronLeft,
+  ChevronRight,
   Video,
   FileText,
   HelpCircle,
@@ -344,6 +345,21 @@ export function ModuleContent({
           </Link>
 
           <div className="flex-1 min-w-0">
+            {/* Desktop breadcrumb */}
+            <nav className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground mb-1">
+              <Link href="/formations" className="hover:text-foreground transition-colors">
+                Formations
+              </Link>
+              <ChevronRight className="h-3 w-3" />
+              <Link
+                href={`/formations/${formationId}`}
+                className="hover:text-foreground transition-colors truncate max-w-[200px]"
+              >
+                {formationTitle}
+              </Link>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-foreground truncate max-w-[200px]">{module.title}</span>
+            </nav>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold truncate">{module.title}</h1>
               {completed && (

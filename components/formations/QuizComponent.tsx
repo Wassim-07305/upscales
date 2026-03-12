@@ -268,9 +268,19 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
                         >
                           {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                         </div>
-                        <span>{option.option_text}</span>
-                        {showCorrect && <CheckCircle className="h-4 w-4 text-neon ml-auto" />}
-                        {showWrong && <XCircle className="h-4 w-4 text-destructive ml-auto" />}
+                        <div className="flex-1 min-w-0">
+                          {option.image_url && (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={option.image_url}
+                              alt={option.option_text}
+                              className="max-h-32 rounded-lg mb-1 object-contain"
+                            />
+                          )}
+                          <span>{option.option_text}</span>
+                        </div>
+                        {showCorrect && <CheckCircle className="h-4 w-4 text-neon ml-auto flex-shrink-0" />}
+                        {showWrong && <XCircle className="h-4 w-4 text-destructive ml-auto flex-shrink-0" />}
                       </button>
                     );
                   })}

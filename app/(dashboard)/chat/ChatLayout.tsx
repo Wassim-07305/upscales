@@ -26,6 +26,9 @@ import {
   FileIcon,
   Smile,
   Pin,
+  Ban,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import {
   Dialog,
@@ -73,6 +76,9 @@ export function ChatLayout({
   const [uploading, setUploading] = useState(false);
   const [reactions, setReactions] = useState<Record<string, { emoji: string; user_id: string }[]>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+  const [archivedChannelIds, setArchivedChannelIds] = useState<string[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +86,70 @@ export function ChatLayout({
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Fetch blocked users and archived channels
+  useEffect(() => {
+    const fetchBlocksAndArchives = async () => {
+      const [{ data: blocks }, { data: archives }] = await Promise.all([
+        supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id),
+        supabase.from("channel_archives").select("channel_id").eq("user_id", user.id),
+      ]);
+      if (blocks) setBlockedUserIds(blocks.map((b) => b.blocked_id));
+      if (archives) setArchivedChannelIds(archives.map((a) => a.channel_id));
+    };
+    fetchBlocksAndArchives();
+  }, [user.id]);
+
+  const handleBlockUser = async (targetUserId: string) => {
+    if (blockedUserIds.includes(targetUserId)) {
+      await supabase
+        .from("blocked_users")
+        .delete()
+        .eq("blocker_id", user.id)
+        .eq("blocked_id", targetUserId);
+      setBlockedUserIds((prev) => prev.filter((id) => id !== targetUserId));
+      toast.success("Utilisateur débloqué");
+    } else {
+      await supabase.from("blocked_users").insert({
+        blocker_id: user.id,
+        blocked_id: targetUserId,
+      });
+      setBlockedUserIds((prev) => [...prev, targetUserId]);
+      toast.success("Utilisateur bloqué");
+    }
+  };
+
+  const handleToggleArchive = async (channelId: string) => {
+    if (archivedChannelIds.includes(channelId)) {
+      await supabase
+        .from("channel_archives")
+        .delete()
+        .eq("channel_id", channelId)
+        .eq("user_id", user.id);
+      setArchivedChannelIds((prev) => prev.filter((id) => id !== channelId));
+      toast.success("Conversation désarchivée");
+    } else {
+      await supabase.from("channel_archives").insert({
+        channel_id: channelId,
+        user_id: user.id,
+      });
+      setArchivedChannelIds((prev) => [...prev, channelId]);
+      if (activeChannel?.id === channelId) {
+        setActiveChannel(null);
+        setShowChannelList(true);
+      }
+      toast.success("Conversation archivée");
+    }
+  };
+
+  // Get the other user in a DM channel
+  const getDmOtherUserId = (channel: Channel): string | null => {
+    if (channel.type !== "dm") return null;
+    const parts = channel.name.split(" & ");
+    const otherName = parts.find((p) => p !== user.full_name) || parts[1];
+    const otherUser = allUsers.find((u) => u.full_name === otherName);
+    return otherUser?.id || null;
   };
 
   // Fetch messages when channel changes
@@ -512,24 +582,78 @@ export function ChatLayout({
               <p className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase">
                 Messages privés
               </p>
-              {dmChannels.map((ch) => (
-                <button
-                  key={ch.id}
-                  onClick={() => {
-                    setActiveChannel(ch);
-                    setShowChannelList(false);
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-sm transition-colors",
-                    activeChannel?.id === ch.id
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  <span className="truncate">{ch.name}</span>
-                </button>
+              {dmChannels
+                .filter((ch) => !archivedChannelIds.includes(ch.id))
+                .map((ch) => (
+                <div key={ch.id} className="group/dm flex items-center">
+                  <button
+                    onClick={() => {
+                      setActiveChannel(ch);
+                      setShowChannelList(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 flex-1 px-2 py-1.5 rounded-lg text-sm transition-colors",
+                      activeChannel?.id === ch.id
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    <span className="truncate">{ch.name}</span>
+                  </button>
+                  <button
+                    onClick={() => handleToggleArchive(ch.id)}
+                    className="hidden group-hover/dm:block p-1 text-muted-foreground hover:text-foreground"
+                    title="Archiver"
+                  >
+                    <Archive className="h-3 w-3" />
+                  </button>
+                </div>
               ))}
+
+              {/* Archived toggle */}
+              {dmChannels.some((ch) => archivedChannelIds.includes(ch.id)) && (
+                <>
+                  <button
+                    onClick={() => setShowArchived(!showArchived)}
+                    className="flex items-center gap-2 w-full px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Archive className="h-3 w-3" />
+                    <span>
+                      {showArchived ? "Masquer archivés" : `Archivés (${dmChannels.filter((ch) => archivedChannelIds.includes(ch.id)).length})`}
+                    </span>
+                  </button>
+                  {showArchived &&
+                    dmChannels
+                      .filter((ch) => archivedChannelIds.includes(ch.id))
+                      .map((ch) => (
+                        <div key={ch.id} className="group/dm flex items-center opacity-60">
+                          <button
+                            onClick={() => {
+                              setActiveChannel(ch);
+                              setShowChannelList(false);
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 flex-1 px-2 py-1.5 rounded-lg text-sm transition-colors",
+                              activeChannel?.id === ch.id
+                                ? "bg-primary/10 text-primary"
+                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                            )}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span className="truncate">{ch.name}</span>
+                          </button>
+                          <button
+                            onClick={() => handleToggleArchive(ch.id)}
+                            className="hidden group-hover/dm:block p-1 text-muted-foreground hover:text-foreground"
+                            title="Désarchiver"
+                          >
+                            <ArchiveRestore className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                </>
+              )}
             </div>
           )}
         </ScrollArea>
@@ -555,7 +679,7 @@ export function ChatLayout({
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <span className="text-lg">{activeChannel.icon || "#"}</span>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm">{activeChannel.name}</p>
                 {activeChannel.description && (
                   <p className="text-xs text-muted-foreground truncate max-w-[300px]">
@@ -563,6 +687,25 @@ export function ChatLayout({
                   </p>
                 )}
               </div>
+              {activeChannel.type === "dm" && (() => {
+                const otherUserId = getDmOtherUserId(activeChannel);
+                if (!otherUserId) return null;
+                const isBlocked = blockedUserIds.includes(otherUserId);
+                return (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleBlockUser(otherUserId)}
+                    className={cn(
+                      "text-xs gap-1.5",
+                      isBlocked ? "text-destructive hover:text-destructive" : "text-muted-foreground"
+                    )}
+                  >
+                    <Ban className="h-3.5 w-3.5" />
+                    {isBlocked ? "Débloquer" : "Bloquer"}
+                  </Button>
+                );
+              })()}
             </div>
 
             {/* Pinned messages bar */}
@@ -836,6 +979,15 @@ export function ChatLayout({
             )}
 
             {/* Input */}
+            {activeChannel.type === "dm" && (() => {
+              const otherUserId = getDmOtherUserId(activeChannel);
+              return otherUserId && blockedUserIds.includes(otherUserId);
+            })() ? (
+              <div className="border-t border-border px-4 py-3 text-center text-sm text-muted-foreground">
+                <Ban className="h-4 w-4 inline mr-1.5" />
+                Vous avez bloqué cet utilisateur
+              </div>
+            ) : (
             <div className="border-t border-border">
               {replyTo && (
                 <div className="px-3 pt-2 flex items-center gap-2 text-xs text-muted-foreground">
@@ -891,6 +1043,7 @@ export function ChatLayout({
                 </Button>
               </div>
             </div>
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">

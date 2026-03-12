@@ -28,14 +28,14 @@
 | 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
-| 10 | Chat & Canaux | 95% | Realtime + edit/delete + reactions + pin messages |
+| 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
 | 11 | Communaute | 90% | Feed + infinite scroll + edition + share posts |
 | 12 | Notifications | 90% | Triggers + suppression + nettoyage + tout lu |
-| 13 | CRM Administrateur | 85% | Fiches + tags + notes CRM OK |
+| 13 | CRM Administrateur | 90% | Fiches + tags + notes CRM + export CSV |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
-| 15 | Landing Pages | 85% | Puck + 11 blocs complets |
+| 15 | Landing Pages | 90% | Puck + 11 blocs + SEO meta/og |
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
-| 17 | Design System | 95% | Dark mode complet |
+| 17 | Design System | 98% | Dark mode complet + reduced-motion |
 
 **Moyenne globale : ~95%**
 
@@ -209,8 +209,8 @@
 | F30.1 | Creation auto DM | ✅ | Au premier message |
 | F30.2 | Liste conversations | ✅ | Avec tri recent |
 | F30.3 | Statut en ligne | 🟡 | Basique |
-| F30.4 | Bloquer utilisateur | ❌ | Non implemente |
-| F30.5 | Archivage conversations | ❌ | Non implemente |
+| F30.4 | Bloquer utilisateur | ✅ | Blocage/deblocage DM + blocage envoi messages |
+| F30.5 | Archivage conversations | ✅ | Archive/desarchive DM + section archivee pliable |
 
 ### 11. COMMUNAUTE
 
@@ -261,7 +261,7 @@
 | F37.1 | Recherche nom/email | ✅ | Temps reel |
 | F37.2 | Filtres role/tags/statut | ✅ | Multi-filtres |
 | F37.3 | Tri par colonne | 🟡 | Basique |
-| F37.4 | Export CSV | ❌ | Non implemente |
+| F37.4 | Export CSV | ✅ | UTF-8 BOM + colonnes FR dans CRMClient |
 | F37.5 | Actions rapides | 🟡 | Voir detail OK, modifier role manquant en liste |
 | F38 | Fiches etudiants | ✅ | Page /admin/crm/[userId] |
 | F38.1 | Profil complet | ✅ | Email, tel, bio, dates |
@@ -310,7 +310,7 @@
 | F44.1 | URL publique slug | ✅ | /p/[slug] |
 | F44.2 | Editeur drag-and-drop | ✅ | Puck integre |
 | F44.3 | Blocs disponibles | ✅ | Hero, Features, CTA, Pricing, FAQ, Testimonials, TextImage, Video, RichText, Email, Spacer |
-| F44.4 | SEO meta/og:image | ❌ | Non implemente |
+| F44.4 | SEO meta/og:image | ✅ | generateMetadata() dans /p/[slug] avec title, description, OpenGraph |
 | F44.5 | Preview avant publication | ❌ | Non implemente |
 | F44.6 | Historique versions | ❌ | Non implemente |
 | F45 | URLs et gestion pages | ✅ | Slug unique |
@@ -350,7 +350,7 @@
 | F49.3 | Animations Framer | ✅ | Transitions, fade-up, float |
 | F49.4 | Glass effects | ✅ | Backdrop blur, gradients |
 | F49.5 | Responsive mobile | ✅ | Mobile-first, hamburger menu |
-| F49.6 | Respect reduce-motion | ❌ | Non implemente |
+| F49.6 | Respect reduce-motion | ✅ | @media prefers-reduced-motion dans globals.css |
 | F49.7 | Typographie | ✅ | Outfit, Syne, Geist Mono |
 
 ---
@@ -408,12 +408,15 @@
 - [x] F3.6 : Audit trail admin (table + page + helper)
 - [x] F14.4 : Sauvegarde position video (deja implemente)
 
-### Sprint 9 (a planifier)
-- [ ] F30.4 : Bloquer utilisateur (DM)
-- [ ] F30.5 : Archivage conversations
-- [ ] F37.4 : Export CSV CRM
-- [ ] F44.4 : SEO meta/og:image landing pages
-- [ ] F49.6 : Respect prefers-reduced-motion
+### Sprint 9 (complete)
+- [x] F30.4 : Bloquer utilisateur (DM) — blocage/deblocage + blocage envoi
+- [x] F30.5 : Archivage conversations — archive/desarchive + section pliable
+- [x] F37.4 : Export CSV CRM (deja implemente)
+- [x] F44.4 : SEO meta/og:image landing pages (deja implemente)
+- [x] F49.6 : Respect prefers-reduced-motion — @media query dans globals.css
+
+### Sprint 10 (a planifier)
+- [ ] A definir
 
 ---
 
@@ -429,3 +432,4 @@
 | Sprint 6 | 2026-03-11 | Shuffle quiz, vue liste formations, validation UI IA/CRM/streaming | main |
 | Sprint 7 | 2026-03-11 | Tri formations, PiP video, validation blocs landing/notifs/posts | main |
 | Sprint 8 | 2026-03-11 | Pin messages, share posts, visibilite profil, audit trail admin | main |
+| Sprint 9 | 2026-03-11 | Block user DM, archive conversations, reduced-motion, validation CSV/SEO | main |

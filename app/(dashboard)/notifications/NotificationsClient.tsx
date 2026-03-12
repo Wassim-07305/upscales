@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
-import { CheckCheck, Trash2, Bell, BellOff } from "lucide-react";
+import { CheckCheck, Trash2, Bell, BellOff, Loader2 } from "lucide-react";
 import { Notification, NotificationType } from "@/lib/types/database";
 import { toast } from "sonner";
 
@@ -25,11 +25,51 @@ const TYPE_LABELS: Record<NotificationType, string> = {
 
 type FilterMode = "all" | "unread" | "read";
 
+const PAGE_SIZE = 30;
+
 export function NotificationsClient({ initialNotifications }: NotificationsClientProps) {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [typeFilter, setTypeFilter] = useState<NotificationType | "all">("all");
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(initialNotifications.length >= 100);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLoadingMore(false); return; }
+
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .range(notifications.length, notifications.length + PAGE_SIZE - 1);
+
+    if (data && data.length > 0) {
+      setNotifications((prev) => [...prev, ...data]);
+      if (data.length < PAGE_SIZE) setHasMore(false);
+    } else {
+      setHasMore(false);
+    }
+    setLoadingMore(false);
+  }, [notifications.length, loadingMore, hasMore]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
@@ -168,16 +208,23 @@ export function NotificationsClient({ initialNotifications }: NotificationsClien
                 : "Aucune notification correspondant aux filtres"}
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {filtered.map((notif) => (
-                <NotificationItem
-                  key={notif.id}
-                  notification={notif}
-                  onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
-                />
-              ))}
-            </div>
+            <>
+              <div className="divide-y divide-border">
+                {filtered.map((notif) => (
+                  <NotificationItem
+                    key={notif.id}
+                    notification={notif}
+                    onMarkAsRead={markAsRead}
+                    onDelete={deleteNotification}
+                  />
+                ))}
+              </div>
+              {hasMore && (
+                <div ref={loadMoreRef} className="flex justify-center py-4">
+                  {loadingMore && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

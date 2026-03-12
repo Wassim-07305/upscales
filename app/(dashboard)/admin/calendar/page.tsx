@@ -21,13 +21,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays, Download, ClipboardCheck } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Clock, MapPin, Loader2, CalendarDays, Download, ClipboardCheck, GripVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Session, SessionStatus } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDateTime, formatTime } from "@/lib/utils/dates";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function AdminCalendarPage() {
   const [sessions, setSessions] = useState<(Session & { participants_count?: number })[]>([]);
@@ -237,6 +254,48 @@ export default function AdminCalendarPage() {
     toast.success("Tous marqués comme présents");
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sessions.findIndex((s) => s.id === active.id);
+    const newIndex = sessions.findIndex((s) => s.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // Swap start times between the two sessions
+    const draggedSession = sessions[oldIndex];
+    const targetSession = sessions[newIndex];
+
+    const newStart = targetSession.start_time;
+    const newEnd = targetSession.end_time;
+
+    // Update dragged session with target's datetime
+    await supabase
+      .from("sessions")
+      .update({ start_time: newStart, end_time: newEnd })
+      .eq("id", draggedSession.id);
+
+    // Update target with dragged session's datetime
+    await supabase
+      .from("sessions")
+      .update({ start_time: draggedSession.start_time, end_time: draggedSession.end_time })
+      .eq("id", targetSession.id);
+
+    setSessions((prev) => {
+      const updated = [...prev];
+      updated[oldIndex] = { ...draggedSession, start_time: newStart, end_time: newEnd };
+      updated[newIndex] = { ...targetSession, start_time: draggedSession.start_time, end_time: draggedSession.end_time };
+      return updated;
+    });
+
+    toast.success("Créneaux échangés");
+  };
+
   const statusColors: Record<SessionStatus, string> = {
     scheduled: "bg-turquoise/20 text-turquoise",
     completed: "bg-neon/20 text-neon",
@@ -263,9 +322,11 @@ export default function AdminCalendarPage() {
           <p className="text-sm mt-1">Créez votre première session pour commencer.</p>
         </div>
       ) : (
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={sessions.map((s) => s.id)} strategy={verticalListSortingStrategy}>
       <div className="grid gap-3">
         {sessions.map((s) => (
-          <Card key={s.id}>
+          <SortableSessionCard key={s.id} id={s.id}>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
@@ -336,9 +397,11 @@ export default function AdminCalendarPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </SortableSessionCard>
         ))}
       </div>
+        </SortableContext>
+      </DndContext>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -441,5 +504,40 @@ export default function AdminCalendarPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SortableSessionCard({ id, children }: { id: string; children: React.ReactNode }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style} className={isDragging ? "z-50 shadow-lg" : ""}>
+      <div className="flex">
+        <button
+          {...attributes}
+          {...listeners}
+          className="flex items-center px-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+          title="Glisser pour échanger les créneaux"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <div className="flex-1">
+          {children}
+        </div>
+      </div>
+    </Card>
   );
 }

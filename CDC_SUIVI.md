@@ -22,18 +22,18 @@
 | 1 | Introduction & Vision | - | Architecture OK |
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 90% | 4 roles, RLS, audit trail |
-| 4 | Authentification & Profils | 95% | OAuth 4 providers, visibilite profil |
+| 4 | Authentification & Profils | 98% | OAuth 4 providers, visibilite profil, rate limiting |
 | 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
 | 6 | Modules & Contenu | 95% | Video + Tiptap + PiP + resume OK |
 | 7 | Quiz & Evaluations | 75% | 3 types, historique, shuffle OK |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
-| 9 | Calendrier & Sessions | 85% | Vues mois/semaine/jour + filtres |
+| 9 | Calendrier & Sessions | 90% | Vues mois/semaine/jour + filtres + drag-and-drop |
 | 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
 | 11 | Communaute | 90% | Feed + infinite scroll + edition + share posts |
-| 12 | Notifications | 90% | Triggers + suppression + nettoyage + tout lu |
+| 12 | Notifications | 95% | Triggers + suppression + nettoyage + tout lu + infinite scroll |
 | 13 | CRM Administrateur | 90% | Fiches + tags + notes CRM + export CSV |
 | 14 | Booking & Reservations | 85% | Systeme fonctionnel |
-| 15 | Landing Pages | 90% | Puck + 11 blocs + SEO meta/og |
+| 15 | Landing Pages | 95% | Puck + 11 blocs + SEO meta/og + preview admin |
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 98% | Dark mode complet + reduced-motion |
 
@@ -61,7 +61,7 @@
 | F5 | Connexion OAuth2 | ✅ | Google, GitHub, Facebook, Discord |
 | F5.1 | Supabase Auth | ✅ | Middleware + cookies httpOnly |
 | F5.2 | Session refresh auto | ✅ | Middleware middleware.ts |
-| F5.3 | Rate limiting login | ❌ | Non implemente |
+| F5.3 | Rate limiting login | ✅ | 5 tentatives max, verrouillage 60s avec countdown |
 | F6 | Inscription + onboarding | ✅ | 5 etapes avec Framer Motion |
 | F6.1 | Creation profil auto | ✅ | Trigger PostgreSQL |
 | F6.2 | Role par defaut prospect | ✅ | Defini dans le trigger |
@@ -175,7 +175,7 @@
 | F25.4 | Multi-couleur sessions | ✅ | Couleur par session |
 | F25.5 | Places restantes | ✅ | Affiche dans les cards |
 | F25.6 | Navigation mois | ✅ | Prev/next + bouton Aujourd'hui |
-| F25.7 | Drag-and-drop admin | ❌ | Non implemente |
+| F25.7 | Drag-and-drop admin | ✅ | @dnd-kit sortable avec echange creneaux |
 | F26 | Sessions live | ✅ | Creation, inscription, details |
 | F26.1 | Lieu physique/visio | ✅ | Support Zoom/Meet |
 | F26.2 | Limitation participants | ✅ | max_participants |
@@ -244,13 +244,13 @@
 | F34.3 | Marquage lu/non-lu | ✅ | Toggle par notification |
 | F34.4 | Suppression individuelle | ✅ | Bouton X au hover |
 | F34.5 | Nettoyage en masse | ✅ | Bouton Nettoyer (supprime les lues) |
-| F34.6 | Pagination/scroll infini | ❌ | Limite a 100 |
+| F34.6 | Pagination/scroll infini | ✅ | IntersectionObserver + chargement par 30 |
 | F35 | Types multiples | ✅ | enrollment, completion, message, community, system |
 | F35.1 | Icone par type | 🟡 | Types existent, icones basiques |
 | F35.2 | Lien navigation direct | 🟡 | Pas toujours vers la ressource |
 | F36 | Marquage lu | ✅ | Toggle lu/non-lu |
 | F36.1 | Marquer tout comme lu | ✅ | Bouton "Tout lu" dans panel + page notifications |
-| F36.2 | Badge header non-lues | ❌ | Pas de badge temps reel dans nav |
+| F36.2 | Badge header non-lues | ✅ | Badge compteur temps reel dans header (99+ max) |
 | F36.3 | Surlignage non-lues | 🟡 | Style different mais subtil |
 
 ### 13. CRM ADMINISTRATEUR
@@ -311,7 +311,7 @@
 | F44.2 | Editeur drag-and-drop | ✅ | Puck integre |
 | F44.3 | Blocs disponibles | ✅ | Hero, Features, CTA, Pricing, FAQ, Testimonials, TextImage, Video, RichText, Email, Spacer |
 | F44.4 | SEO meta/og:image | ✅ | generateMetadata() dans /p/[slug] avec title, description, OpenGraph |
-| F44.5 | Preview avant publication | ❌ | Non implemente |
+| F44.5 | Preview avant publication | ✅ | ?preview=true pour admin, bandeau jaune mode preview |
 | F44.6 | Historique versions | ❌ | Non implemente |
 | F45 | URLs et gestion pages | ✅ | Slug unique |
 | F45.1 | Activation/desactivation | 🟡 | Publish OK, pas de toggle actif/inactif |
@@ -415,7 +415,14 @@
 - [x] F44.4 : SEO meta/og:image landing pages (deja implemente)
 - [x] F49.6 : Respect prefers-reduced-motion — @media query dans globals.css
 
-### Sprint 10 (a planifier)
+### Sprint 10 (complete)
+- [x] F5.3 : Rate limiting login — 5 tentatives max, verrouillage 60s
+- [x] F25.7 : Drag-and-drop calendrier admin — @dnd-kit echange creneaux
+- [x] F34.6 : Infinite scroll notifications — IntersectionObserver + pages de 30
+- [x] F44.5 : Preview landing pages — mode preview admin avec bandeau jaune
+- [x] F36.2 : Badge notifications header (deja implemente)
+
+### Sprint 11 (a planifier)
 - [ ] A definir
 
 ---
@@ -433,3 +440,4 @@
 | Sprint 7 | 2026-03-11 | Tri formations, PiP video, validation blocs landing/notifs/posts | main |
 | Sprint 8 | 2026-03-11 | Pin messages, share posts, visibilite profil, audit trail admin | main |
 | Sprint 9 | 2026-03-11 | Block user DM, archive conversations, reduced-motion, validation CSV/SEO | main |
+| Sprint 10 | 2026-03-12 | Rate limiting login, drag-drop calendar, infinite scroll notifs, preview landing pages | main |

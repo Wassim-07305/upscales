@@ -275,12 +275,10 @@ export function PagesAdminClient({ pages: initialPages }: PagesAdminClientProps)
                             <><Eye className="h-4 w-4 mr-2" />Publier</>
                           )}
                         </DropdownMenuItem>
-                        {page.is_active && (
-                          <DropdownMenuItem onClick={() => window.open(`/p/${page.slug}`, "_blank")}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Voir la page
-                          </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem onClick={() => window.open(`/p/${page.slug}?preview=true`, "_blank")}>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          {page.is_active ? "Voir la page" : "Prévisualiser"}
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => copyUrl(page.slug)}>
                           <Copy className="h-4 w-4 mr-2" />
                           Copier l&apos;URL

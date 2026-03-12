@@ -10,6 +10,12 @@ import { CheckCircle, XCircle, Loader2, History, Lightbulb } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { Quiz, QuizQuestion, QuizOption, QuizAttempt } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
+import { z } from "zod";
+
+const quizAnswersSchema = z.record(
+  z.string().uuid("ID de question invalide"),
+  z.string().min(1, "Réponse vide")
+);
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -128,13 +134,16 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
 
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await supabase.from("quiz_attempts").insert({
-        quiz_id: quiz.id,
-        user_id: user.id,
-        score: calcScore,
-        passed: hasPassed,
-        answers,
-      });
+      const parsed = quizAnswersSchema.safeParse(answers);
+      if (parsed.success) {
+        await supabase.from("quiz_attempts").insert({
+          quiz_id: quiz.id,
+          user_id: user.id,
+          score: calcScore,
+          passed: hasPassed,
+          answers: parsed.data,
+        });
+      }
     }
 
     onComplete?.(hasPassed);

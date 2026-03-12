@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PostCard } from "./PostCard";
 import { Post, Profile, UserRole } from "@/lib/types/database";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
@@ -93,6 +94,16 @@ export function PostFeed({
     return () => observer.disconnect();
   }, [loadMore, hasMore, loading]);
 
+  const handleDelete = useCallback(async (postId: string) => {
+    const { error } = await supabase.from("posts").delete().eq("id", postId);
+    if (error) {
+      toast.error("Erreur", { description: error.message });
+      return;
+    }
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    toast.success("Post supprimé");
+  }, []);
+
   const pinnedPosts = posts.filter((p) => p.is_pinned);
   const regularPosts = posts.filter((p) => !p.is_pinned);
 
@@ -105,6 +116,7 @@ export function PostFeed({
             post={post}
             currentUserId={currentUserId}
             currentUserRole={currentUserRole}
+            onDelete={handleDelete}
           />
         ))}
         {regularPosts.map((post) => (
@@ -113,6 +125,7 @@ export function PostFeed({
             post={post}
             currentUserId={currentUserId}
             currentUserRole={currentUserRole}
+            onDelete={handleDelete}
           />
         ))}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle, ShieldAlert } from "lucide-react";
+
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_DURATION = 120_000; // 2 minutes
 
 const schema = z.object({
   email: z.string().email("Email invalide"),
@@ -22,7 +25,27 @@ type ForgotPasswordForm = z.infer<typeof schema>;
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [lockCountdown, setLockCountdown] = useState(0);
   const supabase = createClient();
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+      setLockCountdown(remaining);
+      if (remaining <= 0) {
+        setLockedUntil(null);
+        setAttempts(0);
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [lockedUntil]);
 
   const {
     register,
@@ -33,7 +56,21 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: ForgotPasswordForm) => {
+    if (isLocked) return;
+
     setLoading(true);
+    const newAttempts = attempts + 1;
+    setAttempts(newAttempts);
+
+    if (newAttempts >= MAX_ATTEMPTS) {
+      setLockedUntil(Date.now() + LOCKOUT_DURATION);
+      toast.error("Trop de tentatives", {
+        description: `Veuillez patienter 2 minutes avant de réessayer.`,
+      });
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${window.location.origin}/login`,
     });
@@ -45,6 +82,7 @@ export default function ForgotPasswordPage() {
     }
 
     setSent(true);
+    setAttempts(0);
     setLoading(false);
   };
 
@@ -80,6 +118,14 @@ export default function ForgotPasswordPage() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                {isLocked && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-sm">
+                    <ShieldAlert className="h-4 w-4 text-destructive flex-shrink-0" />
+                    <span className="text-destructive">
+                      Trop de tentatives. Réessayez dans {lockCountdown}s
+                    </span>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -95,9 +141,9 @@ export default function ForgotPasswordPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-4">
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || isLocked}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Envoyer le lien
+                  {isLocked ? `Patientez ${lockCountdown}s` : "Envoyer le lien"}
                 </Button>
                 <Link href="/login" className="text-sm text-primary hover:underline">
                   <ArrowLeft className="inline mr-1 h-3 w-3" />

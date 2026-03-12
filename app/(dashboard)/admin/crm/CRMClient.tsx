@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, ExternalLink, Download, ChevronDown, UserCog, TagIcon, X, BookOpen } from "lucide-react";
+import { Search, ExternalLink, Download, ChevronDown, UserCog, TagIcon, X, BookOpen, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Profile, Tag, UserRole } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate, timeAgo } from "@/lib/utils/dates";
@@ -49,13 +49,34 @@ interface CRMClientProps {
   currentUserRole: UserRole;
 }
 
+type SortKey = "name" | "role" | "enrollments" | "last_seen" | "created_at";
+type SortDir = "asc" | "desc";
+
 export function CRMClient({ initialStudents, allTags, allFormations, currentUserRole }: CRMClientProps) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const router = useRouter();
   const supabase = createClient();
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="inline ml-1 h-3 w-3 opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="inline ml-1 h-3 w-3 text-primary" />
+      : <ArrowDown className="inline ml-1 h-3 w-3 text-primary" />;
+  };
 
   const filtered = useMemo(() => {
     let result = initialStudents;
@@ -75,8 +96,26 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
       result = result.filter((r) => r.tags.some((t) => t.id === tagFilter));
     }
 
+    const dir = sortDir === "asc" ? 1 : -1;
+    result = [...result].sort((a, b) => {
+      switch (sortKey) {
+        case "name":
+          return dir * (a.full_name || "").localeCompare(b.full_name || "", "fr");
+        case "role":
+          return dir * a.role.localeCompare(b.role, "fr");
+        case "enrollments":
+          return dir * (a.enrollments_count - b.enrollments_count);
+        case "last_seen":
+          return dir * ((a.last_seen_at || "").localeCompare(b.last_seen_at || ""));
+        case "created_at":
+          return dir * a.created_at.localeCompare(b.created_at);
+        default:
+          return 0;
+      }
+    });
+
     return result;
-  }, [initialStudents, search, roleFilter, tagFilter]);
+  }, [initialStudents, search, roleFilter, tagFilter, sortKey, sortDir]);
 
   const allSelected = filtered.length > 0 && filtered.every((s) => selected.has(s.id));
 
@@ -345,12 +384,22 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
                       onCheckedChange={toggleAll}
                     />
                   </th>
-                  <th className="text-left p-3 text-xs font-medium text-muted-foreground">Utilisateur</th>
-                  <th className="text-left p-3 text-xs font-medium text-muted-foreground">Rôle</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("name")}>
+                    Utilisateur <SortIcon col="name" />
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("role")}>
+                    Rôle <SortIcon col="role" />
+                  </th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Tags</th>
-                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Formations</th>
-                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Dernière activité</th>
-                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Inscription</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("enrollments")}>
+                    Formations <SortIcon col="enrollments" />
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("last_seen")}>
+                    Dernière activité <SortIcon col="last_seen" />
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("created_at")}>
+                    Inscription <SortIcon col="created_at" />
+                  </th>
                   <th className="p-3"></th>
                 </tr>
               </thead>

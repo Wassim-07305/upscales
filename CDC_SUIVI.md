@@ -1,6 +1,6 @@
 # Suivi du Cahier des Charges - Upscale LMS
 
-> Derniere mise a jour : 2026-03-11
+> Derniere mise a jour : 2026-03-12
 > Version CDC : 1.0 | Mars 2026
 
 ---
@@ -22,22 +22,22 @@
 | 1 | Introduction & Vision | - | Architecture OK |
 | 2 | Architecture & Technologie | 95% | Stack conforme |
 | 3 | Roles & Securite | 90% | 4 roles, RLS, audit trail |
-| 4 | Authentification & Profils | 98% | OAuth 4 providers, visibilite profil, rate limiting |
+| 4 | Authentification & Profils | 100% | OAuth 4 providers, visibilite profil, rate limiting login+reset |
 | 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
 | 6 | Modules & Contenu | 98% | Video + Tiptap + PiP + resume + breadcrumb OK |
-| 7 | Quiz & Evaluations | 80% | 3 types, historique, shuffle, multimedia options |
+| 7 | Quiz & Evaluations | 85% | 3 types, historique, shuffle, multimedia, validation Zod |
 | 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
 | 9 | Calendrier & Sessions | 90% | Vues mois/semaine/jour + filtres + drag-and-drop |
 | 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
-| 11 | Communaute | 90% | Feed + infinite scroll + edition + share posts |
-| 12 | Notifications | 95% | Triggers + suppression + nettoyage + tout lu + infinite scroll |
-| 13 | CRM Administrateur | 90% | Fiches + tags + notes CRM + export CSV |
+| 11 | Communaute | 95% | Feed + infinite scroll + edition + share + suppression posts |
+| 12 | Notifications | 98% | Triggers + suppression + nettoyage + tout lu + infinite scroll + liens directs |
+| 13 | CRM Administrateur | 95% | Fiches + tags + notes CRM + export CSV + tri colonnes |
 | 14 | Booking & Reservations | 90% | Systeme fonctionnel + exceptions jours fermes |
 | 15 | Landing Pages | 95% | Puck + 11 blocs + SEO meta/og + preview admin |
 | 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
 | 17 | Design System | 98% | Dark mode complet + reduced-motion |
 
-**Moyenne globale : ~95%**
+**Moyenne globale : ~96%**
 
 ---
 
@@ -68,7 +68,7 @@
 | F6.3 | Captcha | ❌ | Non implemente |
 | F7 | Recuperation mot de passe | ✅ | Page forgot-password fonctionnelle |
 | F7.1 | Token 24h expiration | ✅ | Gere par Supabase Auth |
-| F7.2 | Rate limiting reset | ❌ | Non implemente |
+| F7.2 | Rate limiting reset | ✅ | 3 tentatives max, verrouillage 120s avec countdown |
 | F8 | Profil personnalisable | ✅ | Photo, bio, telephone, preferences |
 | F8.1 | Upload photo profil | ✅ | Compression + Supabase Storage |
 | F8.2 | Visibilite profil | ✅ | Toggle public/prive avec Switch dans ProfileForm |
@@ -135,7 +135,7 @@
 | F19 | Types questions | ✅ | multiple_choice, true_false, free_response |
 | F19.1 | Options aleatoires | ✅ | Fisher-Yates shuffle questions + options, re-shuffle au retry |
 | F19.2 | Support multimedia options | ✅ | image_url sur quiz_options + affichage dans QuizComponent |
-| F19.3 | Validation Zod reponses | ❌ | Validation client seulement |
+| F19.3 | Validation Zod reponses | ✅ | Schema Zod valide answers avant insert DB |
 | F20 | Notation automatique | ✅ | Score % + pass/fail |
 | F20.1 | Score de passage 70% | ✅ | Configurable par quiz |
 | F20.2 | Notation manuelle libre | 🟡 | Reponses libres = toujours correct |
@@ -228,7 +228,7 @@
 | F32.1 | Upload image/video | ✅ | CreatePost avec media |
 | F32.2 | Commentaires imbriques | ✅ | CommentSection |
 | F32.3 | Like/unlike posts+comments | ✅ | Avec compteur optimiste |
-| F32.4 | Suppression par auteur/modo | 🟡 | Moderation admin OK, pas cote user |
+| F32.4 | Suppression par auteur/modo | ✅ | Auteur + moderateur peuvent supprimer via PostCard menu |
 | F32.5 | Edition post par auteur | ✅ | Mode edition dans PostCard |
 | F33 | Detail post | ✅ | Page /community/[postId] |
 | F33.1 | Commentaires + reponses | ✅ | Thread complet |
@@ -247,7 +247,7 @@
 | F34.6 | Pagination/scroll infini | ✅ | IntersectionObserver + chargement par 30 |
 | F35 | Types multiples | ✅ | enrollment, completion, message, community, system |
 | F35.1 | Icone par type | ✅ | 6 icones distinctes + couleurs par type dans NotificationItem |
-| F35.2 | Lien navigation direct | 🟡 | Pas toujours vers la ressource |
+| F35.2 | Lien navigation direct | ✅ | Link vers ressource via notification.link |
 | F36 | Marquage lu | ✅ | Toggle lu/non-lu |
 | F36.1 | Marquer tout comme lu | ✅ | Bouton "Tout lu" dans panel + page notifications |
 | F36.2 | Badge header non-lues | ✅ | Badge compteur temps reel dans header (99+ max) |
@@ -260,7 +260,7 @@
 | F37 | Liste etudiants | ✅ | Table avec colonnes completes |
 | F37.1 | Recherche nom/email | ✅ | Temps reel |
 | F37.2 | Filtres role/tags/statut | ✅ | Multi-filtres |
-| F37.3 | Tri par colonne | 🟡 | Basique |
+| F37.3 | Tri par colonne | ✅ | Nom, role, formations, activite, inscription — asc/desc |
 | F37.4 | Export CSV | ✅ | UTF-8 BOM + colonnes FR dans CRMClient |
 | F37.5 | Actions rapides | 🟡 | Voir detail OK, modifier role manquant en liste |
 | F38 | Fiches etudiants | ✅ | Page /admin/crm/[userId] |
@@ -429,7 +429,14 @@
 - [x] F45.1 : Toggle actif/inactif landing pages (deja implemente)
 - [x] F35.1 : Icones par type notification (deja implemente)
 
-### Sprint 12 (a planifier)
+### Sprint 12 (complete)
+- [x] F7.2 : Rate limiting reset password — 3 tentatives max, verrouillage 120s
+- [x] F19.3 : Validation Zod reponses quiz — schema valide answers avant insert
+- [x] F32.4 : Suppression post cote user — onDelete handler dans PostFeed
+- [x] F35.2 : Lien navigation direct notifications (deja implemente)
+- [x] F37.3 : Tri par colonne CRM — nom, role, formations, activite, inscription asc/desc
+
+### Sprint 13 (a planifier)
 - [ ] A definir
 
 ---
@@ -449,3 +456,4 @@
 | Sprint 9 | 2026-03-11 | Block user DM, archive conversations, reduced-motion, validation CSV/SEO | main |
 | Sprint 10 | 2026-03-12 | Rate limiting login, drag-drop calendar, infinite scroll notifs, preview landing pages | main |
 | Sprint 11 | 2026-03-12 | Multimedia quiz options, breadcrumb modules, validation booking/pages/notifs | main |
+| Sprint 12 | 2026-03-12 | Rate limiting reset, validation Zod quiz, suppression posts, tri CRM colonnes | main |

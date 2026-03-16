@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-04-30.basil",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getWebhookSecret() {
+  return process.env.STRIPE_WEBHOOK_SECRET!;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -22,7 +26,8 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    const stripe = getStripe();
+    event = stripe.webhooks.constructEvent(body, signature, getWebhookSecret());
   } catch (err) {
     const message = err instanceof Error ? err.message : "Signature invalide";
     console.error("[Stripe Webhook] Verification failed:", message);

@@ -53,7 +53,7 @@ export const createBookingSchema = z.object({
   prospect_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(200),
   prospect_email: z.string().email("Adresse email invalide"),
   prospect_phone: z.string().max(20).optional().nullable(),
-  qualification_answers: z.record(z.unknown()).optional().nullable(),
+  qualification_answers: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
 // ============================================
@@ -184,7 +184,7 @@ export const crmNoteSchema = z.object({
 
 export const quizAttemptSchema = z.object({
   quiz_id: z.string().uuid("ID de quiz invalide"),
-  answers: z.record(z.unknown()),
+  answers: z.record(z.string(), z.unknown()),
 });
 
 // ============================================
@@ -197,7 +197,7 @@ export const landingPageSchema = z.object({
   description: z.string().max(1000).optional().nullable(),
   og_image_url: z.string().url().optional().nullable(),
   is_active: z.boolean().default(false),
-  puck_data: z.record(z.unknown()),
+  puck_data: z.record(z.string(), z.unknown()),
 });
 
 // ============================================
@@ -216,7 +216,7 @@ export const bookingPageSchema = z.object({
   min_notice_hours: z.number().int().min(1).max(168).default(24),
   max_days_ahead: z.number().int().min(1).max(90).default(14),
   timezone: z.string().default("Europe/Paris"),
-  qualification_fields: z.array(z.record(z.unknown())).default([]),
+  qualification_fields: z.array(z.record(z.string(), z.unknown())).default([]),
 });
 
 // ============================================

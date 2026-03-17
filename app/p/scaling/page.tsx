@@ -1,6 +1,5 @@
-import { Render, type Data } from "@measured/puck";
-import { puckConfig } from "@/lib/puck/config";
 import type { Metadata } from "next";
+import { ScalingPageClient } from "./client";
 
 export const metadata: Metadata = {
   title: "Programme Scaling 6 Mois — Upscale",
@@ -328,9 +327,5 @@ const puckData: Data = {
 };
 
 export default function ScalingLandingPage() {
-  return (
-    <main className="min-h-screen bg-[#0D0D0D] text-white">
-      <Render config={puckConfig} data={puckData} />
-    </main>
-  );
+  return <ScalingPageClient data={puckData} />;
 }

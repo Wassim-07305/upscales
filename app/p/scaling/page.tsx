@@ -1,23 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { Render, type Data } from "@measured/puck";
+import { puckConfig } from "@/lib/puck/config";
+import type { Metadata } from "next";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+export const metadata: Metadata = {
+  title: "Programme Scaling 6 Mois — Upscale",
+  description:
+    "Passe de freelance solo à une agence de 10+ personnes en 6 mois. Accompagnement personnalisé, paiement au résultat.",
+};
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error(
-    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment variables."
-  );
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
-
-const puckData = {
+const puckData: Data = {
   root: { props: {} },
   content: [
-    // 1. Navbar
     {
       type: "Navbar",
       props: {
@@ -36,8 +29,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 2. Hero Scaling
     {
       type: "HeroScaling",
       props: {
@@ -63,15 +54,12 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 3. Features — Les 6 piliers
     {
       type: "Features",
       props: {
         id: "features-piliers",
         heading: "Pourquoi c'est différent",
-        subtitle:
-          "Les 6 piliers de notre programme de scaling.",
+        subtitle: "Les 6 piliers de notre programme de scaling.",
         columns: "3",
         features: [
           {
@@ -114,8 +102,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 4. How It Works
     {
       type: "HowItWorks",
       props: {
@@ -148,8 +134,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 5. Features — Ce que tu obtiens
     {
       type: "Features",
       props: {
@@ -161,54 +145,61 @@ const puckData = {
           {
             icon: "📞",
             title: "Appel stratégique hebdo",
-            description: "1 appel stratégique par semaine en one-to-one avec ton coach dédié.",
+            description:
+              "1 appel stratégique par semaine en one-to-one avec ton coach dédié.",
           },
           {
             icon: "👥",
             title: "Appels de groupe",
-            description: "Appels de groupe hebdomadaires avec la communauté pour partager et progresser.",
+            description:
+              "Appels de groupe hebdomadaires avec la communauté pour partager et progresser.",
           },
           {
             icon: "📋",
             title: "Plan d'action quotidien",
-            description: "Un plan d'action personnalisé chaque jour pour avancer concrètement.",
+            description:
+              "Un plan d'action personnalisé chaque jour pour avancer concrètement.",
           },
           {
             icon: "🎬",
             title: "Looms d'audit",
-            description: "Des audits vidéo personnalisés de ton business avec des recommandations concrètes.",
+            description:
+              "Des audits vidéo personnalisés de ton business avec des recommandations concrètes.",
           },
           {
             icon: "🎙️",
             title: "Messagerie vocale illimitée",
-            description: "Accès illimité à la messagerie vocale avec ton coach pour ne jamais rester bloqué.",
+            description:
+              "Accès illimité à la messagerie vocale avec ton coach pour ne jamais rester bloqué.",
           },
           {
             icon: "📊",
             title: "Dashboard & tracking",
-            description: "Tracker de résultats et dashboard data pour suivre ta progression en temps réel.",
+            description:
+              "Tracker de résultats et dashboard data pour suivre ta progression en temps réel.",
           },
           {
             icon: "🏠",
             title: "Communauté privée",
-            description: "Accès à la communauté privée de freelances ambitieux.",
+            description:
+              "Accès à la communauté privée de freelances ambitieux.",
           },
           {
             icon: "📚",
             title: "Formation délégation",
-            description: "Formation complète sur la délégation et le management d'équipe.",
+            description:
+              "Formation complète sur la délégation et le management d'équipe.",
           },
           {
             icon: "🗓️",
             title: "6 mois complets",
-            description: "Un accompagnement intensif sur 6 mois pour des résultats durables.",
+            description:
+              "Un accompagnement intensif sur 6 mois pour des résultats durables.",
           },
         ],
         accentColor: "#C6FF00",
       },
     },
-
-    // 6. Testimonials Enhanced
     {
       type: "TestimonialsEnhanced",
       props: {
@@ -241,8 +232,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 7. Pricing Single
     {
       type: "PricingSingle",
       props: {
@@ -260,8 +249,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 8. FAQ — Anti-objections
     {
       type: "FAQ",
       props: {
@@ -301,8 +288,6 @@ const puckData = {
         ],
       },
     },
-
-    // 9. CTA Banner
     {
       type: "CtaBanner",
       props: {
@@ -316,8 +301,6 @@ const puckData = {
         accentColor: "#C6FF00",
       },
     },
-
-    // 10. Footer
     {
       type: "Footer",
       props: {
@@ -344,33 +327,10 @@ const puckData = {
   ],
 };
 
-async function seed() {
-  console.log("Seeding landing page 'scaling'...");
-
-  const { data, error } = await supabase
-    .from("landing_pages")
-    .upsert(
-      {
-        slug: "scaling",
-        title: "Programme Scaling 6 Mois — Upscale",
-        description:
-          "Passe de freelance solo à une agence de 10+ personnes en 6 mois. Accompagnement personnalisé, paiement au résultat.",
-        is_active: true,
-        puck_data: puckData,
-        published_at: new Date().toISOString(),
-      },
-      { onConflict: "slug" }
-    )
-    .select();
-
-  if (error) {
-    console.error("Error seeding landing page:", error.message);
-    process.exit(1);
-  }
-
-  console.log("Landing page seeded successfully!");
-  console.log("URL: /p/scaling");
-  console.log("Data:", JSON.stringify(data, null, 2));
+export default function ScalingLandingPage() {
+  return (
+    <main className="min-h-screen bg-[#0D0D0D] text-white">
+      <Render config={puckConfig} data={puckData} />
+    </main>
+  );
 }
-
-seed();

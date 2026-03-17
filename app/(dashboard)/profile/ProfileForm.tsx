@@ -74,24 +74,28 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("bucket", "avatars");
+    const ext = file.name.split(".").pop();
+    const filePath = `${profile.id}/avatar.${ext}`;
 
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const json = await res.json();
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
 
-    if (!res.ok) {
-      toast.error("Erreur lors de l'upload", { description: json.error });
+    if (uploadError) {
+      toast.error("Erreur lors de l'upload", { description: uploadError.message });
       return;
     }
 
+    const { data: { publicUrl } } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
     await supabase
       .from("profiles")
-      .update({ avatar_url: json.url })
+      .update({ avatar_url: publicUrl })
       .eq("id", profile.id);
 
-    setAvatarUrl(json.url);
+    setAvatarUrl(publicUrl);
     toast.success("Avatar mis à jour");
     router.refresh();
   };

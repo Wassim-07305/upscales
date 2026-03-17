@@ -359,6 +359,17 @@ body::after {
   50% { transform: translateY(-6px); }
 }
 
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
 .animate-fade-up {
   animation: fade-up 0.5s var(--ease-out-expo) both;
 }
@@ -473,7 +484,8 @@ body::after {
   .animate-fade-up,
   .animate-fade-in,
   .animate-glow-pulse,
-  .animate-float {
+  .animate-float,
+  .animate-gradient-shift {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

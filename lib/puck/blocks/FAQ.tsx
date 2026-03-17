@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ComponentConfig } from "@measured/puck";
+import { useInView, FadeIn } from "../animations";
 
 interface FAQItem {
   question: string;
@@ -15,31 +16,51 @@ interface FAQProps {
 
 function FAQAccordion({ heading, items }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { ref, isInView } = useInView();
 
   return (
-    <section className="px-6 py-20">
+    <section ref={ref} className="px-6 py-20">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">{heading}</h2>
+        <FadeIn isInView={isInView} delay={0}>
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">{heading}</h2>
+        </FadeIn>
         <div className="space-y-3">
           {items.map((item, i) => {
             const isOpen = openIndex === i;
             return (
-              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
+              <div
+                key={i}
+                className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden transition-all duration-700"
+                style={{
+                  opacity: isInView ? 1 : 0,
+                  transform: isInView ? "translateY(0)" : "translateY(16px)",
+                  transitionDelay: `${i * 80}ms`,
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left font-medium hover:bg-white/[0.03] transition-colors"
                 >
                   <span>{item.question}</span>
-                  <span className="text-xl ml-4 flex-shrink-0 transition-transform duration-200" style={{ transform: isOpen ? "rotate(45deg)" : "none" }}>
+                  <span
+                    className="text-xl ml-4 flex-shrink-0 transition-transform duration-300"
+                    style={{ transform: isOpen ? "rotate(45deg)" : "none" }}
+                  >
                     +
                   </span>
                 </button>
-                {isOpen && (
+                <div
+                  className="overflow-hidden transition-all duration-300 ease-in-out"
+                  style={{
+                    maxHeight: isOpen ? "24rem" : "0",
+                    opacity: isOpen ? 1 : 0,
+                  }}
+                >
                   <div className="px-6 pb-5 text-gray-400 leading-relaxed">
                     {item.answer}
                   </div>
-                )}
+                </div>
               </div>
             );
           })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { ImageUploadField } from "../fields/ImageUploadField";
@@ -28,9 +28,23 @@ function NavbarComponent({
   accentColor,
 }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#0D0D0D]/80 backdrop-blur-md">
+    <nav
+      className={`sticky top-0 z-40 w-full transition-all duration-500 ${
+        scrolled
+          ? "border-b border-white/10 bg-[#0D0D0D]/80 backdrop-blur-md"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Brand */}
         <a href="/" className="shrink-0">
@@ -61,10 +75,16 @@ function NavbarComponent({
           {ctaText && (
             <a
               href={ctaUrl}
-              className="rounded-lg px-5 py-2 text-sm font-semibold transition-all hover:scale-105"
+              className="rounded-lg px-5 py-2 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-[0.98]"
               style={{
                 backgroundColor: accentColor,
                 color: "#0D0D0D",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 40px ${accentColor}30`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
               {ctaText}

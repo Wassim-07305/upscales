@@ -1,5 +1,8 @@
+"use client";
+
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
+import { useInView, FadeIn } from "../animations";
 
 interface Step {
   title: string;
@@ -11,6 +14,83 @@ interface HowItWorksProps {
   subtitle: string;
   steps: Step[];
   accentColor: string;
+}
+
+function HowItWorksComponent({ heading, subtitle, steps, accentColor }: HowItWorksProps) {
+  const { ref, isInView } = useInView();
+
+  return (
+    <section ref={ref} className="px-6 py-20">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <FadeIn isInView={isInView} delay={0} className="text-center mb-14">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            {heading}
+          </h2>
+          {subtitle && (
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+              {subtitle}
+            </p>
+          )}
+        </FadeIn>
+
+        {/* Steps */}
+        <div className="relative">
+          {steps.map((step, index) => {
+            const isLast = index === steps.length - 1;
+            const number = String(index + 1).padStart(2, "0");
+
+            return (
+              <div
+                key={index}
+                className="relative flex gap-6 pb-12 last:pb-0 transition-all duration-700"
+                style={{
+                  opacity: isInView ? 1 : 0,
+                  transform: isInView ? "translateY(0)" : "translateY(24px)",
+                  transitionDelay: `${index * 150}ms`,
+                }}
+              >
+                {/* Left column: number + connecting line */}
+                <div className="relative flex flex-col items-center">
+                  <div
+                    className="z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold transition-transform duration-500"
+                    style={{
+                      backgroundColor: accentColor,
+                      color: "#0D0D0D",
+                      transform: isInView ? "scale(1)" : "scale(0)",
+                      transitionDelay: `${index * 150 + 100}ms`,
+                    }}
+                  >
+                    {number}
+                  </div>
+                  {!isLast && (
+                    <div
+                      className="absolute top-12 bottom-0 w-px transition-all duration-1000"
+                      style={{
+                        backgroundColor: `${accentColor}30`,
+                        opacity: isInView ? 1 : 0,
+                        transitionDelay: `${index * 150 + 200}ms`,
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Right column: content */}
+                <div className="pt-2 pb-2">
+                  <h3 className="text-lg font-semibold text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-400">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export const HowItWorks: ComponentConfig<HowItWorksProps> = {
@@ -63,62 +143,5 @@ export const HowItWorks: ComponentConfig<HowItWorksProps> = {
     ],
     accentColor: "#C6FF00",
   },
-  render: ({ heading, subtitle, steps, accentColor }) => (
-    <section className="px-6 py-20">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-            {heading}
-          </h2>
-          {subtitle && (
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-              {subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* Steps */}
-        <div className="relative">
-          {steps.map((step, index) => {
-            const isLast = index === steps.length - 1;
-            const number = String(index + 1).padStart(2, "0");
-
-            return (
-              <div key={index} className="relative flex gap-6 pb-12 last:pb-0">
-                {/* Left column: number + connecting line */}
-                <div className="relative flex flex-col items-center">
-                  <div
-                    className="z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                    style={{
-                      backgroundColor: accentColor,
-                      color: "#0D0D0D",
-                    }}
-                  >
-                    {number}
-                  </div>
-                  {!isLast && (
-                    <div
-                      className="absolute top-12 bottom-0 w-px"
-                      style={{ backgroundColor: `${accentColor}30` }}
-                    />
-                  )}
-                </div>
-
-                {/* Right column: content */}
-                <div className="pt-2 pb-2">
-                  <h3 className="text-lg font-semibold text-white">
-                    {step.title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-gray-400">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  ),
+  render: (props) => <HowItWorksComponent {...props} />,
 };

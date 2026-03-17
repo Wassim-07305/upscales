@@ -5,7 +5,7 @@ import { ScalingPageClient } from "./client";
 export const metadata: Metadata = {
   title: "Programme Scaling 6 Mois — Upscale",
   description:
-    "Passe de freelance solo à une agence de 10+ personnes en 6 mois. Accompagnement personnalisé, paiement au résultat.",
+    "On t'accompagne pour scale ton business en 6 mois, paiement au résultat.",
 };
 
 const puckData: Data = {

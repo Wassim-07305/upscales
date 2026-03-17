@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import {
   Users,
-  GraduationCap,
-  MessageCircle,
   Video,
-  Trophy,
   BarChart3,
   ArrowRight,
   TrendingUp,
@@ -26,6 +23,7 @@ import {
   Target,
   LineChart,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -122,53 +120,53 @@ const ACCENT_LIGHT = "#B8E600";
 const ACCENT_GLOW = "rgba(198, 255, 0, 0.12)";
 
 const navLinks = [
-  { label: "L'accompagnement", href: "#features" },
+  { label: "Le programme", href: "#features" },
   { label: "Comment ça marche", href: "#how-it-works" },
-  { label: "Pourquoi Upscale", href: "#why" },
-  { label: "Témoignages", href: "#testimonials" },
+  { label: "Ce que tu obtiens", href: "#why" },
+  { label: "Résultats", href: "#testimonials" },
 ];
 
 const stats = [
-  { value: 35, suffix: "+", label: "Freelances accompagnés" },
-  { value: 10, suffix: "K", label: "Objectif CA mensuel" },
-  { value: 97, suffix: "%", label: "De satisfaction" },
+  { value: 43, suffix: "+", label: "Freelances dans le programme" },
+  { value: 6, suffix: " mois", label: "D'accompagnement intensif" },
+  { value: 100, suffix: "%", label: "Aligné sur tes résultats" },
 ];
 
 const features = [
   {
-    icon: GraduationCap,
-    title: "Formation complète",
-    desc: "Modules structurés étape par étape : marché, offre, communication, acquisition, conversion. Avance à ton rythme.",
+    icon: Shield,
+    title: "Paiement au résultat",
+    desc: "Tu paies un % sur les revenus additionnels. Si tu ne gagnes pas plus, tu ne paies pas plus. Nos intérêts sont alignés à 100%.",
     gradient: "from-lime-400/20 to-lime-400/5",
   },
   {
     icon: Video,
-    title: "Appels coaching",
-    desc: "Appels vidéo intégrés avec ton coach, transcription automatique et documents générés après chaque session.",
+    title: "Coaching one-to-one",
+    desc: "1 call stratégique par semaine avec ton coach dédié. Il connaît tes chiffres, ton marché, tes blocages. Pas un cours avec 500 personnes.",
     gradient: "from-emerald-500/20 to-emerald-500/5",
   },
   {
-    icon: MessageCircle,
-    title: "Messagerie directe",
-    desc: "Échange avec ton coach et la communauté en temps réel. Canaux dédiés, système urgent et réponses rapides.",
+    icon: Rocket,
+    title: "Plan d'action quotidien",
+    desc: "Chaque matin, tu sais exactement quoi faire. On suit ton exécution et on ajuste en temps réel. Zéro flou.",
     gradient: "from-cyan-500/20 to-cyan-500/5",
   },
   {
-    icon: Users,
-    title: "Communauté",
-    desc: "Rejoins des freelances qui partagent tes objectifs. Wins, entraide, challenges et lives exclusifs chaque semaine.",
+    icon: Compass,
+    title: "Looms personnalisés",
+    desc: "Des audits vidéo de TON business, pas des templates génériques. Ton coach analyse tes assets et te dit quoi corriger.",
     gradient: "from-violet-500/20 to-violet-500/5",
   },
   {
-    icon: Trophy,
-    title: "Gamification",
-    desc: "XP, badges, leaderboard et challenges pour rester motivé. Célèbre tes victoires et progresse avec les autres.",
+    icon: BarChart3,
+    title: "Dashboard data",
+    desc: "Tes KPIs en temps réel : ads, booking, closing. Tu prends des décisions basées sur la data, pas sur l'intuition.",
     gradient: "from-amber-500/20 to-amber-500/5",
   },
   {
-    icon: BarChart3,
-    title: "Suivi de progression",
-    desc: "Dashboard personnel avec tes KPIs, ta roadmap et tes objectifs. Sache toujours où tu en es et ce qu'il te reste à faire.",
+    icon: Users,
+    title: "Communauté & groupe",
+    desc: "Appels de groupe hebdomadaires, messagerie vocale illimitée avec ton coach. Tu n'es jamais seul dans le process.",
     gradient: "from-teal-500/20 to-teal-500/5",
   },
 ];
@@ -177,77 +175,77 @@ const steps = [
   {
     icon: UserPlus,
     number: "01",
-    title: "Rejoins le programme",
-    desc: "Crée ton compte, découvre la plateforme avec un onboarding guidé et fais connaissance avec ton coach.",
+    title: "Appel stratégique",
+    desc: "On analyse ton business, tes chiffres et tes blocages. Si le fit est bon, on définit ensemble tes objectifs pour les 6 prochains mois.",
   },
   {
     icon: Compass,
     number: "02",
-    title: "Suis ta formation",
-    desc: "Avance dans les modules à ton rythme, complète les workbooks et échange avec ton coach à chaque étape.",
+    title: "Plan d'action personnalisé",
+    desc: "Ton coach construit ta roadmap sur mesure. Chaque semaine : un call 1-to-1, un plan d'action clair, des Looms d'audit de ton business.",
   },
   {
     icon: Rocket,
     number: "03",
-    title: "Atteins tes objectifs",
-    desc: "Applique ce que tu apprends, suis ta progression et dépasse les 10K€/mois avec un accompagnement sur mesure.",
+    title: "Tu scales",
+    desc: "Tu exécutes, on mesure. Dashboard KPI en temps réel, ajustements continus. Le paiement au résultat garantit qu'on pousse dans la même direction.",
   },
 ];
 
 const valueProps = [
   {
     icon: Target,
-    title: "Tout au même endroit",
-    desc: "Formation, coaching, messagerie, appels, communauté — tout est réuni dans ton espace Upscale. Plus besoin de jongler entre 10 outils.",
+    title: "1 call stratégique/semaine en 1-to-1",
+    desc: "Ton coach dédié connaît ton business par cœur. Chaque semaine, il t'aide à prioriser, débloquer et accélérer.",
     items: [
-      "Accès à tout depuis un seul endroit",
-      "Expérience fluide et intuitive",
-      "Impression pro dès la première seconde",
+      "Appels de groupe hebdomadaires",
+      "Plan d'action quotidien personnalisé",
+      "Looms d'audit de ton business",
     ],
   },
   {
     icon: LineChart,
-    title: "Un suivi personnalisé",
-    desc: "Ton coach suit ta progression en temps réel. Il sait exactement où tu en es, ce qui te bloque et comment t'aider à avancer.",
+    title: "Dashboard KPI en temps réel",
+    desc: "Ads, booking, closing — tout est visible d'un coup d'œil. Tu sais exactement où ça bloque et quoi optimiser.",
     items: [
-      "Roadmap personnalisée par l'IA",
-      "Alertes automatiques si tu décroches",
-      "Check-ins réguliers avec ton coach",
+      "Messagerie vocale illimitée",
+      "Communauté privée active",
+      "Gamification et classement",
     ],
   },
   {
     icon: Flame,
-    title: "Une communauté qui pousse",
-    desc: "Tu n'es pas seul. Échange avec des freelances qui vivent la même chose, partage tes wins et reste motivé au quotidien.",
+    title: "Formation scaling & délégation",
+    desc: "Apprends à structurer ton offre, recruter et déléguer. Passe de freelance solo à une équipe qui tourne sans toi.",
     items: [
-      "Challenges hebdomadaires",
-      "Leaderboard et badges",
-      "Lives et replays exclusifs",
+      "Formation délégation & management",
+      "Accès à l'app Upscale complète",
+      "Replays et ressources exclusives",
     ],
   },
 ];
 
 const testimonials = [
   {
-    name: "Marie L.",
-    role: "Freelance copywriting",
-    text: "En 3 mois d'accompagnement, j'ai structuré mon offre, trouvé mes premiers clients récurrents et dépassé les 6K€/mois. La plateforme est incroyablement bien faite.",
+    name: "Thomas K.",
+    role: "Media buyer freelance",
+    text: "Le paiement au résultat m'a convaincu de tester. En 4 mois, je suis passé de 4k€ à 18k€/mois. Le dashboard m'a permis de voir exactement où je perdais des leads dans mon funnel.",
     rating: 5,
-    metric: "6K€/mois en 3 mois",
+    metric: "De 4K€ à 18K€/mois en 4 mois",
   },
   {
-    name: "Julien R.",
-    role: "Consultant SEO",
-    text: "Ce qui m'a le plus aidé c'est la communauté et les challenges. On se tire tous vers le haut. Mon coach m'a aidé à clarifier mon positionnement et ça a tout changé.",
+    name: "Camille R.",
+    role: "Graphiste → agence créa",
+    text: "Le coaching 1-to-1 a tout changé. Mon coach a audité mon positionnement en Loom et m'a aidée à restructurer mon offre. J'ai recruté 2 personnes et je refuse des missions maintenant.",
     rating: 5,
-    metric: "Offre repositionnée",
+    metric: "De solo à une équipe de 3",
   },
   {
-    name: "Sophie D.",
-    role: "Freelance graphiste",
-    text: "J'avais du mal à me vendre. Grâce aux modules sur l'offre et au suivi personnalisé, j'ai compris comment me positionner. Aujourd'hui je refuse des missions.",
+    name: "Maxime D.",
+    role: "Développeur freelance",
+    text: "La communauté et les calls de groupe, c'est ce qui m'a tenu motivé. Voir les autres avancer te pousse à exécuter. En 5 mois j'ai doublé mon CA sans bosser plus.",
     rating: 5,
-    metric: "Plus de clients que de dispo",
+    metric: "CA x2 en 5 mois",
   },
 ];
 
@@ -274,6 +272,33 @@ const footerSections = [
       { label: "Mentions légales", href: "/mentions-legales" },
       { label: "Confidentialité", href: "/confidentialite" },
     ],
+  },
+];
+
+const faqItems = [
+  {
+    question: "Pourquoi je paierais un coach alors que tout est gratuit sur YouTube ?",
+    answer: "L'information est gratuite, l'exécution personnalisée ne l'est pas. YouTube ne connaît pas tes chiffres, ton marché, tes blocages. Ici, chaque conseil est basé sur TES données, pas sur des généralités.",
+  },
+  {
+    question: "C'est quoi le catch avec le paiement au résultat ?",
+    answer: "Aucun catch. On définit ensemble tes objectifs de CA. Tu paies un pourcentage uniquement sur les revenus additionnels générés pendant l'accompagnement. Si tu ne gagnes rien de plus, tu ne paies rien de plus.",
+  },
+  {
+    question: "J'ai déjà testé du coaching, ça n'a pas marché",
+    answer: "La plupart des coachings sont des cours en ligne déguisés avec un groupe Slack. Ici c'est du 1-to-1 avec un coach qui connaît tes chiffres, qui t'envoie des Looms personnalisés et qui suit ton exécution au quotidien. Rien de générique.",
+  },
+  {
+    question: "Je n'ai pas le temps pour ça",
+    answer: "1 call par semaine + un plan d'action clair chaque jour. On optimise ton temps, on ne l'alourdit pas. Le but c'est que tu fasses MOINS mais MIEUX. La plupart de nos clients gagnent du temps dès le premier mois.",
+  },
+  {
+    question: "Ça marche pour ma niche ?",
+    answer: "Chaque accompagnement est personnalisé à ton marché. On a accompagné des devs, designers, media buyers, copywriters, consultants SEO. Le framework de scaling s'adapte — c'est le coaching 1-to-1 qui permet ça.",
+  },
+  {
+    question: "Combien de places sont disponibles ?",
+    answer: "On limite volontairement le nombre de clients parce que le format one-to-one ne scale pas à 500 personnes. C'est précisément ce qui fait la qualité. Quand c'est plein, c'est plein — pas de fausse urgence.",
   },
 ];
 
@@ -409,6 +434,8 @@ export default function ScalingPageClient() {
   const howSection = useInView(0.1);
   const whySection = useInView(0.1);
   const testimonialsSection = useInView(0.1);
+  const faqSection = useInView(0.1);
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const ctaSection = useInView(0.2);
 
   useEffect(() => {
@@ -566,12 +593,12 @@ export default function ScalingPageClient() {
                     boxShadow: `0 0 8px ${ACCENT_GLOW}`,
                   }}
                 />
-                L&apos;accompagnement business par Upscale
+                Accompagnement scaling — places limitées
               </div>
 
               {/* Headline */}
               <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white font-display sm:text-[3.5rem] lg:text-[4rem]">
-                Atteins{" "}
+                Tu fais 5K&euro;/mois.{" "}
                 <span className="relative inline-block whitespace-nowrap">
                   <span
                     className="bg-clip-text text-transparent"
@@ -579,7 +606,7 @@ export default function ScalingPageClient() {
                       backgroundImage: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_LIGHT}, ${ACCENT})`,
                     }}
                   >
-                    10K&euro;/mois
+                    On t&apos;emm&egrave;ne &agrave; 20K.
                   </span>
                   <span
                     className="absolute -bottom-1 left-0 h-px w-full"
@@ -588,15 +615,13 @@ export default function ScalingPageClient() {
                     }}
                     aria-hidden="true"
                   />
-                </span>{" "}
-                en freelance
+                </span>
               </h1>
 
               {/* Subheadline */}
               <p className="mx-auto mt-6 max-w-xl text-[1.125rem] leading-relaxed text-gray-400 sm:text-lg">
-                Formation, coaching personnalisé, communauté et outils business
-                réunis dans un seul espace. L&apos;accompagnement complet pour
-                structurer et scaler ton activité.
+                6 mois d&apos;accompagnement one-to-one avec un coach d&eacute;di&eacute;.
+                Pay&eacute; au r&eacute;sultat — si tu ne gagnes pas plus, tu ne paies pas plus.
               </p>
 
               {/* CTAs */}
@@ -610,16 +635,16 @@ export default function ScalingPageClient() {
                       boxShadow: `0 0 40px ${ACCENT_GLOW}, 0 1px 2px rgba(0,0,0,0.2)`,
                     }}
                   >
-                    Rejoindre le programme
+                    R&eacute;server mon appel strat&eacute;gique
                     <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </Link>
-                <a href="#features">
+                <a href="#testimonials">
                   <button
                     type="button"
                     className="h-12 rounded-xl border border-white/20 bg-white/5 px-7 text-[15px] font-medium text-gray-300 transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:text-white"
                   >
-                    Découvrir l&apos;accompagnement
+                    Voir les r&eacute;sultats
                   </button>
                 </a>
               </div>
@@ -628,17 +653,17 @@ export default function ScalingPageClient() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-[13px] text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <Shield className="size-3.5" />
-                  Accompagnement premium
+                  Paiement au résultat
                 </span>
                 <span className="h-3 w-px bg-white/20" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
                   <Clock className="size-3.5" />
-                  Setup en 5 min
+                  Coaching 1-to-1 chaque semaine
                 </span>
                 <span className="h-3 w-px bg-white/20" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
                   <Zap className="size-3.5" />
-                  Données sécurisées RGPD
+                  Places limitées
                 </span>
               </div>
             </div>
@@ -659,7 +684,7 @@ export default function ScalingPageClient() {
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <p className="mb-10 text-center text-[13px] font-medium uppercase tracking-[0.15em] text-gray-500">
-              Ils ont rejoint l&apos;accompagnement Upscale
+              Le programme en chiffres
             </p>
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8">
               {stats.map((stat, i) => (
@@ -711,16 +736,16 @@ export default function ScalingPageClient() {
                 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em]"
                 style={{ color: `${ACCENT}B3` }}
               >
-                Fonctionnalités
+                Le programme
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl lg:text-[2.75rem]">
-                Tout ce dont tu as besoin,
+                Pourquoi Upscale,
                 <br className="hidden sm:block" />
-                <span className="text-gray-500">dans un seul endroit</span>
+                <span className="text-gray-500">pas une formation YouTube</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                L&apos;accompagnement Upscale réunit tout ce qu&apos;il te
-                faut pour passer de 0 à 10K&euro;/mois en freelance.
+                L&apos;information est gratuite. L&apos;ex&eacute;cution personnalis&eacute;e,
+                le suivi et la redevabilit&eacute; ne le sont pas.
               </p>
             </FadeIn>
 
@@ -776,13 +801,13 @@ export default function ScalingPageClient() {
                 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em]"
                 style={{ color: `${ACCENT}B3` }}
               >
-                Comment ça marche
+                Comment &ccedil;a marche
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Opérationnel en <span className="text-gray-500">3 étapes</span>
+                Du premier appel au <span className="text-gray-500">scaling</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                De la configuration au scaling, tout est fluide et intuitif.
+                Un process simple. Pas de bullshit, pas de modules &agrave; finir avant de commencer.
               </p>
             </FadeIn>
 
@@ -840,14 +865,14 @@ export default function ScalingPageClient() {
                 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em]"
                 style={{ color: `${ACCENT}B3` }}
               >
-                Pourquoi Upscale
+                Ce que tu obtiens
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Plus qu&apos;un outil,{" "}
-                <span className="text-gray-500">un avantage compétitif</span>
+                Tout ce que tu obtiens{" "}
+                <span className="text-gray-500">pendant 6 mois</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                Tu mérites mieux qu&apos;un patchwork de SaaS génériques.
+                Pas de surprise. Voici exactement ce qui est inclus dans le programme.
               </p>
             </FadeIn>
 
@@ -908,14 +933,14 @@ export default function ScalingPageClient() {
                 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em]"
                 style={{ color: `${ACCENT}B3` }}
               >
-                Témoignages
+                R&eacute;sultats
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Ils ont transformé leur activité
+                Ils ont scal&eacute;. &Agrave; ton tour.
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                Découvre les retours de freelances qui ont rejoint
-                l&apos;accompagnement Upscale.
+                Des r&eacute;sultats concrets, pas des promesses. Chaque t&eacute;moignage
+                est v&eacute;rifiable.
               </p>
             </FadeIn>
 
@@ -975,7 +1000,77 @@ export default function ScalingPageClient() {
         </section>
 
         {/* ============================================================== */}
-        {/*  7. CTA FINAL                                                   */}
+        {/*  7. FAQ                                                          */}
+        {/* ============================================================== */}
+        <section
+          id="faq"
+          ref={faqSection.ref}
+          className="scroll-mt-20 py-24 sm:py-32 lg:py-40"
+        >
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <FadeIn
+              isInView={faqSection.isInView}
+              className="text-center"
+            >
+              <p
+                className="mb-4 text-[13px] font-semibold uppercase tracking-[0.15em]"
+                style={{ color: `${ACCENT}B3` }}
+              >
+                FAQ
+              </p>
+              <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
+                Les vraies questions
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
+                Pas les questions polies. Celles que tu te poses vraiment.
+              </p>
+            </FadeIn>
+
+            <div className="mt-14 divide-y divide-white/10 border-t border-b border-white/10">
+              {faqItems.map((item, index) => {
+                const isOpen = faqOpen === index;
+                return (
+                  <div
+                    key={index}
+                    className={`transition-all duration-500 ${
+                      faqSection.isInView
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-4"
+                    }`}
+                    style={{ transitionDelay: `${index * 80}ms` }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setFaqOpen(isOpen ? null : index)}
+                      className="flex w-full items-center justify-between gap-4 py-5 text-left"
+                    >
+                      <span className="text-[15px] font-medium text-white">
+                        {item.question}
+                      </span>
+                      <ChevronDown
+                        className={`size-5 shrink-0 text-gray-500 transition-transform duration-200 ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        isOpen ? "max-h-96 pb-5" : "max-h-0"
+                      }`}
+                    >
+                      <p className="text-[14px] leading-relaxed text-gray-400">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================== */}
+        {/*  8. CTA FINAL                                                   */}
         {/* ============================================================== */}
         <section
           ref={ctaSection.ref}
@@ -998,13 +1093,14 @@ export default function ScalingPageClient() {
               <Sparkles className="size-6" style={{ color: `${ACCENT}99` }} />
             </div>
             <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl lg:text-5xl">
-              Prêt à passer au
+              Tu sais d&eacute;j&agrave;
               <br />
-              <span className="text-gray-500">niveau supérieur</span> ?
+              <span className="text-gray-500">si c&apos;est pour toi.</span>
             </h2>
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-gray-400 sm:text-lg">
-              Rejoins l&apos;accompagnement Upscale et commence à construire
-              ton activité rentable dès aujourd&apos;hui.
+              Paiement au r&eacute;sultat. Coaching 1-to-1. Places limit&eacute;es
+              parce que le format ne scale pas &agrave; 500 personnes &mdash;
+              et c&apos;est pr&eacute;cis&eacute;ment ce qui fait la qualit&eacute;.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
               <Link href="/register">
@@ -1016,12 +1112,12 @@ export default function ScalingPageClient() {
                     boxShadow: `0 0 40px ${ACCENT_GLOW}`,
                   }}
                 >
-                  Rejoindre le programme
+                  R&eacute;server mon appel strat&eacute;gique
                   <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </Link>
               <span className="text-[13px] text-gray-500">
-                Places limitées — sur candidature uniquement
+                Format one-to-one &mdash; places volontairement limit&eacute;es
               </span>
             </div>
           </FadeIn>
@@ -1042,8 +1138,8 @@ export default function ScalingPageClient() {
                 </span>
               </Link>
               <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/50">
-                L&apos;accompagnement business pour les
-                freelances qui visent les 10K&euro;/mois.
+                Accompagnement scaling pour freelances
+                et agences. Pay&eacute; au r&eacute;sultat.
               </p>
             </div>
 

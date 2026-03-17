@@ -3,6 +3,44 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { useInView, FadeIn } from "../animations";
+import {
+  GraduationCap,
+  Video,
+  MessageCircle,
+  Users,
+  Trophy,
+  BarChart3,
+  Target,
+  LineChart,
+  Flame,
+  Zap,
+  Shield,
+  Rocket,
+  Star,
+  Heart,
+  Clock,
+  CheckCircle,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  GraduationCap,
+  Video,
+  MessageCircle,
+  Users,
+  Trophy,
+  BarChart3,
+  Target,
+  LineChart,
+  Flame,
+  Zap,
+  Shield,
+  Rocket,
+  Star,
+  Heart,
+  Clock,
+  CheckCircle,
+};
 
 interface Feature {
   icon: string;
@@ -16,6 +54,22 @@ interface FeaturesProps {
   columns: string;
   features: Feature[];
   accentColor: string;
+}
+
+function FeatureIcon({ name, accentColor }: { name: string; accentColor: string }) {
+  const IconComponent = ICON_MAP[name];
+  if (IconComponent) {
+    return (
+      <div
+        className="mb-5 flex size-10 items-center justify-center rounded-lg transition-colors duration-300"
+        style={{ backgroundColor: `${accentColor}15`, color: accentColor }}
+      >
+        <IconComponent className="size-5" />
+      </div>
+    );
+  }
+  // Fallback: treat as emoji
+  return <div className="text-3xl mb-4">{name}</div>;
 }
 
 function FeaturesComponent({ heading, subtitle, columns, features, accentColor }: FeaturesProps) {
@@ -41,7 +95,6 @@ function FeaturesComponent({ heading, subtitle, columns, features, accentColor }
                 transform: isInView ? "translateY(0)" : "translateY(24px)",
                 transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
                 transitionDelay: `${i * 80}ms`,
-                borderColor: undefined,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = `${accentColor}40`;
@@ -52,8 +105,8 @@ function FeaturesComponent({ heading, subtitle, columns, features, accentColor }
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              <div className="text-3xl mb-4 transition-transform duration-300 group-hover:scale-110">
-                {feature.icon}
+              <div className="transition-transform duration-300 group-hover:scale-110">
+                <FeatureIcon name={feature.icon} accentColor={accentColor} />
               </div>
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
               <p className="text-gray-400 leading-relaxed">{feature.description}</p>
@@ -83,13 +136,13 @@ export const Features: ComponentConfig<FeaturesProps> = {
       type: "array",
       label: "Fonctionnalités",
       arrayFields: {
-        icon: { type: "text", label: "Emoji / Icône" },
+        icon: { type: "text", label: "Icône (nom Lucide ou emoji)" },
         title: { type: "text", label: "Titre" },
         description: { type: "textarea", label: "Description" },
       },
       getItemSummary: (item: Feature) => item.title || "Fonctionnalité",
       defaultItemProps: {
-        icon: "🚀",
+        icon: "Rocket",
         title: "Titre",
         description: "Description de la fonctionnalité.",
       },
@@ -104,9 +157,9 @@ export const Features: ComponentConfig<FeaturesProps> = {
     subtitle: "",
     columns: "3",
     features: [
-      { icon: "🎯", title: "Précision", description: "Une approche ciblée pour des résultats concrets." },
-      { icon: "⚡", title: "Rapidité", description: "Des résultats visibles en quelques semaines." },
-      { icon: "🏆", title: "Excellence", description: "Un standard de qualité sans compromis." },
+      { icon: "Target", title: "Précision", description: "Une approche ciblée pour des résultats concrets." },
+      { icon: "Zap", title: "Rapidité", description: "Des résultats visibles en quelques semaines." },
+      { icon: "Trophy", title: "Excellence", description: "Un standard de qualité sans compromis." },
     ],
     accentColor: "#C6FF00",
   },

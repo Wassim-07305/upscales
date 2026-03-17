@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ScalingPageClient from "./client";
 
 export const metadata: Metadata = {
-  title: "Tu fais 5K€/mois. On t'emmène à 20K. — Upscale",
+  title: "Atteins 5K, 10K voire 20K€/mois — Upscale",
   description:
-    "6 mois d'accompagnement one-to-one avec un coach dédié. Payé au résultat — si tu ne gagnes pas plus, tu ne paies pas plus.",
+    "La roadmap pas-à-pas pour structurer ton business et scaler de façon simple, régulière et prévisible. Déjà utilisé par 200+ coachs rentables.",
 };
 
 export default function ScalingLandingPage() {

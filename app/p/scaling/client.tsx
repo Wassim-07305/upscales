@@ -127,46 +127,46 @@ const navLinks = [
 ];
 
 const stats = [
-  { value: 43, suffix: "+", label: "Freelances dans le programme" },
-  { value: 6, suffix: " mois", label: "D'accompagnement intensif" },
-  { value: 100, suffix: "%", label: "Aligné sur tes résultats" },
+  { value: 200, suffix: "+", label: "Coachs & freelances accompagnés" },
+  { value: 10, suffix: "M€+", label: "De résultats clients générés" },
+  { value: 28, suffix: "", label: "Vidéos & workshops exclusifs" },
 ];
 
 const features = [
   {
-    icon: Shield,
-    title: "Paiement au résultat",
-    desc: "Tu paies un % sur les revenus additionnels. Si tu ne gagnes pas plus, tu ne paies pas plus. Nos intérêts sont alignés à 100%.",
+    icon: Video,
+    title: "28 vidéos & workshops exclusifs",
+    desc: "La roadmap pas-à-pas pour structurer ton business de zéro ou scaler ce que tu as déjà. Pas de blabla, que du concret.",
     gradient: "from-lime-400/20 to-lime-400/5",
   },
   {
-    icon: Video,
-    title: "Coaching one-to-one",
-    desc: "1 call stratégique par semaine avec ton coach dédié. Il connaît tes chiffres, ton marché, tes blocages. Pas un cours avec 500 personnes.",
+    icon: Target,
+    title: "Stratégies à +10M€ de résultats",
+    desc: "Ce ne sont pas des théories. Ce sont les stratégies exactes qui ont généré +10M€ de résultats pour nos clients.",
     gradient: "from-emerald-500/20 to-emerald-500/5",
   },
   {
     icon: Rocket,
-    title: "Plan d'action quotidien",
-    desc: "Chaque matin, tu sais exactement quoi faire. On suit ton exécution et on ajuste en temps réel. Zéro flou.",
+    title: "Systèmes & modèles opérationnels",
+    desc: "Automatise ton acquisition et tes ventes. Des ressources prêtes à l'emploi pour arrêter de tout faire à la main.",
     gradient: "from-cyan-500/20 to-cyan-500/5",
   },
   {
     icon: Compass,
-    title: "Looms personnalisés",
-    desc: "Des audits vidéo de TON business, pas des templates génériques. Ton coach analyse tes assets et te dit quoi corriger.",
+    title: "Scripts & frameworks prêts à l'emploi",
+    desc: "Structure ton offre, ton funnel et ton management. Tout est prémâché — tu adaptes à ton business et tu exécutes.",
     gradient: "from-violet-500/20 to-violet-500/5",
   },
   {
     icon: BarChart3,
-    title: "Dashboard data",
-    desc: "Tes KPIs en temps réel : ads, booking, closing. Tu prends des décisions basées sur la data, pas sur l'intuition.",
+    title: "Système IG complet",
+    desc: "La même méthode utilisée par des coachs à +50K€/mois. De la stratégie de contenu à la conversion en DM.",
     gradient: "from-amber-500/20 to-amber-500/5",
   },
   {
     icon: Users,
-    title: "Communauté & groupe",
-    desc: "Appels de groupe hebdomadaires, messagerie vocale illimitée avec ton coach. Tu n'es jamais seul dans le process.",
+    title: "Sessions live avec Mateusz",
+    desc: "Coaching stratégique, supervision et feedback direct. Pas un chatbot, un vrai entrepreneur qui a déjà fait le chemin.",
     gradient: "from-teal-500/20 to-teal-500/5",
   },
 ];
@@ -175,77 +175,77 @@ const steps = [
   {
     icon: UserPlus,
     number: "01",
-    title: "Appel stratégique",
-    desc: "On analyse ton business, tes chiffres et tes blocages. Si le fit est bon, on définit ensemble tes objectifs pour les 6 prochains mois.",
+    title: "Rejoins le groupe gratuitement",
+    desc: "Crée ton compte en 2 minutes. Accède immédiatement aux 28 vidéos, workshops et ressources opérationnelles.",
   },
   {
     icon: Compass,
     number: "02",
-    title: "Plan d'action personnalisé",
-    desc: "Ton coach construit ta roadmap sur mesure. Chaque semaine : un call 1-to-1, un plan d'action clair, des Looms d'audit de ton business.",
+    title: "Suis la roadmap pas-à-pas",
+    desc: "Que tu partes de zéro ou que tu fasses déjà du CA, la roadmap s'adapte. Structuration, acquisition, ventes, management.",
   },
   {
     icon: Rocket,
     number: "03",
-    title: "Tu scales",
-    desc: "Tu exécutes, on mesure. Dashboard KPI en temps réel, ajustements continus. Le paiement au résultat garantit qu'on pousse dans la même direction.",
+    title: "Scale de façon prévisible",
+    desc: "Applique les systèmes, utilise les scripts et frameworks. Rejoins les lives avec Mateusz pour du feedback direct sur ton business.",
   },
 ];
 
 const valueProps = [
   {
     icon: Target,
-    title: "1 call stratégique/semaine en 1-to-1",
-    desc: "Ton coach dédié connaît ton business par cœur. Chaque semaine, il t'aide à prioriser, débloquer et accélérer.",
+    title: "Structuration complète",
+    desc: "Que tu sois coach sportif, consultant ou freelance créa — apprends à structurer ton offre, ton prix et ton acquisition de A à Z.",
     items: [
-      "Appels de groupe hebdomadaires",
-      "Plan d'action quotidien personnalisé",
-      "Looms d'audit de ton business",
+      "Offre, positionnement et pricing",
+      "Funnel de vente étape par étape",
+      "Scripts de closing prêts à l'emploi",
     ],
   },
   {
     icon: LineChart,
-    title: "Dashboard KPI en temps réel",
-    desc: "Ads, booking, closing — tout est visible d'un coup d'œil. Tu sais exactement où ça bloque et quoi optimiser.",
+    title: "Acquisition & ventes automatisées",
+    desc: "Le système IG complet, les frameworks d'acquisition et les modèles pour vendre sans passer ta vie en DM.",
     items: [
-      "Messagerie vocale illimitée",
-      "Communauté privée active",
-      "Gamification et classement",
+      "Stratégie de contenu qui convertit",
+      "Automatisation des ventes",
+      "Système de booking client",
     ],
   },
   {
     icon: Flame,
-    title: "Formation scaling & délégation",
-    desc: "Apprends à structurer ton offre, recruter et déléguer. Passe de freelance solo à une équipe qui tourne sans toi.",
+    title: "Scaling & management",
+    desc: "Passe de solo à une équipe. Les systèmes pour déléguer, recruter et gérer sans que tout repose sur toi.",
     items: [
-      "Formation délégation & management",
-      "Accès à l'app Upscale complète",
-      "Replays et ressources exclusives",
+      "Formation délégation & recrutement",
+      "Modèles de management opérationnels",
+      "Dashboard et suivi de performance",
     ],
   },
 ];
 
 const testimonials = [
   {
-    name: "Thomas K.",
-    role: "Media buyer freelance",
-    text: "Le paiement au résultat m'a convaincu de tester. En 4 mois, je suis passé de 4k€ à 18k€/mois. Le dashboard m'a permis de voir exactement où je perdais des leads dans mon funnel.",
+    name: "Lucas M.",
+    role: "Coach sportif → coaching en ligne",
+    text: "Je partais de zéro en ligne. Grâce à la roadmap et au système IG, j'ai lancé mon offre de coaching en ligne en 3 semaines. En 2 mois j'étais à 4K€/mois avec des clients récurrents.",
     rating: 5,
-    metric: "De 4K€ à 18K€/mois en 4 mois",
+    metric: "0 à 4K€/mois en 2 mois",
   },
   {
     name: "Camille R.",
-    role: "Graphiste → agence créa",
-    text: "Le coaching 1-to-1 a tout changé. Mon coach a audité mon positionnement en Loom et m'a aidée à restructurer mon offre. J'ai recruté 2 personnes et je refuse des missions maintenant.",
+    role: "Consultante marketing",
+    text: "Les scripts de closing et le funnel m'ont fait gagner un temps fou. J'ai structuré mon offre en 1 semaine et signé 3 clients le mois suivant. La communauté est ultra motivante.",
     rating: 5,
-    metric: "De solo à une équipe de 3",
+    metric: "3 clients signés en 1 mois",
   },
   {
     name: "Maxime D.",
-    role: "Développeur freelance",
-    text: "La communauté et les calls de groupe, c'est ce qui m'a tenu motivé. Voir les autres avancer te pousse à exécuter. En 5 mois j'ai doublé mon CA sans bosser plus.",
+    role: "Coach sportif spécialisé perte de poids",
+    text: "J'avais les compétences mais pas les systèmes. Le programme m'a donné la méthode exacte pour passer de 6 à 15 coachés en même temps, sans y passer mes soirées.",
     rating: 5,
-    metric: "CA x2 en 5 mois",
+    metric: "De 6 à 15 coachés actifs",
   },
 ];
 
@@ -277,28 +277,28 @@ const footerSections = [
 
 const faqItems = [
   {
-    question: "Pourquoi je paierais un coach alors que tout est gratuit sur YouTube ?",
-    answer: "L'information est gratuite, l'exécution personnalisée ne l'est pas. YouTube ne connaît pas tes chiffres, ton marché, tes blocages. Ici, chaque conseil est basé sur TES données, pas sur des généralités.",
+    question: "Je débute, c'est pour moi ?",
+    answer: "Oui. La roadmap est conçue pour fonctionner que tu partes de zéro ou que tu fasses déjà du CA. Beaucoup de nos membres sont des coachs sportifs ou consultants qui lancent leur activité en ligne pour la première fois.",
   },
   {
-    question: "C'est quoi le catch avec le paiement au résultat ?",
-    answer: "Aucun catch. On définit ensemble tes objectifs de CA. Tu paies un pourcentage uniquement sur les revenus additionnels générés pendant l'accompagnement. Si tu ne gagnes rien de plus, tu ne paies rien de plus.",
+    question: "C'est vraiment gratuit ?",
+    answer: "L'accès au groupe est gratuit maintenant. Tu accèdes aux 28 vidéos, workshops, ressources et sessions live sans sortir ta CB. Ça peut devenir payant prochainement, donc autant en profiter maintenant.",
   },
   {
-    question: "J'ai déjà testé du coaching, ça n'a pas marché",
-    answer: "La plupart des coachings sont des cours en ligne déguisés avec un groupe Slack. Ici c'est du 1-to-1 avec un coach qui connaît tes chiffres, qui t'envoie des Looms personnalisés et qui suit ton exécution au quotidien. Rien de générique.",
+    question: "Ça marche pour les coachs sportifs ?",
+    answer: "C'est même une de nos spécialités. Le système IG, les scripts de closing et les frameworks d'offre sont utilisés par des coachs sportifs à +50K€/mois. Que tu fasses du coaching en salle ou en ligne, la méthode s'adapte.",
   },
   {
     question: "Je n'ai pas le temps pour ça",
-    answer: "1 call par semaine + un plan d'action clair chaque jour. On optimise ton temps, on ne l'alourdit pas. Le but c'est que tu fasses MOINS mais MIEUX. La plupart de nos clients gagnent du temps dès le premier mois.",
+    answer: "Les vidéos sont courtes et actionnables. Pas de formation de 200h. Tu regardes, tu appliques. Les lives avec Mateusz sont optionnels mais c'est là que ça accélère vraiment.",
   },
   {
-    question: "Ça marche pour ma niche ?",
-    answer: "Chaque accompagnement est personnalisé à ton marché. On a accompagné des devs, designers, media buyers, copywriters, consultants SEO. Le framework de scaling s'adapte — c'est le coaching 1-to-1 qui permet ça.",
+    question: "Ça marche pour d'autres niches que le coaching sportif ?",
+    answer: "Oui. Le programme est utilisé par des coachs, consultants, freelances marketing, copywriters, media buyers et plus. Le framework de structuration et de scaling est universel — seule l'application change.",
   },
   {
-    question: "Combien de places sont disponibles ?",
-    answer: "On limite volontairement le nombre de clients parce que le format one-to-one ne scale pas à 500 personnes. C'est précisément ce qui fait la qualité. Quand c'est plein, c'est plein — pas de fausse urgence.",
+    question: "Quelle est la différence avec une formation classique ?",
+    answer: "Les formations classiques te donnent de l'info et te laissent seul. Ici tu as des systèmes opérationnels prêts à l'emploi, des sessions live avec feedback direct et une communauté de 200+ membres actifs qui avancent avec toi.",
   },
 ];
 
@@ -593,12 +593,12 @@ export default function ScalingPageClient() {
                     boxShadow: `0 0 8px ${ACCENT_GLOW}`,
                   }}
                 />
-                Accompagnement scaling — places limitées
+                D&eacute;j&agrave; utilis&eacute; par 200+ coachs rentables
               </div>
 
               {/* Headline */}
               <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white font-display sm:text-[3.5rem] lg:text-[4rem]">
-                Tu fais 5K&euro;/mois.{" "}
+                Atteins{" "}
                 <span className="relative inline-block whitespace-nowrap">
                   <span
                     className="bg-clip-text text-transparent"
@@ -606,7 +606,7 @@ export default function ScalingPageClient() {
                       backgroundImage: `linear-gradient(135deg, ${ACCENT}, ${ACCENT_LIGHT}, ${ACCENT})`,
                     }}
                   >
-                    On t&apos;emm&egrave;ne &agrave; 20K.
+                    5K, 10K voire 20K&euro;/mois
                   </span>
                   <span
                     className="absolute -bottom-1 left-0 h-px w-full"
@@ -615,13 +615,14 @@ export default function ScalingPageClient() {
                     }}
                     aria-hidden="true"
                   />
-                </span>
+                </span>{" "}
+                de fa&ccedil;on simple et pr&eacute;visible.
               </h1>
 
               {/* Subheadline */}
               <p className="mx-auto mt-6 max-w-xl text-[1.125rem] leading-relaxed text-gray-400 sm:text-lg">
-                6 mois d&apos;accompagnement one-to-one avec un coach d&eacute;di&eacute;.
-                Pay&eacute; au r&eacute;sultat — si tu ne gagnes pas plus, tu ne paies pas plus.
+                La roadmap pas-&agrave;-pas pour structurer ton business et scaler sans stress.
+                Strat&eacute;gies concr&egrave;tes issues d&apos;un programme &agrave; +10M&euro; de r&eacute;sultats clients.
               </p>
 
               {/* CTAs */}
@@ -635,16 +636,16 @@ export default function ScalingPageClient() {
                       boxShadow: `0 0 40px ${ACCENT_GLOW}, 0 1px 2px rgba(0,0,0,0.2)`,
                     }}
                   >
-                    R&eacute;server mon appel strat&eacute;gique
+                    Rejoindre gratuitement
                     <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </button>
                 </Link>
-                <a href="#testimonials">
+                <a href="#features">
                   <button
                     type="button"
                     className="h-12 rounded-xl border border-white/20 bg-white/5 px-7 text-[15px] font-medium text-gray-300 transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:text-white"
                   >
-                    Voir les r&eacute;sultats
+                    D&eacute;couvrir le programme
                   </button>
                 </a>
               </div>
@@ -653,17 +654,17 @@ export default function ScalingPageClient() {
               <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-[13px] text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <Shield className="size-3.5" />
-                  Paiement au résultat
+                  Acc&egrave;s gratuit maintenant
                 </span>
                 <span className="h-3 w-px bg-white/20" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
                   <Clock className="size-3.5" />
-                  Coaching 1-to-1 chaque semaine
+                  28 vid&eacute;os &amp; workshops
                 </span>
                 <span className="h-3 w-px bg-white/20" aria-hidden="true" />
                 <span className="flex items-center gap-1.5">
                   <Zap className="size-3.5" />
-                  Places limitées
+                  Sessions live avec Mateusz
                 </span>
               </div>
             </div>
@@ -684,7 +685,7 @@ export default function ScalingPageClient() {
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <p className="mb-10 text-center text-[13px] font-medium uppercase tracking-[0.15em] text-gray-500">
-              Le programme en chiffres
+              D&eacute;j&agrave; utilis&eacute; par 200+ coachs et freelances
             </p>
             <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8">
               {stats.map((stat, i) => (
@@ -739,13 +740,13 @@ export default function ScalingPageClient() {
                 Le programme
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl lg:text-[2.75rem]">
-                Pourquoi Upscale,
+                Ce que tu obtiens
                 <br className="hidden sm:block" />
-                <span className="text-gray-500">pas une formation YouTube</span>
+                <span className="text-gray-500">en rejoignant Upscale</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                L&apos;information est gratuite. L&apos;ex&eacute;cution personnalis&eacute;e,
-                le suivi et la redevabilit&eacute; ne le sont pas.
+                Que tu d&eacute;marres de z&eacute;ro ou que tu veuilles passer au niveau sup&eacute;rieur,
+                tout est l&agrave; pour structurer et scaler.
               </p>
             </FadeIn>
 
@@ -804,10 +805,10 @@ export default function ScalingPageClient() {
                 Comment &ccedil;a marche
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Du premier appel au <span className="text-gray-500">scaling</span>
+                Simple, rapide, <span className="text-gray-500">concret</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                Un process simple. Pas de bullshit, pas de modules &agrave; finir avant de commencer.
+                Pas de formation de 200h &agrave; finir avant de passer &agrave; l&apos;action. Tu avances d&egrave;s le jour 1.
               </p>
             </FadeIn>
 
@@ -868,11 +869,11 @@ export default function ScalingPageClient() {
                 Ce que tu obtiens
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Tout ce que tu obtiens{" "}
-                <span className="text-gray-500">pendant 6 mois</span>
+                Structuration, profit{" "}
+                <span className="text-gray-500">&amp; simplicit&eacute;</span>
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                Pas de surprise. Voici exactement ce qui est inclus dans le programme.
+                La m&eacute;thode utilis&eacute;e par 200+ coachs et freelances pour g&eacute;n&eacute;rer des revenus pr&eacute;visibles.
               </p>
             </FadeIn>
 
@@ -936,11 +937,11 @@ export default function ScalingPageClient() {
                 R&eacute;sultats
               </p>
               <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl">
-                Ils ont scal&eacute;. &Agrave; ton tour.
+                Ils ont structur&eacute; et scal&eacute;.
               </h2>
               <p className="mt-5 text-base leading-relaxed text-gray-400 sm:text-lg">
-                Des r&eacute;sultats concrets, pas des promesses. Chaque t&eacute;moignage
-                est v&eacute;rifiable.
+                Coachs sportifs, consultants, freelances &mdash; ils sont partis de situations
+                diff&eacute;rentes mais ont tous progress&eacute; avec la m&ecirc;me m&eacute;thode.
               </p>
             </FadeIn>
 
@@ -1093,14 +1094,13 @@ export default function ScalingPageClient() {
               <Sparkles className="size-6" style={{ color: `${ACCENT}99` }} />
             </div>
             <h2 className="text-3xl font-bold tracking-tight font-display sm:text-4xl lg:text-5xl">
-              Tu sais d&eacute;j&agrave;
+              Pr&ecirc;t &agrave; structurer
               <br />
-              <span className="text-gray-500">si c&apos;est pour toi.</span>
+              <span className="text-gray-500">et scaler ton business ?</span>
             </h2>
             <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-gray-400 sm:text-lg">
-              Paiement au r&eacute;sultat. Coaching 1-to-1. Places limit&eacute;es
-              parce que le format ne scale pas &agrave; 500 personnes &mdash;
-              et c&apos;est pr&eacute;cis&eacute;ment ce qui fait la qualit&eacute;.
+              Rejoins 200+ coachs et freelances qui utilisent d&eacute;j&agrave; la m&eacute;thode.
+              Acc&egrave;s gratuit &mdash; peut devenir payant prochainement.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
               <Link href="/register">
@@ -1112,12 +1112,12 @@ export default function ScalingPageClient() {
                     boxShadow: `0 0 40px ${ACCENT_GLOW}`,
                   }}
                 >
-                  R&eacute;server mon appel strat&eacute;gique
+                  Rejoindre gratuitement
                   <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </Link>
               <span className="text-[13px] text-gray-500">
-                Format one-to-one &mdash; places volontairement limit&eacute;es
+                Acc&egrave;s gratuit maintenant &mdash; peut devenir payant prochainement
               </span>
             </div>
           </FadeIn>
@@ -1138,8 +1138,8 @@ export default function ScalingPageClient() {
                 </span>
               </Link>
               <p className="mt-4 max-w-[220px] text-[13px] leading-relaxed text-white/50">
-                Accompagnement scaling pour freelances
-                et agences. Pay&eacute; au r&eacute;sultat.
+                Structuration, profit &amp; simplicit&eacute;.
+                La m&eacute;thode pour coachs et freelances.
               </p>
             </div>
 

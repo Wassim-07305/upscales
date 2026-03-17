@@ -469,7 +469,7 @@ export default function ScalingPageClient() {
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/Logo.webp" alt="Upscale" className="h-8 w-auto" />
+            <img src="/Logo.webp" alt="Upscale" className="h-8 w-auto rounded-lg" />
           </Link>
 
           {/* Desktop links */}

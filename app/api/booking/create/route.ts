@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
+import { refreshGoogleToken } from "@/lib/gcal/oauth";
+import { pushBookingToGCal } from "@/lib/gcal/sync";
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for") || "anonymous";
@@ -62,6 +65,47 @@ export async function POST(request: Request) {
       { error: error.message },
       { status: 500 }
     );
+  }
+
+  // Fire-and-forget GCal sync — never blocks the booking response
+  if (process.env.GOOGLE_CLIENT_ID) {
+    void (async () => {
+      try {
+        const adminClient = createAdminClient();
+        const { data: tokens } = await adminClient
+          .from("google_calendar_tokens")
+          .select("*")
+          .limit(1)
+          .single();
+        if (!tokens) return;
+
+        let accessToken: string = tokens.access_token;
+        if (new Date(tokens.expires_at) <= new Date()) {
+          const refreshed = await refreshGoogleToken(tokens.refresh_token);
+          accessToken = refreshed.access_token;
+          await adminClient
+            .from("google_calendar_tokens")
+            .update({
+              access_token: refreshed.access_token,
+              expires_at: new Date(Date.now() + refreshed.expires_in * 1000).toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", tokens.id);
+        }
+
+        const bookingResult = data as { end_time?: string } | null;
+        await pushBookingToGCal(accessToken, tokens.calendar_id ?? "primary", {
+          prospect_name: prospect_name!,
+          prospect_email: prospect_email!,
+          prospect_phone: prospect_phone ?? null,
+          date: date!,
+          start_time: start_time!,
+          end_time: bookingResult?.end_time ?? start_time!,
+        });
+      } catch (e) {
+        console.error("[GCal sync]", e);
+      }
+    })();
   }
 
   return NextResponse.json({ booking: data });

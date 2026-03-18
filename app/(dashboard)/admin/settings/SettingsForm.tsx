@@ -15,15 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save } from "lucide-react";
+import { CalendarDays, CheckCircle2, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 
-export function SettingsForm() {
+interface SettingsFormProps {
+  isGCalEnabled?: boolean;
+  isGCalConnected?: boolean;
+}
+
+export function SettingsForm({ isGCalEnabled = false, isGCalConnected: initialGCalConnected = false }: SettingsFormProps) {
   const [platformName, setPlatformName] = useState("UPSCALE");
   const [allowRegistration, setAllowRegistration] = useState(true);
   const [defaultRole, setDefaultRole] = useState("prospect");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [gcalConnected, setGcalConnected] = useState(initialGCalConnected);
+  const [gcalLoading, setGcalLoading] = useState(false);
   const supabase = createClient();
 
   // Charger les paramètres existants depuis la base de données
@@ -54,6 +61,23 @@ export function SettingsForm() {
     loadSettings();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleGCalDisconnect = async () => {
+    setGcalLoading(true);
+    try {
+      const res = await fetch("/api/auth/google-calendar", { method: "DELETE" });
+      if (res.ok) {
+        setGcalConnected(false);
+        toast.success("Google Calendar déconnecté");
+      } else {
+        toast.error("Erreur lors de la déconnexion");
+      }
+    } catch {
+      toast.error("Erreur lors de la déconnexion");
+    } finally {
+      setGcalLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -155,6 +179,54 @@ export function SettingsForm() {
           </ul>
         </CardContent>
       </Card>
+
+      {isGCalEnabled && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Google Calendar
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Synchronisation des bookings</p>
+                <p className="text-xs text-muted-foreground">
+                  Les nouveaux bookings seront automatiquement ajoutés à votre Google Calendar
+                </p>
+              </div>
+              {gcalConnected ? (
+                <div className="flex items-center gap-2 text-sm text-green-500">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Connecté
+                </div>
+              ) : null}
+            </div>
+            {gcalConnected ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGCalDisconnect}
+                disabled={gcalLoading}
+              >
+                {gcalLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Déconnecter
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = "/api/auth/google-calendar"}
+                disabled={gcalLoading}
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                Connecter Google Calendar
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Button onClick={handleSave} disabled={saving}>
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

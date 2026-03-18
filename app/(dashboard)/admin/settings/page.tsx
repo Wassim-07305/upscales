@@ -20,5 +20,22 @@ export default async function SettingsPage() {
 
   if (!profile || !isAdmin(profile.role)) redirect("/admin");
 
-  return <SettingsForm />;
+  const isGCalEnabled = !!process.env.GOOGLE_CLIENT_ID;
+  let isGCalConnected = false;
+
+  if (isGCalEnabled) {
+    const { data: gcalToken } = await supabase
+      .from("google_calendar_tokens")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    isGCalConnected = !!gcalToken;
+  }
+
+  return (
+    <SettingsForm
+      isGCalEnabled={isGCalEnabled}
+      isGCalConnected={isGCalConnected}
+    />
+  );
 }

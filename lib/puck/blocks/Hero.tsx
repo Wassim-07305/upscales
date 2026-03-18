@@ -1,6 +1,7 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { ImageUploadField } from "../fields/ImageUploadField";
+import { getContrastColor } from "../utils";
 
 interface HeroProps {
   headline: string;
@@ -93,7 +94,7 @@ export const Hero: ComponentConfig<HeroProps> = {
               className="inline-flex items-center px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105"
               style={{
                 backgroundColor: accentColor,
-                color: "#0D0D0D",
+                color: getContrastColor(accentColor),
                 boxShadow: `0 0 30px ${accentColor}30`,
               }}
             >

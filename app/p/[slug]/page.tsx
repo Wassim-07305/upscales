@@ -70,9 +70,19 @@ export default async function LandingPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const puckData = page.puck_data as Data;
+  let puckData: Data;
+  try {
+    puckData = page.puck_data as Data;
+    if (!puckData || !puckData.content) throw new Error("No content");
+  } catch {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-gray-500">
+        <p>Cette page est en cours de construction.</p>
+      </div>
+    );
+  }
 
-  if (!puckData || !puckData.content || puckData.content.length === 0) {
+  if (puckData.content.length === 0) {
     return (
       <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-gray-500">
         <p>Cette page est en cours de construction.</p>

@@ -179,11 +179,15 @@ export default function OnboardingPage() {
   // ─── Navigation ─────────────────────────────────────────────
   const goNext = useCallback(() => {
     if (step < totalSteps - 1) {
+      if (STEPS[step]?.id === "phone" && phone && !/^\+?[0-9\s\-(). ]{7,20}$/.test(phone)) {
+        toast.error("Numéro de téléphone invalide");
+        return;
+      }
       if (step > 0) saveCurrentStep();
       setDirection(1);
       setStep((s) => s + 1);
     }
-  }, [step, totalSteps, saveCurrentStep]);
+  }, [step, totalSteps, phone, saveCurrentStep]);
 
   const goPrev = useCallback(() => {
     if (step > 0) {

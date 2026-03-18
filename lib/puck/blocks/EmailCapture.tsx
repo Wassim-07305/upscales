@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
+import { getContrastColor } from "../utils";
 
 interface EmailCaptureProps {
   heading: string;
@@ -52,7 +53,7 @@ function EmailCaptureForm({ heading, text, buttonText, successMessage, accentCol
           <button
             type="submit"
             className="px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 flex-shrink-0"
-            style={{ backgroundColor: accentColor, color: "#0D0D0D" }}
+            style={{ backgroundColor: accentColor, color: getContrastColor(accentColor) }}
           >
             {buttonText}
           </button>

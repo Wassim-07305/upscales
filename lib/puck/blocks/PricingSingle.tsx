@@ -3,6 +3,7 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { useInView, FadeIn } from "../animations";
+import { getContrastColor } from "../utils";
 
 interface PricingSingleProps {
   heading: string;
@@ -92,7 +93,7 @@ function PricingSingleComponent({
               className="block w-full text-center px-6 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 backgroundColor: accentColor,
-                color: "#0D0D0D",
+                color: getContrastColor(accentColor),
                 boxShadow: `0 0 20px ${accentColor}25`,
               }}
               onMouseEnter={(e) => {

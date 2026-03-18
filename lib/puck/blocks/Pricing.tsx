@@ -1,5 +1,6 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
+import { getContrastColor } from "../utils";
 
 interface PricingPlan {
   name: string;
@@ -129,7 +130,7 @@ export const Pricing: ComponentConfig<PricingProps> = {
                   className="block w-full text-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02]"
                   style={
                     isHighlighted
-                      ? { backgroundColor: accentColor, color: "#0D0D0D" }
+                      ? { backgroundColor: accentColor, color: getContrastColor(accentColor) }
                       : { border: "1px solid rgba(255,255,255,0.2)", color: "white" }
                   }
                 >

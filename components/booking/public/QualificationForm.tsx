@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import type { QualificationField } from "@/lib/types/database";
 
 interface FormData {
@@ -40,6 +41,13 @@ export function QualificationForm({
 }: QualificationFormProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (
+      formData.prospectPhone &&
+      !/^\+?[0-9\s\-(). ]{7,20}$/.test(formData.prospectPhone)
+    ) {
+      toast.error("Numéro de téléphone invalide");
+      return;
+    }
     onSubmit();
   };
 

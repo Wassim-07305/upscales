@@ -83,6 +83,7 @@ export function StudentDetail({
   const [warningReason, setWarningReason] = useState("");
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -373,7 +374,13 @@ export function StudentDetail({
               </Badge>
             ))}
             {isAdmin && availableTags.length > 0 && (
-              <Select onValueChange={handleAddTag}>
+              <Select
+                value={selectedTag}
+                onValueChange={(val) => {
+                  handleAddTag(val);
+                  setSelectedTag("");
+                }}
+              >
                 <SelectTrigger className="w-[130px] h-7 text-xs">
                   <Plus className="h-3 w-3 mr-1" />
                   Ajouter tag

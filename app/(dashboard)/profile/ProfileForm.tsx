@@ -25,7 +25,13 @@ import { cn } from "@/lib/utils";
 const profileSchema = z.object({
   full_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   bio: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .refine(
+      (val) => !val || /^\+?[0-9\s\-(). ]{7,20}$/.test(val),
+      "Numéro de téléphone invalide"
+    )
+    .optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -174,6 +180,9 @@ export function ProfileForm({ profile }: { profile: Profile }) {
                 placeholder="+33 6 00 00 00 00"
                 className="bg-[#141414]"
               />
+              {errors.phone && (
+                <p className="text-xs text-destructive">{errors.phone.message}</p>
+              )}
             </div>
 
             <Button type="submit" disabled={loading}>

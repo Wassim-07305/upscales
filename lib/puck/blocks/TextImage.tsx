@@ -1,6 +1,7 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { ImageUploadField } from "../fields/ImageUploadField";
+import { getContrastColor } from "../utils";
 
 interface TextImageProps {
   heading: string;
@@ -60,7 +61,7 @@ export const TextImage: ComponentConfig<TextImageProps> = {
               className="inline-flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
               style={{
                 backgroundColor: accentColor,
-                color: "#0D0D0D",
+                color: getContrastColor(accentColor),
               }}
             >
               {ctaText}

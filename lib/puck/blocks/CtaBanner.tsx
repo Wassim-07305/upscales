@@ -3,6 +3,7 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { useInView, FadeIn } from "../animations";
+import { getContrastColor } from "../utils";
 
 interface CtaBannerProps {
   heading: string;
@@ -57,7 +58,7 @@ function CtaBannerComponent({
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 active:scale-[0.98] animate-glow-pulse"
                 style={{
                   backgroundColor: accentColor,
-                  color: "#0D0D0D",
+                  color: getContrastColor(accentColor),
                   boxShadow: `0 0 30px ${accentColor}30`,
                 }}
                 onMouseEnter={(e) => {

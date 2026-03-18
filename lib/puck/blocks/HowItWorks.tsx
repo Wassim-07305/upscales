@@ -3,6 +3,7 @@
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { useInView, FadeIn } from "../animations";
+import { getContrastColor } from "../utils";
 
 interface Step {
   title: string;
@@ -56,7 +57,7 @@ function HowItWorksComponent({ heading, subtitle, steps, accentColor }: HowItWor
                     className="z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold transition-transform duration-500"
                     style={{
                       backgroundColor: accentColor,
-                      color: "#0D0D0D",
+                      color: getContrastColor(accentColor),
                       transform: isInView ? "scale(1)" : "scale(0)",
                       transitionDelay: `${index * 150 + 100}ms`,
                     }}

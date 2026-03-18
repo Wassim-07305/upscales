@@ -449,7 +449,7 @@ export function AdminFormationsClient({
               {editingFormation ? "Modifier la formation" : "Nouvelle formation"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
             <div className="space-y-2">
               <Label>Titre</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-[#141414]" />

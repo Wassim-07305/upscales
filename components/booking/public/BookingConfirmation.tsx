@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { format, parse } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CheckCircle2, Calendar, Clock, User, ArrowLeft } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, User, ArrowLeft, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +33,15 @@ export function BookingConfirmation({
   // Parse la date au format "YYYY-MM-DD"
   const dateObj = parse(bookingResult.date, "yyyy-MM-dd", new Date());
   const formattedDate = format(dateObj, "EEEE d MMMM yyyy", { locale: fr });
+
+  // Lien Google Agenda
+  const gcalDateStr = bookingResult.date.replace(/-/g, "");
+  const gcalStart = `${gcalDateStr}T${bookingResult.start_time.slice(0, 8).replace(/:/g, "")}`;
+  const gcalEnd = `${gcalDateStr}T${bookingResult.end_time.slice(0, 8).replace(/:/g, "")}`;
+  const gcalUrl =
+    `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+    `&text=${encodeURIComponent(pageTitle || "Rendez-vous")}` +
+    `&dates=${gcalStart}/${gcalEnd}`;
 
   return (
     <div className="text-center animate-fade-up">
@@ -111,9 +120,21 @@ export function BookingConfirmation({
         </CardContent>
       </Card>
 
-      {/* Lien retour */}
-      <div className="mt-8">
-        <Button asChild variant="outline" className="gap-2">
+      {/* Actions : agenda + retour */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <Button asChild variant="outline" className="gap-2 w-full sm:w-auto">
+          <a href={gcalUrl} target="_blank" rel="noopener noreferrer">
+            <Calendar className="size-4" />
+            Ajouter à Google Agenda
+          </a>
+        </Button>
+        <Button asChild variant="outline" className="gap-2 w-full sm:w-auto">
+          <a href={`/api/calendar/${bookingResult.id}`}>
+            <Download className="size-4" />
+            Télécharger (.ics)
+          </a>
+        </Button>
+        <Button asChild variant="ghost" className="gap-2 w-full sm:w-auto">
           <Link href="/">
             <ArrowLeft className="size-4" />
             Retour à l&apos;accueil

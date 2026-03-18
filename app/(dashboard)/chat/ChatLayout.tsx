@@ -37,6 +37,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Channel, Message, Profile } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatMessageDate } from "@/lib/utils/dates";
@@ -76,6 +81,7 @@ export function ChatLayout({
   const [uploading, setUploading] = useState(false);
   const [reactions, setReactions] = useState<Record<string, { emoji: string; user_id: string }[]>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+  const [showInputEmoji, setShowInputEmoji] = useState(false);
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
   const [archivedChannelIds, setArchivedChannelIds] = useState<string[]>([]);
   const [showArchived, setShowArchived] = useState(false);
@@ -322,6 +328,23 @@ export function ChatLayout({
 
   const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👀"];
 
+  const ALL_EMOJIS = [
+    "😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩",
+    "😘","😗","😚","😙","🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐",
+    "😐","😑","😶","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕",
+    "🤢","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","😟","🙁",
+    "☹️","😮","😯","😲","😳","🥺","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣",
+    "😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹",
+    "👺","👻","👽","👾","🤖","😺","😸","😹","😻","😼","😽","🙀","😿","😾",
+    "👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆",
+    "🖕","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","🫶","👐","🤲","🤝","🙏",
+    "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖",
+    "💝","💘","💟","☮️","✝️","☪️","🕉️","🔥","💫","⭐","🌟","✨","🎉","🎊","🎈","🎁",
+    "🏆","🥇","🎯","🎪","🎭","🎨","🎬","🎤","🎧","🎸","🎺","🎻","🥁","🎷","🎮","🎲",
+    "🚀","🛸","🌈","☀️","🌙","⭐","🌊","🌺","🌸","🌼","🌻","🍕","🍔","🍦","🍰","🎂",
+    "☕","🍵","🥂","🍾","🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐸",
+  ];
+
   const fetchReactions = async (channelId: string) => {
     const { data: msgs } = await supabase
       .from("messages")
@@ -415,7 +438,7 @@ export function ChatLayout({
       await supabase.from("messages").insert({
         channel_id: activeChannel.id,
         sender_id: user.id,
-        content: content || "📷 Image",
+        content: content,
         media_url: url,
         parent_id: replyTo?.id?.startsWith("temp-") ? null : replyTo?.id || null,
       });
@@ -816,7 +839,7 @@ export function ChatLayout({
                                       className="max-w-[300px] max-h-[200px] rounded-xl object-cover cursor-pointer"
                                       onClick={() => window.open(msg.media_url!, "_blank")}
                                     />
-                                    {msg.content && msg.content !== "📷 Image" && (
+                                    {msg.content && (
                                       <p className="px-2 py-1 text-xs">{msg.content}</p>
                                     )}
                                   </div>
@@ -887,18 +910,31 @@ export function ChatLayout({
                               {/* Emoji picker */}
                               {showEmojiPicker === msg.id && (
                                 <div className={cn(
-                                  "absolute z-20 mt-1 flex gap-1 bg-card border border-border rounded-full px-2 py-1 shadow-lg",
+                                  "absolute z-20 mt-1 bg-card border border-border rounded-xl px-2 py-1.5 shadow-lg",
                                   isOwn ? "right-0" : "left-0"
                                 )} style={{ top: "100%" }}>
-                                  {QUICK_EMOJIS.map((emoji) => (
-                                    <button
-                                      key={emoji}
-                                      onClick={() => handleToggleReaction(msg.id, emoji)}
-                                      className="text-base hover:scale-125 transition-transform p-0.5"
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
+                                  <div className="flex gap-1 mb-1">
+                                    {QUICK_EMOJIS.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => handleToggleReaction(msg.id, emoji)}
+                                        className="text-base hover:scale-125 transition-transform p-0.5"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <div className="grid grid-cols-8 gap-0.5 max-h-32 overflow-y-auto border-t border-border pt-1">
+                                    {ALL_EMOJIS.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        onClick={() => handleToggleReaction(msg.id, emoji)}
+                                        className="text-sm hover:scale-125 transition-transform p-0.5 rounded hover:bg-muted"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
 
@@ -1026,6 +1062,30 @@ export function ChatLayout({
                     <ImageIcon className="h-4 w-4" />
                   )}
                 </Button>
+                <Popover open={showInputEmoji} onOpenChange={setShowInputEmoji}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="flex-shrink-0">
+                      <Smile className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-2" side="top" align="start">
+                    <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto">
+                      {ALL_EMOJIS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setNewMessage((prev) => prev + emoji);
+                            setShowInputEmoji(false);
+                            inputRef.current?.focus();
+                          }}
+                          className="text-xl p-1 rounded hover:bg-muted transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <Input
                   ref={inputRef}
                   value={newMessage}

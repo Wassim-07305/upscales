@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { ComponentConfig } from "@measured/puck";
 import { ColorField } from "../fields/ColorField";
 import { ImageUploadField } from "../fields/ImageUploadField";
+import { getContrastColor } from "../utils";
 
 interface NavLink {
   label: string;
@@ -78,7 +79,7 @@ function NavbarComponent({
               className="rounded-lg px-5 py-2 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-[0.98]"
               style={{
                 backgroundColor: accentColor,
-                color: "#0D0D0D",
+                color: getContrastColor(accentColor),
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = `0 0 40px ${accentColor}30`;
@@ -154,7 +155,7 @@ function NavbarComponent({
               className="mt-2 block rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors"
               style={{
                 backgroundColor: accentColor,
-                color: "#0D0D0D",
+                color: getContrastColor(accentColor),
               }}
               onClick={() => setMobileOpen(false)}
             >

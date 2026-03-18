@@ -39,6 +39,7 @@ import {
   ShieldCheck,
   AlertTriangle,
   Trash2,
+  Download,
 } from "lucide-react";
 import { Profile, Tag, Certificate, CrmNote, UserRole, UserWarning } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
@@ -79,6 +80,7 @@ export function StudentDetail({
   const [role, setRole] = useState(student.role);
   const [suspended, setSuspended] = useState(student.is_suspended);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
   const [warningReason, setWarningReason] = useState("");
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
@@ -222,6 +224,26 @@ export function StudentDetail({
     setTags((prev) => prev.filter((t) => t.id !== tagId));
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/admin/users/${student.id}/export?format=json`);
+      if (!res.ok) throw new Error("Export échoué");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `export-${student.id}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Export téléchargé");
+    } catch {
+      toast.error("Erreur lors de l'export");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const availableTags = allTags.filter((t) => !tags.some((ut) => ut.id === t.id));
 
   return (
@@ -352,6 +374,20 @@ export function StudentDetail({
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExport}
+                  disabled={exporting}
+                >
+                  {exporting ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-1" />
+                  )}
+                  Exporter (RGPD)
+                </Button>
               </div>
             )}
           </div>

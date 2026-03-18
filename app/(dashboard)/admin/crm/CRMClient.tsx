@@ -238,10 +238,12 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
           <h1 className="text-2xl font-bold">CRM — Suivi des élèves</h1>
           <p className="text-muted-foreground">{initialStudents.length} utilisateurs au total</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportCSV}>
-          <Download className="mr-2 h-3.5 w-3.5" />
-          Exporter CSV
-        </Button>
+        {currentUserRole === "admin" && (
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="mr-2 h-3.5 w-3.5" />
+            Exporter CSV
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -295,32 +297,32 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
 
         {selected.size > 0 && (
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <UserCog className="mr-2 h-3.5 w-3.5" />
-                  Changer le rôle
-                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleBulkRole("prospect")}>
-                  Prospect
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkRole("member")}>
-                  Membre
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleBulkRole("moderator")}>
-                  Modérateur
-                </DropdownMenuItem>
-                {currentUserRole === "admin" && (
+            {currentUserRole === "admin" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <UserCog className="mr-2 h-3.5 w-3.5" />
+                    Changer le rôle
+                    <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleBulkRole("prospect")}>
+                    Prospect
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleBulkRole("member")}>
+                    Membre
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleBulkRole("moderator")}>
+                    Modérateur
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleBulkRole("admin")}>
                     Admin
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             {allTags.length > 0 && (
               <DropdownMenu>

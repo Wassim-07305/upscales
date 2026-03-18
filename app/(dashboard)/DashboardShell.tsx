@@ -3,11 +3,11 @@
 import { AppShell } from "@/components/layout/app-shell";
 import {
   ADMIN_SECTIONS,
+  MODERATOR_ADMIN_SECTIONS,
   STUDENT_SECTIONS,
   NAV_ITEMS,
   QUICK_LINKS,
   BREADCRUMB_LABELS,
-  ADMIN_ROLES,
 } from "@/lib/constants/navigation";
 
 interface DashboardShellProps {
@@ -27,8 +27,12 @@ export function DashboardShell({
   userId,
   children,
 }: DashboardShellProps) {
-  const isAdmin = ADMIN_ROLES.includes(role);
-  const navSections = isAdmin ? ADMIN_SECTIONS : STUDENT_SECTIONS;
+  const navSections =
+    role === "admin"
+      ? ADMIN_SECTIONS
+      : role === "moderator"
+      ? MODERATOR_ADMIN_SECTIONS
+      : STUDENT_SECTIONS;
 
   return (
     <AppShell

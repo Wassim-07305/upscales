@@ -30,6 +30,7 @@ import type { NavItem, NavSection } from "@/lib/types/appshell";
 export const ALL_ROLES = ["admin", "moderator", "member", "prospect"];
 export const MEMBERS_UP = ["admin", "moderator", "member"];
 export const ADMIN_ROLES = ["admin", "moderator"];
+export const ADMIN_ONLY_ROLES: string[] = ["admin"];
 
 // ─── Navigation eleve ──────────────────────────────────────
 
@@ -163,7 +164,7 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Base IA",
     href: "/admin/ai",
     icon: Brain,
-    roles: ADMIN_ROLES,
+    roles: ADMIN_ONLY_ROLES,
   },
   {
     label: "Calendrier",
@@ -205,7 +206,33 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "Paramètres",
     href: "/admin/settings",
     icon: Settings,
-    roles: ADMIN_ROLES,
+    roles: ADMIN_ONLY_ROLES,
+  },
+];
+
+// Sections pour les modérateurs (sans /admin/ai et /admin/settings)
+export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
+  {
+    label: "",
+    items: ADMIN_NAV_ITEMS.filter((i) => i.href === "/admin"),
+  },
+  {
+    label: "Gestion",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/crm", "/admin/formations", "/admin/pages", "/admin/analytics"].includes(i.href)
+    ),
+  },
+  {
+    label: "Communication",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/chat", "/community", "/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation"].includes(i.href)
+    ),
+  },
+  {
+    label: "Planning",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/calendar", "/admin/booking"].includes(i.href)
+    ),
   },
 ];
 

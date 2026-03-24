@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/rate-limit";
 import { refreshGoogleToken } from "@/lib/gcal/oauth";
 import { pushBookingToGCal } from "@/lib/gcal/sync";
+import { sendBookingConfirmation } from "@/lib/email/email-service";
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for") || "anonymous";
@@ -66,6 +67,14 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  // Fire-and-forget email confirmation
+  void sendBookingConfirmation(prospect_email!, {
+    name: prospect_name!,
+    date: date!,
+    time: start_time!,
+    pageTitle: slug!,
+  }).catch((e) => console.error("[Email booking]", e));
 
   // Fire-and-forget GCal sync — never blocks the booking response
   if (process.env.GOOGLE_CLIENT_ID) {

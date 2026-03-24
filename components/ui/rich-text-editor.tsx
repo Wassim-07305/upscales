@@ -3,6 +3,8 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -15,6 +17,7 @@ import {
   Undo,
   Redo,
   Code,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +37,14 @@ export function RichTextEditor({
   minHeight = "120px",
 }: RichTextEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
       }),
       Placeholder.configure({ placeholder }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -92,6 +98,12 @@ export function RichTextEditor({
       action: () => editor.chain().focus().toggleOrderedList().run(),
       active: editor.isActive("orderedList"),
       title: "Liste numérotée",
+    },
+    {
+      icon: ListChecks,
+      action: () => editor.chain().focus().toggleTaskList().run(),
+      active: editor.isActive("taskList"),
+      title: "Checklist",
     },
     {
       icon: Quote,

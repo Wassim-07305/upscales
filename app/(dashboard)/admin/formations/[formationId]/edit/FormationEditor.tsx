@@ -66,6 +66,7 @@ const typeIcons: Record<ModuleType, typeof Video> = {
   video_embed: Video,
   text: FileText,
   quiz: HelpCircle,
+  exercise: FileText,
 };
 
 const typeLabels: Record<ModuleType, string> = {
@@ -73,6 +74,7 @@ const typeLabels: Record<ModuleType, string> = {
   video_embed: "Vidéo (embed)",
   text: "Texte",
   quiz: "Quiz",
+  exercise: "Exercice",
 };
 
 export function FormationEditor({
@@ -421,6 +423,7 @@ export function FormationEditor({
                   <SelectItem value="video_embed">Vidéo (embed URL)</SelectItem>
                   <SelectItem value="text">Texte</SelectItem>
                   <SelectItem value="quiz">Quiz</SelectItem>
+                  <SelectItem value="exercise">Exercice</SelectItem>
                 </SelectContent>
               </Select>
             </div>

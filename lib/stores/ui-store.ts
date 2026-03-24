@@ -44,6 +44,9 @@ export const useUIStore = create<UIState>()(
         sidebarCollapsed: state.sidebarCollapsed,
         theme: state.theme,
       }),
+      // Prevent synchronous rehydration from localStorage during SSR/hydration.
+      // The store rehydrates after mount via useEffect in the component.
+      skipHydration: true,
     }
   )
 );

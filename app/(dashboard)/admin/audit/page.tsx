@@ -16,6 +16,9 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   "post.delete": { label: "Suppression post", color: "bg-destructive/20 text-destructive border-destructive/30" },
   "post.pin": { label: "Épinglage post", color: "bg-primary/20 text-primary border-primary/30" },
   "channel.create": { label: "Création canal", color: "bg-turquoise/20 text-turquoise border-turquoise/30" },
+  "channel.delete": { label: "Suppression canal", color: "bg-destructive/20 text-destructive border-destructive/30" },
+  "channel.archive": { label: "Archivage canal", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  "channel.restore": { label: "Restauration canal", color: "bg-neon/20 text-neon border-neon/30" },
   "document.upload": { label: "Upload document IA", color: "bg-primary/20 text-primary border-primary/30" },
   "document.delete": { label: "Suppression document IA", color: "bg-destructive/20 text-destructive border-destructive/30" },
 };

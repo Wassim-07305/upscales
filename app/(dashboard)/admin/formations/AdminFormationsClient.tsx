@@ -53,6 +53,7 @@ import { formatDate } from "@/lib/utils/dates";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { logAuditAction } from "@/lib/actions/audit";
 
 interface FormationWithCount extends Formation {
   enrolled_count: number;
@@ -142,20 +143,22 @@ export function AdminFormationsClient({
       if (error) {
         toast.error("Erreur", { description: error.message });
       } else {
+        await logAuditAction("formation.update", "formation", editingFormation.id, { title: data.title });
         toast.success("Formation mise à jour");
       }
     } else {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const { error } = await supabase.from("formations").insert({
+      const { data: created, error } = await supabase.from("formations").insert({
         ...data,
         created_by: user?.id,
-      });
+      }).select("id").single();
 
       if (error) {
         toast.error("Erreur", { description: error.message });
       } else {
+        await logAuditAction("formation.create", "formation", created?.id, { title: data.title });
         toast.success("Formation créée");
       }
     }
@@ -166,7 +169,9 @@ export function AdminFormationsClient({
   };
 
   const handleDelete = async (id: string) => {
+    const formation = formations.find((f) => f.id === id);
     await supabase.from("formations").delete().eq("id", id);
+    await logAuditAction("formation.delete", "formation", id, { title: formation?.title });
     setFormations((prev) => prev.filter((f) => f.id !== id));
     toast.success("Formation supprimée");
   };
@@ -329,6 +334,7 @@ export function AdminFormationsClient({
                         value={f.status}
                         onValueChange={async (v) => {
                           await supabase.from("formations").update({ status: v }).eq("id", f.id);
+                          await logAuditAction("formation.update", "formation", f.id, { status_from: f.status, status_to: v });
                           setFormations((prev) => prev.map((x) => x.id === f.id ? { ...x, status: v as FormationStatus } : x));
                           toast.success("Statut mis à jour");
                         }}

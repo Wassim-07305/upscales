@@ -1,11 +1,27 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import { MobileNav } from "@/components/layout/mobile-nav";
 import { NotificationsPanel } from "@/components/layout/notifications-panel";
-import { GlobalSearch } from "@/components/layout/global-search";
+import dynamic from "next/dynamic";
+
+const Sidebar = dynamic(
+  () => import("@/components/layout/sidebar").then((m) => m.Sidebar),
+  {
+    ssr: false,
+    loading: () => (
+      <aside className="z-30 hidden md:flex h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar" />
+    ),
+  }
+);
+const MobileNav = dynamic(
+  () => import("@/components/layout/mobile-nav").then((m) => m.MobileNav),
+  { ssr: false }
+);
+const GlobalSearch = dynamic(
+  () => import("@/components/layout/global-search").then((m) => m.GlobalSearch),
+  { ssr: false }
+);
 import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { useUIStore } from "@/lib/stores/ui-store";
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -50,6 +66,13 @@ interface AppShellProps {
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useUIStore();
+
+  // Rehydrate Zustand persisted state after mount (skipHydration is enabled
+  // to prevent SSR/client mismatch). This runs once at the top of the tree
+  // so all child components (Sidebar, Header, etc.) get correct values.
+  useEffect(() => {
+    useUIStore.persist.rehydrate();
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;

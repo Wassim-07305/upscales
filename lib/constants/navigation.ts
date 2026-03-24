@@ -21,6 +21,15 @@ import {
   Hash,
   Megaphone,
   StickyNote,
+  Bug,
+  Target,
+  ListTodo,
+  FolderOpen,
+  ClipboardList,
+  Kanban,
+  Clapperboard,
+  UsersRound,
+  Link2,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -39,6 +48,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    roles: ALL_ROLES,
+  },
+  {
+    label: "Mes tâches",
+    href: "/tasks",
+    icon: ListTodo,
     roles: ALL_ROLES,
   },
   {
@@ -78,6 +93,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: ALL_ROLES,
   },
   {
+    label: "Playbooks",
+    href: "/playbook",
+    icon: ClipboardList,
+    roles: MEMBERS_UP,
+  },
+  {
     label: "Chat",
     href: "/chat",
     icon: MessageCircle,
@@ -93,6 +114,18 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     label: "MateuzsIA",
     href: "/ai",
     icon: Sparkles,
+    roles: MEMBERS_UP,
+  },
+  {
+    label: "Ressources",
+    href: "/ressources",
+    icon: FolderOpen,
+    roles: MEMBERS_UP,
+  },
+  {
+    label: "Liens & Outils",
+    href: "/tools",
+    icon: Link2,
     roles: MEMBERS_UP,
   },
   {
@@ -125,6 +158,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ROLES,
   },
   {
+    label: "Mes tâches",
+    href: "/tasks",
+    icon: ListTodo,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
@@ -134,6 +173,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "CRM",
     href: "/admin/crm",
     icon: Users,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Pipeline",
+    href: "/admin/leads",
+    icon: Kanban,
     roles: ADMIN_ROLES,
   },
   {
@@ -179,6 +224,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ROLES,
   },
   {
+    label: "Équipe",
+    href: "/admin/team",
+    icon: UsersRound,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Communauté",
     href: "/community",
     icon: Globe,
@@ -203,6 +254,54 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ROLES,
   },
   {
+    label: "Contenu",
+    href: "/admin/content",
+    icon: Clapperboard,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Exercices",
+    href: "/admin/exercises",
+    icon: FileText,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Playbooks",
+    href: "/admin/playbooks",
+    icon: ClipboardList,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "OKRs",
+    href: "/admin/okrs",
+    icon: Target,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "SOPs",
+    href: "/admin/sops",
+    icon: FolderOpen,
+    roles: ADMIN_ONLY_ROLES,
+  },
+  {
+    label: "Ressources",
+    href: "/ressources",
+    icon: BookOpen,
+    roles: ADMIN_ROLES,
+  },
+  {
+    label: "Liens & Outils",
+    href: "/admin/tools",
+    icon: Link2,
+    roles: ADMIN_ONLY_ROLES,
+  },
+  {
+    label: "Error Logs",
+    href: "/admin/error-logs",
+    icon: Bug,
+    roles: ADMIN_ONLY_ROLES,
+  },
+  {
     label: "Paramètres",
     href: "/admin/settings",
     icon: Settings,
@@ -219,19 +318,19 @@ export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/formations", "/admin/pages", "/admin/analytics"].includes(i.href)
+      ["/tasks", "/admin/crm", "/admin/leads", "/admin/formations", "/admin/pages", "/admin/analytics", "/admin/okrs", "/admin/sops", "/admin/playbooks", "/ressources"].includes(i.href)
     ),
   },
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation", "/admin/content"].includes(i.href)
     ),
   },
   {
     label: "Planning",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/calendar", "/admin/booking"].includes(i.href)
+      ["/admin/calendar", "/admin/booking", "/admin/team"].includes(i.href)
     ),
   },
 ];
@@ -251,7 +350,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "Apprendre",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/formations", "/calendar", "/certificates", "/leaderboard", "/progress", "/notes"].includes(i.href)
+      ["/tasks", "/formations", "/calendar", "/certificates", "/leaderboard", "/progress", "/notes", "/playbook"].includes(i.href)
     ),
   },
   {
@@ -263,7 +362,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/referral", "/notifications", "/settings"].includes(i.href)
+      ["/ressources", "/tools", "/referral", "/notifications", "/settings"].includes(i.href)
     ),
   },
 ];
@@ -277,25 +376,25 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "Gestion",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/formations", "/admin/pages", "/admin/analytics"].includes(i.href)
+      ["/tasks", "/admin/crm", "/admin/leads", "/admin/formations", "/admin/pages", "/admin/analytics", "/admin/okrs", "/admin/sops", "/admin/playbooks", "/ressources"].includes(i.href)
     ),
   },
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation", "/admin/content"].includes(i.href)
     ),
   },
   {
     label: "Planning",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/calendar", "/admin/booking"].includes(i.href)
+      ["/admin/calendar", "/admin/booking", "/admin/team"].includes(i.href)
     ),
   },
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/settings"].includes(i.href)
+      ["/admin/tools", "/admin/error-logs", "/admin/settings"].includes(i.href)
     ),
   },
 ];
@@ -324,6 +423,18 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   broadcast: "Annonces",
   channels: "Channels",
   moderation: "Modération",
+  exercises: "Exercices",
+  okrs: "OKRs",
+  tasks: "Mes tâches",
+  sops: "SOPs",
+  playbook: "Playbooks",
+  playbooks: "Playbooks",
+  leads: "Pipeline",
+  content: "Contenu",
+  team: "Équipe",
+  tools: "Liens & Outils",
+  ressources: "Ressources",
+  "error-logs": "Error Logs",
   settings: "Paramètres",
   edit: "Modifier",
 };
@@ -332,6 +443,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
 
 export const QUICK_LINKS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Mes tâches", href: "/tasks", icon: ListTodo },
   { label: "Formations", href: "/formations", icon: BookOpen },
   { label: "Chat", href: "/chat", icon: MessageCircle },
   { label: "MateuzsIA", href: "/ai", icon: Sparkles },

@@ -29,12 +29,14 @@ import { Module, ModuleProgress, Quiz, QuizQuestion, QuizOption } from "@/lib/ty
 import { showXPToast } from "@/components/gamification/XPToast";
 import { ModuleNotes } from "@/components/formations/ModuleNotes";
 import { ModuleDiscussions } from "@/components/formations/ModuleDiscussions";
+import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
   video_embed: Video,
   text: FileText,
   quiz: HelpCircle,
+  exercise: FileText,
 };
 
 interface ModuleContentProps {
@@ -439,6 +441,16 @@ export function ModuleContent({
                 }
               }
             }}
+          />
+        )}
+
+        {module.type === "exercise" && (
+          <ExerciseBlock
+            moduleId={module.id}
+            formationId={formationId}
+            userId={currentUserId}
+            completed={completed}
+            onComplete={() => { if (!completed) handleMarkCompleted(); }}
           />
         )}
 

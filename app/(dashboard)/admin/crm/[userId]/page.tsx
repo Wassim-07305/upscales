@@ -44,6 +44,8 @@ export default async function StudentDetailPage({
     { data: allTags },
     { count: messageCount },
     { count: postCount },
+    { data: coachClientArr },
+    { data: clientReports },
   ] = await Promise.all([
     supabase.from("formation_enrollments").select("*, formation:formations(title)").eq("user_id", userId),
     supabase.from("module_progress").select("*").eq("user_id", userId),
@@ -54,6 +56,8 @@ export default async function StudentDetailPage({
     supabase.from("tags").select("*").order("name"),
     supabase.from("messages").select("*", { count: "exact", head: true }).eq("sender_id", userId),
     supabase.from("posts").select("*", { count: "exact", head: true }).eq("author_id", userId),
+    supabase.from("coach_clients").select("*").eq("client_id", userId),
+    supabase.from("client_reports").select("*").eq("client_id", userId).order("period_start", { ascending: false }),
   ]);
 
   // Fetch modules for enrolled formations (depends on enrollments result)
@@ -88,6 +92,9 @@ export default async function StudentDetailPage({
       messageCount={messageCount || 0}
       postCount={postCount || 0}
       isAdmin={adminProfile.role === "admin"}
+      coachClient={coachClientArr?.[0] || null}
+      reports={clientReports || []}
+      currentUserId={user.id}
     />
   );
 }

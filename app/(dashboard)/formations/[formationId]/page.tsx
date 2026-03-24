@@ -54,11 +54,16 @@ export default async function FormationDetailPage({
         .order("created_at", { ascending: false }),
     ]);
 
-  // Fetch prerequisites for all modules in this formation
+  // Fetch prerequisites and drip schedules for all modules
   const moduleIds = modulesRes.data?.map((m) => m.id) || [];
-  const { data: prerequisites } = moduleIds.length > 0
-    ? await supabase.from("module_prerequisites").select("*").in("module_id", moduleIds)
-    : { data: [] };
+  const [prerequisitesRes, dripRes] = await Promise.all([
+    moduleIds.length > 0
+      ? supabase.from("module_prerequisites").select("*").in("module_id", moduleIds)
+      : Promise.resolve({ data: [] }),
+    supabase.from("drip_schedules").select("*").eq("formation_id", formationId),
+  ]);
+  const prerequisites = prerequisitesRes.data || [];
+  const dripSchedules = dripRes.data || [];
 
   const formation = formationRes.data;
   if (!formation) notFound();
@@ -143,7 +148,9 @@ export default async function FormationDetailPage({
                 progress={progress}
                 formationId={formationId}
                 enrolled={!!enrollment}
-                prerequisites={prerequisites || []}
+                prerequisites={prerequisites}
+                dripSchedules={dripSchedules}
+                enrolledAt={enrollment?.enrolled_at}
               />
             </CardContent>
           </Card>

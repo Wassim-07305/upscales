@@ -13,7 +13,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Camera, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2,
+  Camera,
+  Eye,
+  EyeOff,
+  MessageCircle,
+  FileText,
+  BookOpen,
+  CalendarDays,
+  Award,
+  Bell,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Profile } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
@@ -40,6 +51,10 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
   const [isPublic, setIsPublic] = useState((profile as any).is_public !== false);
+  const defaultPrefs = { message: true, post: true, formation: true, session: true, certificate: true, system: true };
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
+    () => ({ ...defaultPrefs, ...((profile as any).notification_preferences || {}) })
+  );
   const router = useRouter();
   const supabase = createClient();
 
@@ -229,6 +244,45 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               }}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Preferences de notifications</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {([
+            { key: "message", label: "Messages prives", desc: "Nouveaux messages directs", icon: MessageCircle },
+            { key: "post", label: "Publications communaute", desc: "Commentaires et likes sur vos posts", icon: FileText },
+            { key: "formation", label: "Formations", desc: "Nouvelles formations et mises a jour", icon: BookOpen },
+            { key: "session", label: "Sessions", desc: "Rappels et nouvelles sessions", icon: CalendarDays },
+            { key: "certificate", label: "Certificats", desc: "Certificats obtenus", icon: Award },
+            { key: "system", label: "Systeme", desc: "Annonces et mises a jour plateforme", icon: Bell },
+          ] as const).map(({ key, label, desc, icon: Icon }) => (
+            <div key={key} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Icon className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </div>
+              <Switch
+                checked={notifPrefs[key] !== false}
+                onCheckedChange={async (checked) => {
+                  const updated = { ...notifPrefs, [key]: checked };
+                  setNotifPrefs(updated);
+                  await supabase
+                    .from("profiles")
+                    .update({ notification_preferences: updated })
+                    .eq("id", profile.id);
+                  toast.success(checked ? `Notifications "${label}" activees` : `Notifications "${label}" desactivees`);
+                }}
+              />
+            </div>
+          ))}
         </CardContent>
       </Card>
 

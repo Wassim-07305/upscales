@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: "Embeddings non configurés (OPENAI_API_KEY manquante)" }, { status: 503 });
+  }
+
   const { documentId } = await request.json();
 
   // Fetch document record

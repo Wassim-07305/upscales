@@ -35,7 +35,25 @@ import { toast } from "sonner";
 interface StudentData extends Profile {
   tags: Tag[];
   enrollments_count: number;
+  coach_phase: string | null;
+  coach_health: string | null;
 }
+
+const PHASE_LABELS: Record<string, { label: string; color: string }> = {
+  onboarding: { label: "Onboarding", color: "bg-blue-400/20 text-blue-400" },
+  lancement: { label: "Lancement", color: "bg-cyan-400/20 text-cyan-400" },
+  optimisation: { label: "Optim.", color: "bg-neon/20 text-neon" },
+  scaling: { label: "Scaling", color: "bg-purple-400/20 text-purple-400" },
+  autonomie: { label: "Autonomie", color: "bg-emerald-400/20 text-emerald-400" },
+  offboarding: { label: "Offboard.", color: "bg-orange-400/20 text-orange-400" },
+};
+
+const HEALTH_ICONS: Record<string, string> = {
+  en_forme: "🟢",
+  attention: "🟡",
+  critique: "🔴",
+  a_risque: "⚠️",
+};
 
 interface FormationOption {
   id: string;
@@ -393,6 +411,8 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
                     Rôle <SortIcon col="role" />
                   </th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Tags</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Phase</th>
+                  <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Santé</th>
                   <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("enrollments")}>
                     Formations <SortIcon col="enrollments" />
                   </th>
@@ -457,6 +477,24 @@ export function CRMClient({ initialStudents, allTags, allFormations, currentUser
                           </Badge>
                         ))}
                       </div>
+                    </td>
+                    <td className="p-3 hidden lg:table-cell">
+                      {student.coach_phase && PHASE_LABELS[student.coach_phase] ? (
+                        <Badge variant="outline" className={cn("text-[10px]", PHASE_LABELS[student.coach_phase].color)}>
+                          {PHASE_LABELS[student.coach_phase].label}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="p-3 hidden lg:table-cell">
+                      {student.coach_health && HEALTH_ICONS[student.coach_health] ? (
+                        <span className="text-sm" title={student.coach_health}>
+                          {HEALTH_ICONS[student.coach_health]}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="p-3 hidden md:table-cell">
                       <span className="text-sm">{student.enrollments_count}</span>

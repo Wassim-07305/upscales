@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendCertificateEarned } from "@/lib/email/email-service";
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import QRCode from "qrcode";
@@ -232,6 +233,13 @@ export async function GET(
         certificateNumber: certificate.certificate_number,
       })
     );
+
+    // Fire-and-forget certificate email
+    void sendCertificateEarned(user.email!, {
+      name: studentName,
+      formationTitle,
+      certificateNumber: certificate.certificate_number,
+    }).catch((e) => console.error("[Email certificate]", e));
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {

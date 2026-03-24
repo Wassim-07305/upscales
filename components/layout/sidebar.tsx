@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,11 +65,17 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const {
-    sidebarCollapsed: isCollapsed,
+    sidebarCollapsed: storeCollapsed,
     toggleSidebar,
     sidebarMobileOpen,
     setMobileSidebarOpen,
   } = useUIStore();
+
+  // Prevent hydration mismatch: render with default values until mounted.
+  // Rehydration from localStorage happens in AppShell's ThemeProvider.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const isCollapsed = hydrated ? storeCollapsed : false;
 
   function closeMobile() {
     setMobileSidebarOpen(false);

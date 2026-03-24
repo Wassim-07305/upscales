@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
   const ext = file.name.split(".").pop();
   const fileName = `${user.id}/${Date.now()}.${ext}`;
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: "Upload non configuré (service role key manquante)" }, { status: 503 });
+  }
+
   const admin = createAdminClient();
   const { data, error } = await admin.storage
     .from(bucket)

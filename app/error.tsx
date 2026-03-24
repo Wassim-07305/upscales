@@ -13,6 +13,15 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("[Upscale Error]", error);
+    import("@/lib/error-logger").then(({ logError }) =>
+      logError({
+        message: error.message,
+        stack: error.stack,
+        source: "error-boundary",
+        severity: "critical",
+        metadata: { digest: error.digest },
+      })
+    );
   }, [error]);
 
   return (

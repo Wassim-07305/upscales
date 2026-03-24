@@ -27,6 +27,7 @@ import { Channel, ChannelType } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { timeAgo } from "@/lib/utils/dates";
 import { toast } from "sonner";
+import { logAuditAction } from "@/lib/actions/audit";
 
 interface ChannelWithCount extends Channel {
   members_count: number;
@@ -136,6 +137,7 @@ export default function AdminChannelsPage() {
         .single();
       if (created) {
         setChannels((prev) => [...prev, { ...created, members_count: 0 }]);
+        await logAuditAction("channel.create", "channel", created.id, { name: data.name, type: data.type });
         toast.success("Channel créé");
       }
     }
@@ -145,13 +147,17 @@ export default function AdminChannelsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    const channel = channels.find((c) => c.id === id);
     await supabase.from("channels").delete().eq("id", id);
+    await logAuditAction("channel.delete", "channel", id, { name: channel?.name });
     setChannels((prev) => prev.filter((c) => c.id !== id));
     toast.success("Channel supprimé");
   };
 
   const handleArchive = async (id: string, archived: boolean) => {
+    const channel = channels.find((c) => c.id === id);
     await supabase.from("channels").update({ is_archived: archived }).eq("id", id);
+    await logAuditAction(archived ? "channel.archive" : "channel.restore", "channel", id, { name: channel?.name });
     setChannels((prev) =>
       prev.map((c) => (c.id === id ? { ...c, is_archived: archived } : c))
     );

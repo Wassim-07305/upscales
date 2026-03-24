@@ -1,6 +1,6 @@
 export type UserRole = "admin" | "moderator" | "member" | "prospect";
 export type FormationStatus = "draft" | "published" | "archived";
-export type ModuleType = "video_upload" | "video_embed" | "text" | "quiz";
+export type ModuleType = "video_upload" | "video_embed" | "text" | "quiz" | "exercise";
 export type ChannelType = "public" | "private" | "dm";
 export type NotificationType = "message" | "post" | "formation" | "session" | "certificate" | "system";
 export type SessionStatus = "scheduled" | "completed" | "cancelled";
@@ -454,4 +454,287 @@ export interface ModulePrerequisite {
   module_id: string;
   prerequisite_module_id: string;
   created_at: string;
+}
+
+// ============================================
+// OKRs (Objectives & Key Results)
+// ============================================
+export type OKRPeriodType = "annual" | "quarterly" | "monthly";
+
+export interface OKRPeriod {
+  id: string;
+  title: string;
+  type: OKRPeriodType;
+  start_date: string;
+  end_date: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  objectives?: OKRObjective[];
+}
+
+export interface OKRObjective {
+  id: string;
+  period_id: string;
+  title: string;
+  description: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+  key_results?: OKRKeyResult[];
+}
+
+// ============================================
+// Tasks (personal to-do)
+// ============================================
+export type TaskStatus = "todo" | "done";
+export type TaskPriority = "high" | "medium" | "low";
+
+export interface Task {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  due_date: string | null;
+  is_top_priority: boolean;
+  completed_at: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// SOPs (Standard Operating Procedures)
+// ============================================
+export type SOPDepartment = "ceo" | "sales" | "delivery" | "publicite" | "contenu" | "equipe" | "tresorerie" | "operations";
+
+export interface SOPExternalLink {
+  label: string;
+  url: string;
+}
+
+export interface SOP {
+  id: string;
+  title: string;
+  content: string | null;
+  department: SOPDepartment;
+  target_roles: string[];
+  external_links: SOPExternalLink[];
+  order: number;
+  is_published: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OKRKeyResult {
+  id: string;
+  objective_id: string;
+  title: string;
+  target_value: number;
+  current_value: number;
+  unit: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// Playbooks (Role-based Operating Systems)
+// ============================================
+export type PlaybookRole = "setter" | "closer" | "coach" | "assistante" | "all";
+export type PlaybookPageType = "content" | "checklist" | "script" | "kpi" | "links";
+
+export interface Playbook {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  target_role: PlaybookRole;
+  icon: string;
+  is_published: boolean;
+  order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlaybookSection {
+  id: string;
+  playbook_id: string;
+  title: string;
+  description: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlaybookPage {
+  id: string;
+  section_id: string;
+  title: string;
+  content: string | null;
+  page_type: PlaybookPageType;
+  external_links: SOPExternalLink[];
+  order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PlaybookWithSections extends Playbook {
+  sections: (PlaybookSection & { pages: PlaybookPage[] })[];
+}
+
+// ============================================
+// Coach Clients (CRM Coach avancé)
+// ============================================
+export type CoachPhase = "onboarding" | "lancement" | "optimisation" | "scaling" | "autonomie" | "offboarding";
+export type HealthStatus = "en_forme" | "attention" | "critique" | "a_risque";
+
+export interface CoachClient {
+  id: string;
+  client_id: string;
+  coach_id: string | null;
+  phase: CoachPhase;
+  health_status: HealthStatus;
+  start_date: string;
+  end_date: string | null;
+  monthly_revenue: number;
+  nps_score: number | null;
+  last_contact_at: string;
+  instagram_url: string | null;
+  ads_url: string | null;
+  product: string | null;
+  notes: string | null;
+  plan_content: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// Leads (Pipeline Setter)
+// ============================================
+export type LeadStatus = "nouveau" | "qualifie" | "appel_booke" | "en_reflexion" | "close" | "perdu" | "no_show";
+
+export interface Lead {
+  id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  instagram_url: string | null;
+  source: string | null;
+  status: LeadStatus;
+  estimated_value: number;
+  notes: string | null;
+  next_action: string | null;
+  next_action_date: string | null;
+  assigned_to: string | null;
+  created_by: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// Client Reports (Rapports hebdo/mensuels + NPS)
+// ============================================
+export type ReportType = "weekly" | "monthly";
+
+export interface ReportMetrics {
+  leads?: number;
+  appels_bookes?: number;
+  show_up_pct?: number;
+  closes?: number;
+  depense_pub?: number;
+  cpa?: number;
+  ca_mensuel?: number;
+}
+
+export interface ClientReport {
+  id: string;
+  client_id: string;
+  author_id: string;
+  report_type: ReportType;
+  period_start: string;
+  period_end: string;
+  nps_score: number | null;
+  metrics: ReportMetrics;
+  diagnostic: string | null;
+  actions: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: { full_name: string };
+}
+
+// ============================================
+// Video Content (Production vidéo)
+// ============================================
+export type VideoPlatform = "instagram" | "youtube" | "tiktok" | "other";
+export type VideoStatus = "idee" | "script_pret" | "tournage_pret" | "publie";
+
+export interface VideoContent {
+  id: string;
+  title: string;
+  platform: VideoPlatform;
+  status: VideoStatus;
+  publish_date: string | null;
+  script_notes: string | null;
+  description: string | null;
+  external_url: string | null;
+  created_by: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// Time Entries (Suivi heures)
+// ============================================
+export interface TimeEntry {
+  id: string;
+  member_id: string;
+  title: string;
+  entry_date: string;
+  hours: number;
+  notes: string | null;
+  created_at: string;
+}
+
+// ============================================
+// Meeting Notes (Notes de réunion)
+// ============================================
+export type MeetingType = "hebdo" | "mensuel" | "trimestriel" | "autre";
+
+export interface MeetingNote {
+  id: string;
+  title: string;
+  meeting_date: string;
+  meeting_type: MeetingType;
+  content: string | null;
+  participants: string[];
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================
+// Tool Links (Hub liens/outils)
+// ============================================
+export type ToolCategory = "vente" | "ads" | "delivery" | "operations" | "contenu" | "finance" | "autre";
+
+export interface ToolLink {
+  id: string;
+  title: string;
+  url: string;
+  description: string | null;
+  category: ToolCategory;
+  order: number;
+  is_published: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 }

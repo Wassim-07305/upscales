@@ -41,12 +41,15 @@ import {
   Trash2,
   Download,
 } from "lucide-react";
-import { Profile, Tag, Certificate, CrmNote, UserRole, UserWarning } from "@/lib/types/database";
+import { Profile, Tag, Certificate, CrmNote, UserRole, UserWarning, CoachClient, ClientReport } from "@/lib/types/database";
+import { CoachSection } from "./CoachSection";
+import { ReportsSection } from "./ReportsSection";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate, timeAgo } from "@/lib/utils/dates";
 import { getRoleBadgeColor, getRoleLabel } from "@/lib/utils/roles";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { logAuditAction } from "@/lib/actions/audit";
 
 interface StudentDetailProps {
   student: Profile;
@@ -59,6 +62,9 @@ interface StudentDetailProps {
   messageCount: number;
   postCount: number;
   isAdmin: boolean;
+  coachClient: CoachClient | null;
+  reports: ClientReport[];
+  currentUserId: string;
 }
 
 export function StudentDetail({
@@ -72,6 +78,9 @@ export function StudentDetail({
   messageCount,
   postCount,
   isAdmin,
+  coachClient,
+  reports,
+  currentUserId,
 }: StudentDetailProps) {
   const [notes, setNotes] = useState(initialNotes);
   const [warnings, setWarnings] = useState(initialWarnings);
@@ -109,6 +118,7 @@ export function StudentDetail({
       link: "/suspended",
     });
 
+    await logAuditAction("user.suspend", "user", student.id, { reason: suspendReason.trim() });
     setSuspended(true);
     setSuspendReason("");
     setSuspendDialogOpen(false);
@@ -135,6 +145,7 @@ export function StudentDetail({
       link: "/dashboard",
     });
 
+    await logAuditAction("user.unsuspend", "user", student.id);
     setSuspended(false);
     toast.success("Utilisateur réactivé");
     setLoading(false);
@@ -168,6 +179,7 @@ export function StudentDetail({
         link: "/settings",
       });
 
+      await logAuditAction("user.warning", "user", student.id, { reason: warningReason.trim() });
       toast.success("Avertissement envoyé");
     }
 
@@ -204,7 +216,9 @@ export function StudentDetail({
   };
 
   const handleRoleChange = async (newRole: string) => {
+    const oldRole = role;
     await supabase.from("profiles").update({ role: newRole }).eq("id", student.id);
+    await logAuditAction("user.role_change", "user", student.id, { from: oldRole, to: newRole });
     setRole(newRole as UserRole);
     toast.success("Rôle mis à jour");
     router.refresh();
@@ -409,7 +423,7 @@ export function StudentDetail({
                 )}
               </Badge>
             ))}
-            {isAdmin && availableTags.length > 0 && (
+            {availableTags.length > 0 ? (
               <Select
                 value={selectedTag}
                 onValueChange={(val) => {
@@ -429,6 +443,8 @@ export function StudentDetail({
                   ))}
                 </SelectContent>
               </Select>
+            ) : (
+              <span className="text-[11px] text-muted-foreground italic">Tous les tags assignés</span>
             )}
           </div>
         </CardContent>
@@ -541,6 +557,12 @@ export function StudentDetail({
           </CardContent>
         </Card>
       )}
+
+      {/* Coach Section */}
+      <CoachSection clientId={student.id} coachClient={coachClient} />
+
+      {/* Reports */}
+      <ReportsSection clientId={student.id} userId={currentUserId} reports={reports} />
 
       {/* CRM Notes */}
       <Card>

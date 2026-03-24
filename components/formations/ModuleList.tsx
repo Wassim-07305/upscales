@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Module, ModuleProgress, ModulePrerequisite } from "@/lib/types/database";
-import { Video, FileText, HelpCircle, CheckCircle, Lock } from "lucide-react";
+import { Video, FileText, HelpCircle, CheckCircle, Lock, Clock } from "lucide-react";
 import { formatDuration } from "@/lib/utils/dates";
 import {
   Tooltip,
@@ -12,12 +12,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const typeIcons = {
+const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
   video_embed: Video,
   text: FileText,
   quiz: HelpCircle,
+  exercise: FileText,
 };
+
+interface DripSchedule {
+  module_id: string;
+  delay_days: number;
+  unlock_type: string;
+}
 
 interface ModuleListProps {
   modules: Module[];
@@ -25,9 +32,11 @@ interface ModuleListProps {
   formationId: string;
   enrolled: boolean;
   prerequisites?: ModulePrerequisite[];
+  dripSchedules?: DripSchedule[];
+  enrolledAt?: string;
 }
 
-export function ModuleList({ modules, progress, formationId, enrolled, prerequisites = [] }: ModuleListProps) {
+export function ModuleList({ modules, progress, formationId, enrolled, prerequisites = [], dripSchedules = [], enrolledAt }: ModuleListProps) {
   // Check if all prerequisites for a module are completed
   const arePrerequisitesComplete = (moduleId: string): boolean => {
     const modulePrereqs = prerequisites.filter((p) => p.module_id === moduleId);
@@ -53,6 +62,15 @@ export function ModuleList({ modules, progress, formationId, enrolled, prerequis
       });
   };
 
+  // Check drip lock
+  const isDripLocked = (moduleId: string): { locked: boolean; unlockDate: Date | null } => {
+    const drip = dripSchedules.find((d) => d.module_id === moduleId);
+    if (!drip || !enrolledAt || drip.delay_days === 0) return { locked: false, unlockDate: null };
+    const unlockDate = new Date(enrolledAt);
+    unlockDate.setDate(unlockDate.getDate() + drip.delay_days);
+    return { locked: new Date() < unlockDate, unlockDate };
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-1">
@@ -61,9 +79,11 @@ export function ModuleList({ modules, progress, formationId, enrolled, prerequis
           const isCompleted = prog?.completed;
           const prereqsComplete = arePrerequisitesComplete(mod.id);
           const incompletePrereqs = getIncompletePrerequisites(mod.id);
-          const canAccess = (enrolled || mod.is_preview) && prereqsComplete;
+          const drip = isDripLocked(mod.id);
+          const canAccess = (enrolled || mod.is_preview) && prereqsComplete && !drip.locked;
           const isLockedByPrereqs = enrolled && !prereqsComplete;
-          const Icon = typeIcons[mod.type];
+          const isLockedByDrip = enrolled && prereqsComplete && drip.locked;
+          const Icon = typeIcons[mod.type] || FileText;
 
         return (
           <div key={mod.id}>
@@ -126,6 +146,26 @@ export function ModuleList({ modules, progress, formationId, enrolled, prerequis
                       <li key={i}>{name}</li>
                     ))}
                   </ul>
+                </TooltipContent>
+              </Tooltip>
+            ) : isLockedByDrip ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg opacity-50 cursor-not-allowed">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary flex-shrink-0">
+                      <Clock className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{mod.title}</p>
+                      <p className="text-xs text-blue-400/80">
+                        Disponible le {drip.unlockDate?.toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p className="text-xs">Ce module se debloque progressivement apres votre inscription</p>
                 </TooltipContent>
               </Tooltip>
             ) : (

@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
     return new Response("Forbidden", { status: 403 });
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response("Chat IA non configuré (ANTHROPIC_API_KEY manquante)", { status: 503 });
+  }
+
   const { messages, conversationId } = await request.json();
 
   // Extract text from the last user message (UIMessage format with parts)

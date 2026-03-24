@@ -3,6 +3,7 @@ import { Outfit, Syne, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { PWARegister } from "@/components/providers/PWARegister";
+import { ErrorMonitoringProvider } from "@/components/providers/ErrorMonitoringProvider";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -74,7 +75,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <body className={`${outfit.variable} ${syne.variable} ${geistMono.variable} font-sans antialiased`}>
-        {children}
+        <ErrorMonitoringProvider>
+          {children}
+        </ErrorMonitoringProvider>
         <Toaster richColors position="top-right" />
         <PWARegister />
       </body>

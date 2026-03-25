@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
 import { BookingAdminClient } from "./BookingAdminClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function BookingAdminPage() {
   const supabase = await createClient();
@@ -37,9 +38,12 @@ export default async function BookingAdminPage() {
   ]);
 
   return (
-    <BookingAdminClient
-      bookingPages={bookingPages || []}
-      recentBookings={recentBookings || []}
-    />
+    <>
+      <SubNav tabs={[{ label: "Calendrier", href: "/admin/calendar" }, { label: "Booking", href: "/admin/booking" }]} />
+      <BookingAdminClient
+        bookingPages={bookingPages || []}
+        recentBookings={recentBookings || []}
+      />
+    </>
   );
 }

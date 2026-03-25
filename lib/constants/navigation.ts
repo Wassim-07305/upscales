@@ -322,34 +322,24 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-// Sections pour les modérateurs (sans /admin/ai et /admin/settings)
+// Sections pour les modérateurs — même structure minimaliste
 export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
-    items: ADMIN_NAV_ITEMS.filter((i) => i.href === "/admin"),
-  },
-  {
-    label: "Business",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/analytics"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations"].includes(i.href)
     ),
   },
   {
-    label: "Contenu",
+    label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/formations", "/admin/playbooks", "/ressources"].includes(i.href)
+      ["/chat", "/community", "/ai"].includes(i.href)
     ),
   },
   {
-    label: "Communication",
+    label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/broadcast"].includes(i.href)
-    ),
-  },
-  {
-    label: "Organisation",
-    items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/admin/calendar", "/admin/booking", "/admin/team", "/admin/okrs"].includes(i.href)
+      ["/tasks", "/admin/calendar"].includes(i.href)
     ),
   },
 ];
@@ -360,20 +350,16 @@ export const NAV_ITEMS: NavItem[] = [...STUDENT_NAV_ITEMS, ...ADMIN_NAV_ITEMS];
 
 // ─── Sections de navigation (sidebar grouping) ─────────────
 
-// Sections pour les eleves
+// Sections pour les eleves — sidebar minimale
 export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
-    items: STUDENT_NAV_ITEMS.filter((i) => i.href === "/dashboard"),
-  },
-  {
-    label: "Formation",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/formations", "/calendar", "/certificates", "/progress", "/playbook"].includes(i.href)
+      ["/dashboard", "/formations", "/tasks", "/calendar"].includes(i.href)
     ),
   },
   {
-    label: "Social",
+    label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
       ["/chat", "/community", "/ai"].includes(i.href)
     ),
@@ -381,45 +367,35 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/leaderboard", "/ressources", "/tools", "/referral", "/notifications", "/settings"].includes(i.href)
+      ["/notifications", "/settings"].includes(i.href)
     ),
   },
 ];
 
-// Sections pour les admins
+// Sections pour les admins — sidebar minimale, sous-pages accessibles via SubNav
 export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
-    items: ADMIN_NAV_ITEMS.filter((i) => i.href === "/admin"),
-  },
-  {
-    label: "Business",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/crm", "/admin/analytics"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations"].includes(i.href)
     ),
   },
   {
-    label: "Contenu",
+    label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/formations", "/admin/playbooks", "/ressources"].includes(i.href)
+      ["/chat", "/community", "/ai"].includes(i.href)
     ),
   },
   {
-    label: "Communication",
+    label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/broadcast"].includes(i.href)
+      ["/tasks", "/admin/calendar"].includes(i.href)
     ),
   },
   {
-    label: "Organisation",
+    label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/admin/calendar", "/admin/booking", "/admin/team", "/admin/okrs"].includes(i.href)
-    ),
-  },
-  {
-    label: "Admin",
-    items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/ai", "/admin/channels", "/admin/moderation", "/admin/sops", "/admin/tools", "/admin/audit", "/admin/error-logs", "/profile", "/admin/settings"].includes(i.href)
+      ["/admin/settings"].includes(i.href)
     ),
   },
 ];

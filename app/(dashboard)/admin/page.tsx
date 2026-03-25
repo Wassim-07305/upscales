@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, CalendarDays, MessageCircle, TrendingUp, Activity } from "lucide-react";
 import { isModerator } from "@/lib/utils/roles";
 import { AdminCharts } from "./AdminCharts";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -88,6 +89,10 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <SubNav tabs={[
+        { label: "Dashboard", href: "/admin" },
+        { label: "Analytics", href: "/admin/analytics" },
+      ]} />
       <div>
         <h1 className="text-2xl font-bold">Dashboard Admin</h1>
         <p className="text-muted-foreground">Vue d&apos;ensemble de la plateforme</p>

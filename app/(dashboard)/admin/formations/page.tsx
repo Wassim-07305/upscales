@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/utils/roles";
 import { AdminFormationsClient } from "./AdminFormationsClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminFormationsPage() {
   const supabase = await createClient();
@@ -34,5 +35,14 @@ export default async function AdminFormationsPage() {
     enrolled_count: enrollments?.filter((e) => e.formation_id === f.id).length || 0,
   })) || [];
 
-  return <AdminFormationsClient formations={formationsWithCounts} />;
+  return (
+    <>
+      <SubNav tabs={[
+        { label: "Formations", href: "/admin/formations" },
+        { label: "Playbooks", href: "/admin/playbooks" },
+        { label: "Ressources", href: "/ressources" },
+      ]} />
+      <AdminFormationsClient formations={formationsWithCounts} />
+    </>
+  );
 }

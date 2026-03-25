@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
 import { ModerationClient } from "./ModerationClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function ModerationPage() {
   const supabase = await createClient();
@@ -34,10 +35,13 @@ export default async function ModerationPage() {
   ]);
 
   return (
-    <ModerationClient
-      initialReports={reports || []}
-      pendingCount={pendingCount || 0}
-      moderatorId={user.id}
-    />
+    <>
+      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
+      <ModerationClient
+        initialReports={reports || []}
+        pendingCount={pendingCount || 0}
+        moderatorId={user.id}
+      />
+    </>
   );
 }

@@ -28,6 +28,7 @@ import { getInitials } from "@/lib/utils/formatters";
 import { timeAgo } from "@/lib/utils/dates";
 import { toast } from "sonner";
 import { logAuditAction } from "@/lib/actions/audit";
+import { SubNav } from "@/components/layout/sub-nav";
 
 interface ChannelWithCount extends Channel {
   members_count: number;
@@ -201,13 +202,18 @@ export default function AdminChannelsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <>
+        <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </>
     );
   }
 
   return (
+    <>
+    <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -387,5 +393,6 @@ export default function AdminChannelsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }

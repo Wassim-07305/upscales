@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { TasksClient } from "./TasksClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function TasksPage() {
   const supabase = await createClient();
@@ -18,5 +19,10 @@ export default async function TasksPage() {
     .order("order", { ascending: true })
     .order("created_at", { ascending: false });
 
-  return <TasksClient tasks={tasks || []} userId={user.id} />;
+  return (
+    <>
+      <SubNav tabs={[{ label: "Tâches", href: "/tasks" }, { label: "OKRs", href: "/admin/okrs" }]} />
+      <TasksClient tasks={tasks || []} userId={user.id} />
+    </>
+  );
 }

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
 import { OKRsClient } from "./OKRsClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function OKRsPage() {
   const supabase = await createClient();
@@ -68,8 +69,11 @@ export default async function OKRsPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <OKRsClient periods={assembledPeriods} isAdmin={isAdmin} />
-    </div>
+    <>
+      <SubNav tabs={[{ label: "Tâches", href: "/tasks" }, { label: "OKRs", href: "/admin/okrs" }]} />
+      <div className="space-y-6">
+        <OKRsClient periods={assembledPeriods} isAdmin={isAdmin} />
+      </div>
+    </>
   );
 }

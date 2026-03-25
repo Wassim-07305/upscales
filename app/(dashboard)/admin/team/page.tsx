@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
 import { TeamClient } from "./TeamClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function TeamPage() {
   const supabase = await createClient();
@@ -26,11 +27,14 @@ export default async function TeamPage() {
   ]);
 
   return (
-    <TeamClient
-      timeEntries={timeEntries || []}
-      meetings={meetings || []}
-      members={members || []}
-      userId={user.id}
-    />
+    <>
+      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
+      <TeamClient
+        timeEntries={timeEntries || []}
+        meetings={meetings || []}
+        members={members || []}
+        userId={user.id}
+      />
+    </>
   );
 }

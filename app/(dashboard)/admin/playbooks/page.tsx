@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AdminPlaybooksClient } from "./AdminPlaybooksClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminPlaybooksPage() {
   const supabase = await createClient();
@@ -23,5 +24,14 @@ export default async function AdminPlaybooksPage() {
     .select("*, playbook_sections(id)")
     .order("order", { ascending: true });
 
-  return <AdminPlaybooksClient playbooks={playbooks || []} />;
+  return (
+    <>
+      <SubNav tabs={[
+        { label: "Formations", href: "/admin/formations" },
+        { label: "Playbooks", href: "/admin/playbooks" },
+        { label: "Ressources", href: "/ressources" },
+      ]} />
+      <AdminPlaybooksClient playbooks={playbooks || []} />
+    </>
+  );
 }

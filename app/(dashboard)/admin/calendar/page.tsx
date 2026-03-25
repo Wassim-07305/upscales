@@ -28,6 +28,7 @@ import { Session, SessionStatus } from "@/lib/types/database";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDateTime, formatTime } from "@/lib/utils/dates";
 import { toast } from "sonner";
+import { SubNav } from "@/components/layout/sub-nav";
 import {
   DndContext,
   closestCenter,
@@ -303,7 +304,9 @@ export default function AdminCalendarPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      <SubNav tabs={[{ label: "Calendrier", href: "/admin/calendar" }, { label: "Booking", href: "/admin/booking" }]} />
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Gestion des sessions</h1>
@@ -504,6 +507,7 @@ export default function AdminCalendarPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
 

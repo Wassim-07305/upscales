@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/utils/roles";
 import { SettingsForm } from "./SettingsForm";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -33,9 +34,12 @@ export default async function SettingsPage() {
   }
 
   return (
-    <SettingsForm
-      isGCalEnabled={isGCalEnabled}
-      isGCalConnected={isGCalConnected}
-    />
+    <>
+      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
+      <SettingsForm
+        isGCalEnabled={isGCalEnabled}
+        isGCalConnected={isGCalConnected}
+      />
+    </>
   );
 }

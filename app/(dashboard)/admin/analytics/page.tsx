@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
 import { AnalyticsCharts } from "./AnalyticsCharts";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
@@ -154,6 +155,10 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      <SubNav tabs={[
+        { label: "Dashboard", href: "/admin" },
+        { label: "Analytics", href: "/admin/analytics" },
+      ]} />
       <div>
         <h1 className="text-2xl font-bold">Analytics</h1>
         <p className="text-muted-foreground">

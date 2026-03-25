@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { SubNav } from "@/components/layout/sub-nav";
 import { AIChat } from "./AIChat";
 
 export default async function AIPage() {
@@ -26,5 +27,17 @@ export default async function AIPage() {
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false });
 
-  return <AIChat userId={user.id} conversations={conversations || []} />;
+  const isAdmin = profile.role === "admin";
+
+  return (
+    <>
+      {isAdmin && (
+        <SubNav tabs={[
+          { label: "MateuzsIA", href: "/ai" },
+          { label: "Base IA", href: "/admin/ai" },
+        ]} />
+      )}
+      <AIChat userId={user.id} conversations={conversations || []} />
+    </>
+  );
 }

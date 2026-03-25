@@ -4,7 +4,7 @@ import { SubNav } from "@/components/layout/sub-nav";
 import { ToolsAdminClient } from "./ToolsAdminClient";
 
 const parametresTabs = [
-  { label: "Paramètres", href: "/admin/settings" },
+  { label: "Paramètres", href: "/admin/settings" }, { label: "Utilisateurs", href: "/admin/users" },
   { label: "Équipe", href: "/admin/team" },
   { label: "Channels", href: "/admin/channels" },
   { label: "Modération", href: "/admin/moderation" },

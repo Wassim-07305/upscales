@@ -309,6 +309,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ONLY_ROLES,
   },
   {
+    label: "Utilisateurs",
+    href: "/admin/users",
+    icon: UsersRound,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Mon profil",
     href: "/profile",
     icon: User,
@@ -327,7 +333,7 @@ export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin", "/admin/crm", "/admin/formations"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations", "/admin/users"].includes(i.href)
     ),
   },
   {
@@ -377,7 +383,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin", "/admin/crm", "/admin/formations"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations", "/admin/users"].includes(i.href)
     ),
   },
   {
@@ -437,6 +443,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   tools: "Liens & Outils",
   ressources: "Ressources",
   "error-logs": "Error Logs",
+  users: "Utilisateurs",
   settings: "Paramètres",
   edit: "Modifier",
 };

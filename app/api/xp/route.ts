@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  let body: { action: string; metadata?: Record<string, unknown> };
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { action } = body;
+  const action = body.action as string;
 
   if (!action || !(action in XP_ACTIONS)) {
     return NextResponse.json(
@@ -56,10 +56,17 @@ export async function POST(request: NextRequest) {
   const xpAmount = XP_ACTIONS[action];
   const admin = createAdminClient();
 
-  // Pour le parrainage, l'XP va au parrain
-  const targetUserId = action === "referral_signup" && body.metadata?.referrer_id
-    ? body.metadata.referrer_id as string
-    : user.id;
+  // Pour le parrainage, l'XP va au parrain (pas besoin d'auth car appelé à l'inscription)
+  const referrerId = body.referrer_id || (body.metadata as Record<string, unknown>)?.referrer_id;
+  let targetUserId: string;
+
+  if (action === "referral_signup" && referrerId) {
+    targetUserId = referrerId as string;
+  } else if (!user) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  } else {
+    targetUserId = user.id;
+  }
 
   // Ajouter l'XP via la fonction SQL
   const { error: xpError } = await admin.rpc("add_user_xp", {

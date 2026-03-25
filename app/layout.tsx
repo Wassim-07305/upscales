@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { PWARegister } from "@/components/providers/PWARegister";
 import { ErrorMonitoringProvider } from "@/components/providers/ErrorMonitoringProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -76,7 +77,9 @@ export default function RootLayout({
     <html lang="fr" className="dark">
       <body className={`${outfit.variable} ${syne.variable} ${geistMono.variable} font-sans antialiased`}>
         <ErrorMonitoringProvider>
-          {children}
+          <QueryProvider>
+            {children}
+          </QueryProvider>
         </ErrorMonitoringProvider>
         <Toaster richColors position="top-right" />
         <PWARegister />

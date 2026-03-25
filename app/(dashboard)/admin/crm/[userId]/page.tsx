@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
-import { StudentDetail } from "./StudentDetail";
+import { ClientDetail } from "./ClientDetail";
 
-export default async function StudentDetailPage({
+export default async function ClientDetailPage({
   params,
 }: {
   params: Promise<{ userId: string }>;
@@ -24,77 +24,5 @@ export default async function StudentDetailPage({
 
   if (!adminProfile || !isModerator(adminProfile.role)) redirect("/dashboard");
 
-  // Fetch student profile
-  const { data: student } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (!student) notFound();
-
-  // Parallelize independent queries
-  const [
-    { data: enrollments },
-    { data: progress },
-    { data: certificates },
-    { data: notes },
-    { data: warnings },
-    { data: userTags },
-    { data: allTags },
-    { count: messageCount },
-    { count: postCount },
-    { data: coachClientArr },
-    { data: clientReports },
-  ] = await Promise.all([
-    supabase.from("formation_enrollments").select("*, formation:formations(title)").eq("user_id", userId),
-    supabase.from("module_progress").select("*").eq("user_id", userId),
-    supabase.from("certificates").select("*, formation:formations(title)").eq("user_id", userId),
-    supabase.from("crm_notes").select("*, author:profiles(full_name)").eq("student_id", userId).order("created_at", { ascending: false }),
-    supabase.from("user_warnings").select("*, issuer:profiles!user_warnings_issued_by_fkey(full_name)").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("user_tags").select("*, tag:tags(*)").eq("user_id", userId),
-    supabase.from("tags").select("*").order("name"),
-    supabase.from("messages").select("*", { count: "exact", head: true }).eq("sender_id", userId),
-    supabase.from("posts").select("*", { count: "exact", head: true }).eq("author_id", userId),
-    supabase.from("coach_clients").select("*").eq("client_id", userId),
-    supabase.from("client_reports").select("*").eq("client_id", userId).order("period_start", { ascending: false }),
-  ]);
-
-  // Fetch modules for enrolled formations (depends on enrollments result)
-  const formationIds = enrollments?.map((e) => e.formation_id) || [];
-  const { data: modules } = formationIds.length > 0
-    ? await supabase.from("modules").select("id, formation_id").in("formation_id", formationIds)
-    : { data: [] };
-
-  // Enrollment progress
-  const enrollmentProgress = enrollments?.map((e) => {
-    const fModules = modules?.filter((m) => m.formation_id === e.formation_id) || [];
-    const completed = progress?.filter(
-      (p) => p.formation_id === e.formation_id && p.completed
-    ).length || 0;
-    return {
-      ...e,
-      total_modules: fModules.length,
-      completed_modules: completed,
-      percent: fModules.length > 0 ? Math.round((completed / fModules.length) * 100) : 0,
-    };
-  }) || [];
-
-  return (
-    <StudentDetail
-      student={student}
-      enrollments={enrollmentProgress}
-      certificates={certificates || []}
-      notes={notes || []}
-      warnings={warnings || []}
-      userTags={userTags?.map((ut) => ut.tag).filter(Boolean) || []}
-      allTags={allTags || []}
-      messageCount={messageCount || 0}
-      postCount={postCount || 0}
-      isAdmin={adminProfile.role === "admin"}
-      coachClient={coachClientArr?.[0] || null}
-      reports={clientReports || []}
-      currentUserId={user.id}
-    />
-  );
+  return <ClientDetail clientId={userId} />;
 }

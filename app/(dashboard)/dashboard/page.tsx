@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, CalendarDays, MessageCircle, Award, Zap, Trophy, Play, Flame } from "lucide-react";
+import { BookOpen, CalendarDays, Award, Zap, Trophy, Play, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/dates";
@@ -172,109 +172,104 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Reprendre la dernière formation */}
-      {continueModuleId && lastFormationId && lastFormationTitle && (
-        <Link href={`/formations/${lastFormationId}/${continueModuleId}`}>
-          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer bg-gradient-to-r from-primary/5 to-transparent">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-primary/10">
+      {/* Top row: Reprendre + XP + Streak — tout visible d'un coup */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Reprendre */}
+        {continueModuleId && lastFormationId && lastFormationTitle ? (
+          <Link href={`/formations/${lastFormationId}/${continueModuleId}`}>
+            <Card className="h-full animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer bg-gradient-to-br from-primary/5 to-transparent">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
                     <Play className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Reprendre où vous en étiez</p>
-                    <p className="font-medium">{lastFormationTitle}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Reprendre</p>
+                    <p className="font-medium text-sm truncate">{lastFormationTitle}</p>
                   </div>
                 </div>
-                <Button size="sm" variant="default">
-                  Continuer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Link href="/formations">
+            <Card className="h-full animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Aucune formation</p>
+                    <p className="font-medium text-sm">Découvrir le catalogue</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
-      {/* XP Banner */}
-      {(userXp || userBadges?.length) ? (
+        {/* XP */}
         <Link href="/leaderboard">
-          <Card className="animate-fade-up delay-1 hover:border-primary/30 transition-colors cursor-pointer">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-primary/10">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-2xl font-bold">{userXp?.total_xp || 0} XP</p>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                        Niveau {userXp?.level || 1}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {userBadges?.length || 0} badge{(userBadges?.length || 0) > 1 ? "s" : ""} obtenu{(userBadges?.length || 0) > 1 ? "s" : ""}
-                    </p>
-                  </div>
+          <Card className="h-full animate-fade-up delay-2 hover:border-primary/30 transition-colors cursor-pointer">
+            <CardContent className="pt-5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+                  <Zap className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex gap-1.5">
-                  {userBadges?.slice(0, 3).map((ub) => (
-                    <div key={ub.id} className="p-1.5 rounded-lg bg-muted/50" title={(ub.badge as unknown as { name: string })?.name}>
-                      <Trophy className="h-4 w-4 text-neon" />
-                    </div>
-                  ))}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xl font-bold">{userXp?.total_xp || 0} XP</p>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                      Niv. {userXp?.level || 1}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {userBadges?.length || 0} badge{(userBadges?.length || 0) > 1 ? "s" : ""}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </Link>
-      ) : null}
 
-      {/* Streak */}
-      {streak > 0 && (
+        {/* Streak */}
         <Link href="/progress">
-          <Card className="animate-fade-up delay-1 hover:border-[#FF6B35]/30 transition-colors cursor-pointer bg-gradient-to-r from-[#FF6B35]/5 to-transparent">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-[#FF6B35]/10">
-                    <Flame className="h-5 w-5 text-[#FF6B35]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-2xl font-bold">{streak} jour{streak > 1 ? "s" : ""}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Série d&apos;apprentissage en cours · {totalModulesCompleted} module{totalModulesCompleted > 1 ? "s" : ""} terminé{totalModulesCompleted > 1 ? "s" : ""}
-                    </p>
-                  </div>
+          <Card className="h-full animate-fade-up delay-3 hover:border-[#FF6B35]/30 transition-colors cursor-pointer bg-gradient-to-br from-[#FF6B35]/5 to-transparent">
+            <CardContent className="pt-5 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-[#FF6B35]/10 shrink-0">
+                  <Flame className="h-5 w-5 text-[#FF6B35]" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold">{streak} jour{streak > 1 ? "s" : ""}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {totalModulesCompleted} module{totalModulesCompleted > 1 ? "s" : ""} terminé{totalModulesCompleted > 1 ? "s" : ""}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </Link>
-      )}
+      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="animate-fade-up delay-1">
-          <CardContent className="pt-6">
+      {/* Stats — 3 colonnes, sans notifications */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="animate-fade-up delay-4">
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-primary/10 icon-halo">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold stat-value">
-                  {enrollments?.length || 0}
-                </p>
+                <p className="text-2xl font-bold stat-value">{enrollments?.length || 0}</p>
                 <p className="text-xs text-muted-foreground">Formations</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="animate-fade-up delay-2">
-          <CardContent className="pt-6">
+        <Card className="animate-fade-up delay-5">
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-neon/10 icon-halo">
                 <Award className="h-5 w-5 text-neon" />
@@ -286,36 +281,15 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="animate-fade-up delay-3">
-          <CardContent className="pt-6">
+        <Card className="animate-fade-up delay-6">
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-turquoise/10 icon-halo">
                 <CalendarDays className="h-5 w-5 text-turquoise" />
               </div>
               <div>
-                <p className="text-2xl font-bold stat-value">
-                  {upcomingSessions?.length || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Sessions à venir
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="animate-fade-up delay-4">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[#FFB800]/10 icon-halo">
-                <MessageCircle className="h-5 w-5 text-[#FFB800]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold stat-value">
-                  {recentNotifs?.length || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Notifs non lues
-                </p>
+                <p className="text-2xl font-bold stat-value">{upcomingSessions?.length || 0}</p>
+                <p className="text-xs text-muted-foreground">Sessions à venir</p>
               </div>
             </div>
           </CardContent>

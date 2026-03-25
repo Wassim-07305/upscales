@@ -12,7 +12,16 @@ import {
 } from "@/lib/hooks/use-clients";
 import { useLeads, useLeadStats } from "@/lib/hooks/use-crm-leads";
 import { useFinanceStats } from "@/lib/hooks/use-finances";
-import type { Client, ClientStatus, Lead } from "@/lib/types/database";
+import {
+  usePipelineColumns,
+  usePipelineLeads,
+  useCreatePipelineLead,
+  useUpdatePipelineLead,
+  useDeletePipelineLead,
+  useMovePipelineLead,
+  usePipelineStats,
+} from "@/lib/hooks/use-pipeline";
+import type { Client, ClientStatus, Lead, PipelineColumn } from "@/lib/types/database";
 import {
   CLIENT_STATUSES,
   CLIENT_STATUS_LABELS,
@@ -134,14 +143,23 @@ export function CRMClient() {
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
 
-  // Pipeline queries (bilan uses leads + finances)
+  // Bilan queries
   const { data: allLeads } = useLeads(leadFilters);
   const { data: leadStats } = useLeadStats();
   const { data: financeStats } = useFinanceStats();
 
-  // Pipeline state — kanban shows CLIENTS by status
-  const [draggedClient, setDraggedClient] = useState<Client | null>(null);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  // Pipeline state
+  const [pipelineClientId, setPipelineClientId] = useState<string | null>(null);
+  const { data: pipelineColumns } = usePipelineColumns(pipelineClientId);
+  const { data: pipelineLeads } = usePipelineLeads(pipelineClientId);
+  const { data: pipelineStats } = usePipelineStats(pipelineClientId);
+  const createPipelineLead = useCreatePipelineLead();
+  const updatePipelineLead = useUpdatePipelineLead();
+  const deletePipelineLead = useDeletePipelineLead();
+  const movePipelineLead = useMovePipelineLead();
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
+  const [quickAddName, setQuickAddName] = useState("");
 
   // ─── Derived data ────────────────────────────────────
 
@@ -261,15 +279,25 @@ export function CRMClient() {
 
   // ─── Pipeline helpers (MUST be before any early return) ──
 
-  // Kanban uses clients by status
-  const clientsByStatus = useMemo(() => {
-    const map: Record<string, Client[]> = {};
-    for (const s of CLIENT_STATUSES) map[s] = [];
-    for (const c of clients || []) {
-      if (map[c.status]) map[c.status].push(c);
+  // Auto-select first client for pipeline
+  const effectiveClientId = pipelineClientId || clients?.[0]?.id || null;
+  if (!pipelineClientId && clients?.length && clients[0].id !== pipelineClientId) {
+    // Will trigger on next render
+  }
+
+  // Leads grouped by column for kanban
+  const leadsByColumn = useMemo(() => {
+    const map: Record<string, Lead[]> = {};
+    if (pipelineColumns) {
+      for (const col of pipelineColumns) map[col.id] = [];
+    }
+    for (const l of pipelineLeads || []) {
+      if (l.column_id && map[l.column_id]) {
+        map[l.column_id].push(l);
+      }
     }
     return map;
-  }, [clients]);
+  }, [pipelineLeads, pipelineColumns]);
 
   // Leads grouped for bilan
   const filteredLeads = allLeads || [];
@@ -755,105 +783,116 @@ export function CRMClient() {
 
       </>}
 
-      {/* ═══════════════ PIPELINE TAB (clients par statut) ═══════════════ */}
+      {/* ═══════════════ PIPELINE TAB (leads par colonnes custom) ═══════════════ */}
       {activeTab === "pipeline" && <>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">{clients?.length || 0} clients</span>
+        {/* Client selector + KPIs */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <Select value={pipelineClientId || ""} onValueChange={(v) => setPipelineClientId(v || null)}>
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Sélectionner un client" />
+            </SelectTrigger>
+            <SelectContent>
+              {clients?.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {pipelineStats && (
+            <div className="flex gap-4 text-sm">
+              <span className="text-muted-foreground">{pipelineStats.total} prospects</span>
+              <span>CA: <span className="text-[#C6FF00] font-semibold">{pipelineStats.ca_contracte.toLocaleString("fr-FR")} €</span></span>
+              {pipelineStats.relances_today > 0 && (
+                <span className="text-red-400 font-medium">{pipelineStats.relances_today} relance{pipelineStats.relances_today > 1 ? "s" : ""}</span>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
-          <DndContext
-            collisionDetection={closestCorners}
-            onDragStart={(e) => {
-              const c = clients?.find((cl) => cl.id === e.active.id);
-              setDraggedClient(c || null);
-            }}
-            onDragEnd={(e) => {
-              setDraggedClient(null);
-              const { active, over } = e;
-              if (!over) return;
-              const newStatus = over.id as string;
-              const clientId = active.id as string;
-              const client = clients?.find((c) => c.id === clientId);
-              if (!client || client.status === newStatus) return;
-              updateClient.mutate({ id: clientId, status: newStatus as ClientStatus });
-            }}
-          >
-            {CLIENT_STATUSES.map((status) => {
-              const cols = clientsByStatus[status] || [];
-              return <ClientKanbanColumn key={status} status={status} clients={cols} onClickClient={setSelectedClient} />;
-            })}
-            <DragOverlay>
-              {draggedClient && <ClientCard client={draggedClient} isDragOverlay />}
-            </DragOverlay>
-          </DndContext>
-        </div>
+        {!pipelineClientId ? (
+          <Card><CardContent className="py-12 text-center text-muted-foreground">Sélectionnez un client pour voir son pipeline</CardContent></Card>
+        ) : !pipelineColumns?.length ? (
+          <Card><CardContent className="py-12 text-center text-muted-foreground">Chargement des colonnes...</CardContent></Card>
+        ) : (
+          <>
+            {/* Kanban board */}
+            <DndContext
+              collisionDetection={closestCorners}
+              onDragStart={(e) => {
+                const l = pipelineLeads?.find((lead) => lead.id === e.active.id);
+                setDraggedLead(l || null);
+              }}
+              onDragEnd={(e) => {
+                setDraggedLead(null);
+                const { active, over } = e;
+                if (!over) return;
+                const colId = over.id as string;
+                const leadId = active.id as string;
+                const lead = pipelineLeads?.find((l) => l.id === leadId);
+                const col = pipelineColumns?.find((c) => c.id === colId);
+                if (!lead || !col || lead.column_id === colId) return;
+                movePipelineLead.mutate({ leadId, columnId: colId, columnName: col.name, clientId: pipelineClientId! });
+              }}
+            >
+              <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
+                {pipelineColumns.map((col, idx) => {
+                  const colLeads = leadsByColumn[col.id] || [];
+                  return (
+                    <PipelineKanbanColumn
+                      key={col.id}
+                      column={col}
+                      leads={colLeads}
+                      isFirst={idx === 0}
+                      quickAddName={quickAddName}
+                      onQuickAddChange={setQuickAddName}
+                      onQuickAdd={() => {
+                        if (!quickAddName.trim() || !pipelineClientId) return;
+                        createPipelineLead.mutate({
+                          full_name: quickAddName.trim(),
+                          client_id: pipelineClientId,
+                          column_id: col.id,
+                          status: "nouveau" as Lead["status"],
+                        });
+                        setQuickAddName("");
+                      }}
+                      onClickLead={setSelectedLead}
+                    />
+                  );
+                })}
+              </div>
+              <DragOverlay>
+                {draggedLead && <PipelineLeadCard lead={draggedLead} isDragOverlay />}
+              </DragOverlay>
+            </DndContext>
+          </>
+        )}
 
-        {/* Sidebar panel — détail du client sélectionné */}
-        {selectedClient && (
+        {/* Lead detail drawer */}
+        {selectedLead && (
           <div className="fixed inset-y-0 right-0 w-full max-w-md bg-card border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <h3 className="font-semibold">{selectedClient.name}</h3>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => { router.push(`/admin/crm/${selectedClient.id}`); setSelectedClient(null); }}>
-                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Voir détail
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSelectedClient(null)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              <h3 className="font-semibold">{selectedLead.full_name}</h3>
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSelectedLead(null)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Statut</span>
-                  <Badge variant="outline" className={cn("text-xs", CLIENT_STATUS_COLORS[selectedClient.status])}>
-                    {CLIENT_STATUS_LABELS[selectedClient.status]}
-                  </Badge>
-                </div>
-                {selectedClient.email && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Email</span>
-                    <span className="text-sm">{selectedClient.email}</span>
-                  </div>
-                )}
-                {selectedClient.phone && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Téléphone</span>
-                    <span className="text-sm">{selectedClient.phone}</span>
-                  </div>
-                )}
-                {selectedClient.niche && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Niche</span>
-                    <span className="text-sm">{selectedClient.niche}</span>
-                  </div>
-                )}
-                {selectedClient.notes && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Notes</span>
-                    <p className="text-sm mt-1 whitespace-pre-wrap bg-muted/50 rounded-lg p-3">{selectedClient.notes}</p>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Manager</span>
-                  <span className="text-sm">{managerFor(selectedClient.id)}</span>
-                </div>
-                {closingRates && closingRates[selectedClient.id] && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Taux closing</span>
-                    <span className="text-sm font-semibold">{closingRates[selectedClient.id].rate}%</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Créé le</span>
-                  <span className="text-sm">{formatDate(selectedClient.created_at)}</span>
-                </div>
+              {selectedLead.email && <div className="flex justify-between"><span className="text-sm text-muted-foreground">Email</span><span className="text-sm">{selectedLead.email}</span></div>}
+              {selectedLead.phone && <div className="flex justify-between"><span className="text-sm text-muted-foreground">Téléphone</span><span className="text-sm">{selectedLead.phone}</span></div>}
+              {selectedLead.instagram_url && <div className="flex justify-between"><span className="text-sm text-muted-foreground">Instagram</span><span className="text-sm">{selectedLead.instagram_url}</span></div>}
+              {selectedLead.source && <div className="flex justify-between"><span className="text-sm text-muted-foreground">Source</span><Badge variant="outline" className="text-[10px]">{LEAD_SOURCE_LABELS[selectedLead.source] || selectedLead.source}</Badge></div>}
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">CA contracté</span><span className="text-sm font-semibold">{(selectedLead.ca_contracte || 0).toLocaleString("fr-FR")} €</span></div>
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">CA collecté</span><span className="text-sm">{(selectedLead.ca_collecte || 0).toLocaleString("fr-FR")} €</span></div>
+              {selectedLead.date_relance && <div className="flex justify-between"><span className="text-sm text-muted-foreground">Relance</span><span className={cn("text-sm", selectedLead.date_relance <= new Date().toISOString().split("T")[0] ? "text-red-400 font-medium" : "")}>{formatDate(selectedLead.date_relance)}</span></div>}
+              {selectedLead.notes && <div><span className="text-sm text-muted-foreground">Notes</span><p className="text-sm mt-1 whitespace-pre-wrap bg-muted/50 rounded-lg p-3">{selectedLead.notes}</p></div>}
+              {selectedLead.next_action && <div><span className="text-sm text-muted-foreground">Prochaine action</span><p className="text-sm mt-1">{selectedLead.next_action}</p></div>}
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Ajouté le</span><span className="text-sm">{formatDate(selectedLead.created_at)}</span></div>
+              <div className="pt-4 flex gap-2">
+                <Button size="sm" variant="destructive" onClick={() => { deletePipelineLead.mutate(selectedLead.id); setSelectedLead(null); }}>
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Supprimer
+                </Button>
               </div>
             </div>
           </div>
         )}
-        {selectedClient && <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setSelectedClient(null)} />}
+        {selectedLead && <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setSelectedLead(null)} />}
       </>}
 
       {/* ═══════════════ BILAN TAB ═══════════════ */}
@@ -1000,70 +1039,98 @@ export function CRMClient() {
 
 // ─── Kanban Column ──────────────────────────────────────
 
-// ─── Client Kanban Column ───────────────────────────────
+// ─── Pipeline Kanban Column ─────────────────────────────
 
-function ClientKanbanColumn({
-  status,
-  clients,
-  onClickClient,
+function PipelineKanbanColumn({
+  column,
+  leads,
+  isFirst,
+  quickAddName,
+  onQuickAddChange,
+  onQuickAdd,
+  onClickLead,
 }: {
-  status: string;
-  clients: Client[];
-  onClickClient: (client: Client) => void;
+  column: PipelineColumn;
+  leads: Lead[];
+  isFirst: boolean;
+  quickAddName: string;
+  onQuickAddChange: (v: string) => void;
+  onQuickAdd: () => void;
+  onClickLead: (lead: Lead) => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const relanceCount = leads.filter((l) => l.date_relance && l.date_relance <= new Date().toISOString().split("T")[0]).length;
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "flex-shrink-0 w-[260px] rounded-xl border border-border bg-card/50 flex flex-col max-h-[calc(100vh-20rem)]",
+        "flex-shrink-0 w-[260px] rounded-xl border border-border bg-card/50 flex flex-col max-h-[calc(100vh-18rem)]",
         isOver && "ring-2 ring-[#C6FF00]/50 bg-[#C6FF00]/5"
       )}
     >
-      <div className="p-3 border-b border-border flex items-center gap-2">
-        <Badge variant="outline" className={cn("text-[10px]", CLIENT_STATUS_COLORS[status])}>
-          {CLIENT_STATUS_LABELS[status]}
-        </Badge>
-        <span className="text-xs text-muted-foreground">{clients.length}</span>
+      <div className="p-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: column.color }} />
+          <span className="text-sm font-medium">{column.name}</span>
+          <Badge variant="outline" className="text-[10px] h-5">{leads.length}</Badge>
+        </div>
+        {relanceCount > 0 && (
+          <Badge className="bg-red-500/20 text-red-400 text-[10px] h-5 animate-pulse">{relanceCount}</Badge>
+        )}
       </div>
+      {/* Quick add on first column */}
+      {isFirst && (
+        <div className="p-2 border-b border-border">
+          <form onSubmit={(e) => { e.preventDefault(); onQuickAdd(); }} className="flex gap-1">
+            <Input
+              value={quickAddName}
+              onChange={(e) => onQuickAddChange(e.target.value)}
+              placeholder="+ Nouveau prospect"
+              className="h-7 text-xs bg-[#141414] border-0"
+            />
+          </form>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
-        {clients.map((client) => (
-          <DraggableClientCard key={client.id} client={client} onClick={() => onClickClient(client)} />
+        {leads.map((lead) => (
+          <DraggablePipelineCard key={lead.id} lead={lead} onClick={() => onClickLead(lead)} />
         ))}
-        {clients.length === 0 && (
-          <div className="py-8 text-center text-xs text-muted-foreground">Aucun client</div>
+        {leads.length === 0 && (
+          <div className="py-8 text-center text-xs text-muted-foreground">Aucun prospect</div>
         )}
       </div>
     </div>
   );
 }
 
-function DraggableClientCard({ client, onClick }: { client: Client; onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: client.id });
+function DraggablePipelineCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
   return (
     <div ref={setNodeRef} className={cn(isDragging && "opacity-40")}>
-      <ClientCard client={client} dragHandleProps={{ ...attributes, ...listeners }} onClick={onClick} />
+      <PipelineLeadCard lead={lead} dragHandleProps={{ ...attributes, ...listeners }} onClick={onClick} />
     </div>
   );
 }
 
-function ClientCard({
-  client,
+function PipelineLeadCard({
+  lead,
   isDragOverlay,
   dragHandleProps,
   onClick,
 }: {
-  client: Client;
+  lead: Lead;
   isDragOverlay?: boolean;
   dragHandleProps?: Record<string, unknown>;
   onClick?: () => void;
 }) {
+  const isOverdue = lead.date_relance && lead.date_relance <= new Date().toISOString().split("T")[0];
   return (
     <div
       onClick={onClick}
       className={cn(
-        "rounded-lg border border-border bg-card p-3 space-y-1.5 cursor-pointer hover:border-primary/30 transition-colors",
+        "rounded-lg border bg-card p-3 space-y-1.5 cursor-pointer hover:border-primary/30 transition-colors",
+        isOverdue ? "border-red-500/50" : "border-border",
         isDragOverlay && "shadow-xl ring-2 ring-[#C6FF00]/30"
       )}
     >
@@ -1071,14 +1138,26 @@ function ClientCard({
         <button {...(dragHandleProps || {})} className="cursor-grab active:cursor-grabbing text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <GripVertical className="h-4 w-4" />
         </button>
-        <p className="text-sm font-medium truncate flex-1">{client.name}</p>
+        <p className="text-sm font-medium truncate flex-1">{lead.full_name}</p>
+        {isOverdue && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />}
       </div>
-      {client.email && <p className="text-[11px] text-muted-foreground truncate pl-6">{client.email}</p>}
-      {client.niche && <p className="text-[10px] text-muted-foreground pl-6">{client.niche}</p>}
-      {client.phone && (
-        <span className="flex items-center gap-1 text-[10px] text-muted-foreground pl-6">
-          <Phone className="h-3 w-3" />{client.phone}
-        </span>
+      {lead.email && <p className="text-[11px] text-muted-foreground truncate pl-6">{lead.email}</p>}
+      <div className="flex items-center gap-2 pl-6 flex-wrap">
+        {lead.phone && (
+          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Phone className="h-3 w-3" />{lead.phone}
+          </span>
+        )}
+        {(lead.ca_contracte || 0) > 0 && (
+          <span className={cn("text-[10px] font-semibold", (lead.ca_contracte || 0) >= 3000 ? "text-[#C6FF00]" : "text-muted-foreground")}>
+            {(lead.ca_contracte || 0).toLocaleString("fr-FR")} €
+          </span>
+        )}
+      </div>
+      {lead.date_relance && (
+        <p className={cn("text-[10px] pl-6", isOverdue ? "text-red-400 font-medium" : "text-muted-foreground")}>
+          Relance : {lead.date_relance}
+        </p>
       )}
     </div>
   );

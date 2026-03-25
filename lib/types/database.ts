@@ -736,6 +736,14 @@ export interface Lead {
   assigned_to: string | null;
   created_by: string | null;
   client_id: string | null;
+  column_id: string | null;
+  date_relance: string | null;
+  heure: string | null;
+  ca_contracte: number;
+  ca_collecte: number;
+  duree_collecte: number | null;
+  commission_setter: number;
+  commission_closer: number;
   sort_order: number;
   created_at: string;
   updated_at: string;

@@ -285,12 +285,6 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ONLY_ROLES,
   },
   {
-    label: "Ressources",
-    href: "/ressources",
-    icon: BookOpen,
-    roles: ADMIN_ROLES,
-  },
-  {
     label: "Liens & Outils",
     href: "/admin/tools",
     icon: Link2,

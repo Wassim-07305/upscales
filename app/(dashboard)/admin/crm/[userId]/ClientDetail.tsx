@@ -10,6 +10,7 @@ import { getInitials } from "@/lib/utils/formatters";
 // ─── Hooks ──────────────────────────────────────────────
 import { useClient, useClientAssignments, useUpdateClient, useUpsertAssignment, useDeleteAssignment } from "@/lib/hooks/use-clients";
 import { useLeadsByClient, useCreateLead, useUpdateLead } from "@/lib/hooks/use-crm-leads";
+import type { Lead, CallCalendarEntry, CloserCall, FinancialEntry, ClientStatus } from "@/lib/types/database";
 import { useCallCalendar, useCreateCall } from "@/lib/hooks/use-call-calendar";
 import { useCloserCalls, useCreateCloserCall } from "@/lib/hooks/use-closer-calls";
 import { useFinancialEntries, useFinanceStats, useCreateFinancialEntry } from "@/lib/hooks/use-finances";
@@ -208,7 +209,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
 
   const handleLeadStatusChange = async (leadId: string, newStatus: string) => {
     try {
-      await updateLead.mutateAsync({ id: leadId, status: newStatus as any });
+      await updateLead.mutateAsync({ id: leadId, status: newStatus as Lead["status"] });
       toast.success("Statut mis \u00e0 jour");
     } catch {
       toast.error("Erreur lors de la mise \u00e0 jour");
@@ -220,7 +221,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
       await createCall.mutateAsync({
         ...callForm,
         client_id: clientId,
-      } as any);
+      } as Partial<CallCalendarEntry>);
       setCallDialogOpen(false);
       setCallForm({ date: "", time: "", type: "manuel", status: "planifi\u00e9", notes: "" });
       toast.success("Appel ajout\u00e9");
@@ -234,7 +235,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
       await createCloserCall.mutateAsync({
         ...closerCallForm,
         client_id: clientId,
-      } as any);
+      } as Partial<CloserCall>);
       setCloserCallDialogOpen(false);
       setCloserCallForm({ date: "", status: "en_attente", revenue: 0, nombre_paiements: 1, notes: "", debrief: "" });
       toast.success("Appel closer ajout\u00e9");
@@ -248,7 +249,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
       await createFinancialEntry.mutateAsync({
         ...financeForm,
         client_id: clientId,
-      } as any);
+      } as Partial<FinancialEntry>);
       setFinanceDialogOpen(false);
       setFinanceForm({ type: "ca", label: "", amount: 0, date: "", is_paid: false });
       toast.success("Entr\u00e9e financi\u00e8re ajout\u00e9e");
@@ -290,7 +291,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
         email: editForm.email || null,
         phone: editForm.phone || null,
         niche: editForm.niche || null,
-        status: editForm.status as any,
+        status: editForm.status as ClientStatus,
       });
       setEditDialogOpen(false);
       toast.success("Client mis \u00e0 jour");

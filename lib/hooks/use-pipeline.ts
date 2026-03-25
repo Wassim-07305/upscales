@@ -7,33 +7,36 @@ import type { PipelineColumn, Lead } from "@/lib/types/database";
 function db() { return createClient(); }
 
 const DEFAULT_COLUMNS = [
-  { name: "En discussion", color: "#60a5fa", position: 0 },
-  { name: "Lien envoyé", color: "#818cf8", position: 1 },
-  { name: "Call booké", color: "#a855f7", position: 2 },
-  { name: "En réflexion", color: "#f59e0b", position: 3 },
-  { name: "Closé", color: "#10b981", position: 4 },
-  { name: "Perdu", color: "#71717a", position: 5 },
+  { name: "À contacter", color: "#60a5fa", position: 0 },
+  { name: "Contacté", color: "#818cf8", position: 1 },
+  { name: "Qualifié", color: "#a855f7", position: 2 },
+  { name: "Call booké", color: "#f59e0b", position: 3 },
+  { name: "Proposé", color: "#06b6d4", position: 4 },
+  { name: "Closé", color: "#10b981", position: 5 },
+  { name: "Perdu", color: "#71717a", position: 6 },
 ];
 
 // ─── Pipeline Columns ───────────────────────────────────
 
-export function usePipelineColumns(clientId: string | null) {
+export function usePipelineColumns(clientId?: string | null) {
   const qc = useQueryClient();
 
   return useQuery({
-    queryKey: ["pipeline-columns", clientId],
+    queryKey: ["pipeline-columns", clientId ?? "global"],
     queryFn: async () => {
-      if (!clientId) return [];
+      // For global pipeline, use a special "global" client_id
+      const effectiveId = clientId || "00000000-0000-0000-0000-000000000000";
+
       const { data, error } = await db()
         .from("pipeline_columns")
         .select("*")
-        .eq("client_id", clientId)
+        .eq("client_id", effectiveId)
         .order("position", { ascending: true });
       if (error) throw error;
 
       // Auto-seed default columns if empty
       if (!data || data.length === 0) {
-        const cols = DEFAULT_COLUMNS.map((c) => ({ ...c, client_id: clientId }));
+        const cols = DEFAULT_COLUMNS.map((c) => ({ ...c, client_id: effectiveId }));
         const { data: seeded, error: seedErr } = await db()
           .from("pipeline_columns")
           .insert(cols)
@@ -44,7 +47,6 @@ export function usePipelineColumns(clientId: string | null) {
 
       return data as PipelineColumn[];
     },
-    enabled: !!clientId,
   });
 }
 
@@ -96,21 +98,28 @@ export function useReorderPipelineColumns() {
 
 // ─── Pipeline Leads ─────────────────────────────────────
 
-export function usePipelineLeads(clientId: string | null) {
+export function usePipelineLeads(filters?: { clientId?: string | null; assignedTo?: string | null }) {
   return useQuery({
-    queryKey: ["pipeline-leads", clientId],
+    queryKey: ["pipeline-leads", filters?.clientId ?? "all", filters?.assignedTo ?? "all"],
     queryFn: async () => {
-      if (!clientId) return [];
-      const { data, error } = await db()
+      let query = db()
         .from("leads")
-        .select("*")
-        .eq("client_id", clientId)
+        .select("*, client:clients(id, name)")
         .order("sort_order", { ascending: true })
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false })
+        .limit(500);
+
+      if (filters?.clientId) {
+        query = query.eq("client_id", filters.clientId);
+      }
+      if (filters?.assignedTo) {
+        query = query.eq("assigned_to", filters.assignedTo);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as Lead[];
+      return (data || []) as (Lead & { client?: { id: string; name: string } | null })[];
     },
-    enabled: !!clientId,
   });
 }
 
@@ -122,7 +131,11 @@ export function useCreatePipelineLead() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pipeline-leads"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      qc.invalidateQueries({ queryKey: ["lead-stats"] });
+    },
   });
 }
 
@@ -136,6 +149,7 @@ export function useUpdatePipelineLead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      qc.invalidateQueries({ queryKey: ["lead-stats"] });
     },
   });
 }
@@ -150,11 +164,12 @@ export function useDeletePipelineLead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      qc.invalidateQueries({ queryKey: ["lead-stats"] });
     },
   });
 }
 
-// ─── Move Lead to Column (with auto-actions) ────────────
+// ─── Move Lead to Column ────────────────────────────────
 
 export function useMovePipelineLead() {
   const qc = useQueryClient();
@@ -177,7 +192,7 @@ export function useMovePipelineLead() {
         .eq("id", leadId);
       if (error) throw error;
 
-      const lowerName = columnName.toLowerCase();
+      const lowerName = columnName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
       // Auto-create call_calendar when moved to "Call booké"
       if (lowerName.includes("call") && lowerName.includes("book")) {
@@ -190,8 +205,8 @@ export function useMovePipelineLead() {
         });
       }
 
-      // Auto-create closer_call when moved to "Closé"
-      if (lowerName.includes("clos")) {
+      // Auto-create closer_call + financial_entry when moved to "Closé"
+      if (lowerName.includes("close") || lowerName.includes("clos")) {
         const { data: lead } = await db().from("leads").select("ca_contracte, ca_collecte").eq("id", leadId).single();
         await db().from("closer_calls").insert({
           client_id: clientId,
@@ -200,7 +215,6 @@ export function useMovePipelineLead() {
           status: "closé",
           revenue: lead?.ca_contracte || 0,
         });
-        // Auto-create financial entry
         if (lead?.ca_contracte && lead.ca_contracte > 0) {
           await db().from("financial_entries").insert({
             client_id: clientId,
@@ -214,31 +228,39 @@ export function useMovePipelineLead() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
       qc.invalidateQueries({ queryKey: ["call-calendar"] });
       qc.invalidateQueries({ queryKey: ["closer-calls"] });
       qc.invalidateQueries({ queryKey: ["financial-entries"] });
       qc.invalidateQueries({ queryKey: ["closing-rates"] });
+      qc.invalidateQueries({ queryKey: ["lead-stats"] });
+      qc.invalidateQueries({ queryKey: ["pipeline-stats"] });
     },
   });
 }
 
 // ─── Pipeline Stats ─────────────────────────────────────
 
-export function usePipelineStats(clientId: string | null) {
+export function usePipelineStats(filters?: { clientId?: string | null; assignedTo?: string | null }) {
   return useQuery({
-    queryKey: ["pipeline-stats", clientId],
+    queryKey: ["pipeline-stats", filters?.clientId ?? "all", filters?.assignedTo ?? "all"],
     queryFn: async () => {
-      if (!clientId) return { total: 0, ca_contracte: 0, ca_collecte: 0, relances_today: 0 };
-      const { data } = await db().from("leads").select("ca_contracte, ca_collecte, date_relance, status").eq("client_id", clientId);
+      let query = db().from("leads").select("ca_contracte, ca_collecte, date_relance, status, column_id");
+      if (filters?.clientId) query = query.eq("client_id", filters.clientId);
+      if (filters?.assignedTo) query = query.eq("assigned_to", filters.assignedTo);
+      const { data } = await query;
+
       const leads = data || [];
       const today = new Date().toISOString().split("T")[0];
+      const active = leads.filter((l) => l.status !== "perdu" && l.status !== "close");
       return {
         total: leads.length,
+        active: active.length,
         ca_contracte: leads.reduce((s, l) => s + (Number(l.ca_contracte) || 0), 0),
         ca_collecte: leads.reduce((s, l) => s + (Number(l.ca_collecte) || 0), 0),
+        pipeline_value: active.reduce((s, l) => s + (Number(l.ca_contracte) || 0), 0),
         relances_today: leads.filter((l) => l.date_relance && l.date_relance <= today && l.status !== "close" && l.status !== "perdu").length,
       };
     },
-    enabled: !!clientId,
   });
 }

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
   }
 
   const userIds = members.map((m) => m.user_id);
+  console.log("[Push-Message] Sending to", userIds.length, "users:", userIds);
 
   await sendPushToUsers(userIds, {
     title: `💬 ${sender_name || "Nouveau message"}`,

@@ -22,7 +22,10 @@ interface PushPayload {
  * Send push notification to a specific user (all their subscriptions)
  */
 export async function sendPushToUser(userId: string, payload: PushPayload) {
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    console.log("[Push] VAPID keys not configured, skipping");
+    return;
+  }
 
   const admin = createAdminClient();
   const { data: subscriptions } = await admin
@@ -30,6 +33,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     .select("endpoint, auth, p256dh")
     .eq("user_id", userId);
 
+  console.log("[Push] Subscriptions for user", userId, ":", subscriptions?.length || 0);
   if (!subscriptions || subscriptions.length === 0) return;
 
   const notification = JSON.stringify({
@@ -46,7 +50,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
       webPush.sendNotification(
         { endpoint: sub.endpoint, keys: { auth: sub.auth, p256dh: sub.p256dh } },
         notification
-      ).catch(async (err: { statusCode?: number }) => {
+      ).catch(async (err: { statusCode?: number; body?: string }) => {
+        console.error("[Push] Send failed:", err.statusCode, err.body);
         // Remove invalid subscriptions (410 Gone or 404)
         if (err.statusCode === 410 || err.statusCode === 404) {
           await admin.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);

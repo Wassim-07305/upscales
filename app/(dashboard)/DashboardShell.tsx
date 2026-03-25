@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { usePresence } from "@/lib/hooks/use-presence";
 import {
   ADMIN_SECTIONS,
   MODERATOR_ADMIN_SECTIONS,
@@ -27,6 +28,8 @@ export function DashboardShell({
   userId,
   children,
 }: DashboardShellProps) {
+  usePresence(userId);
+
   const navSections =
     role === "admin"
       ? ADMIN_SECTIONS

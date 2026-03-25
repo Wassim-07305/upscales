@@ -93,7 +93,7 @@ export function ModuleNotes({ moduleId, formationId, initialContent }: ModuleNot
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -132,7 +132,7 @@ export function ModuleNotes({ moduleId, formationId, initialContent }: ModuleNot
           onChange={(e) => setContent(e.target.value)}
           placeholder="Notez les points importants, vos questions, vos idées..."
           className={cn(
-            "min-h-[120px] resize-y bg-muted/30 border-0 text-sm",
+            "min-h-[120px] w-full min-w-0 resize-y bg-muted/30 border-0 text-sm",
             "focus-visible:ring-1 focus-visible:ring-primary/50"
           )}
         />

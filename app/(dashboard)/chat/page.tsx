@@ -24,31 +24,15 @@ export default async function ChatPage({
 
   if (!profile || !isMember(profile.role)) redirect("/dashboard");
 
-  // Parallelize independent queries
-  const [{ data: memberChannels }, { data: channels }, { data: allProfiles }] =
-    await Promise.all([
-      supabase.from("channel_members").select("channel_id").eq("user_id", user.id),
-      supabase.from("channels").select("*").eq("is_archived", false).order("created_at"),
-      supabase.from("profiles").select("id, full_name, avatar_url, is_online").neq("id", user.id),
-    ]);
-
-  const memberChannelIds = memberChannels?.map((m) => m.channel_id) || [];
-
-  const publicChannels = channels?.filter((c) => c.type === "public") || [];
-  const dmChannels = channels?.filter(
-    (c) => c.type === "dm" && memberChannelIds.includes(c.id)
-  ) || [];
-  const privateChannels = channels?.filter(
-    (c) => c.type === "private" && memberChannelIds.includes(c.id)
-  ) || [];
+  // Fetch all users (for DM search + DM partner display)
+  const { data: allProfiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url, is_online")
+    .neq("id", user.id);
 
   return (
     <ChatLayout
       user={profile}
-      publicChannels={publicChannels}
-      privateChannels={privateChannels}
-      dmChannels={dmChannels}
-      memberChannelIds={memberChannelIds}
       allUsers={allProfiles || []}
       initialDmUserId={dmUserId || null}
     />

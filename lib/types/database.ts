@@ -179,6 +179,7 @@ export interface Channel {
   icon: string | null;
   created_by: string | null;
   is_archived: boolean;
+  last_message_at: string | null;
   created_at: string;
   updated_at: string;
 }

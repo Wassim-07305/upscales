@@ -138,7 +138,7 @@ export function ChatLayout({ user, allUsers, initialDmUserId }: ChatLayoutProps)
   useEffect(() => {
     if (initialDmUserId && !dmAutoOpened && allUsers.length > 0) {
       setDmAutoOpened(true);
-      openOrCreateDM(initialDmUserId, allUsers).then((ch) => {
+      openOrCreateDM(initialDmUserId).then((ch) => {
         if (ch) selectChannel(ch);
       });
     }
@@ -146,7 +146,7 @@ export function ChatLayout({ user, allUsers, initialDmUserId }: ChatLayoutProps)
 
   // Create DM
   const handleCreateDM = async (otherUserId: string) => {
-    const ch = await openOrCreateDM(otherUserId, allUsers);
+    const ch = await openOrCreateDM(otherUserId);
     if (ch) {
       selectChannel(ch);
     }

@@ -393,81 +393,29 @@ export function useChannels(userId: string) {
     [userId, memberChannelIds]
   );
 
-  // Create or open DM
+  // Create or open DM (via API route to bypass RLS for member insertion)
   const openOrCreateDM = useCallback(
-    async (otherUserId: string, allUsers: Pick<Profile, "id" | "full_name" | "avatar_url" | "is_online">[]): Promise<Channel | null> => {
+    async (otherUserId: string): Promise<Channel | null> => {
       if (!userId) return null;
-
-      const otherUser = allUsers.find((u) => u.id === otherUserId);
-      if (!otherUser) return null;
 
       // Check existing DM in local state
       const existingLocal = dmChannels.find((ch) => ch.dmPartner?.id === otherUserId);
       if (existingLocal) return existingLocal;
 
-      // Check DB
-      const { data: myMemberships } = await supabase
-        .from("channel_members")
-        .select("channel_id")
-        .eq("user_id", userId);
+      // Use API route (admin client) to handle DM creation
+      const res = await fetch("/api/chat/create-dm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otherUserId }),
+      });
 
-      const myChannelIds = (myMemberships || []).map((m) => m.channel_id);
+      if (!res.ok) return null;
 
-      if (myChannelIds.length > 0) {
-        const { data: otherMemberships } = await supabase
-          .from("channel_members")
-          .select("channel_id")
-          .eq("user_id", otherUserId)
-          .in("channel_id", myChannelIds);
-
-        const sharedIds = (otherMemberships || []).map((m) => m.channel_id);
-
-        if (sharedIds.length > 0) {
-          const { data: existingDM } = await supabase
-            .from("channels")
-            .select("*")
-            .eq("type", "dm")
-            .in("id", sharedIds)
-            .limit(1)
-            .maybeSingle();
-
-          if (existingDM) return existingDM as Channel;
-        }
-      }
-
-      // Fetch my profile name
-      const { data: myProfile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", userId)
-        .single();
-
-      const dmName = `${myProfile?.full_name || "Moi"} & ${otherUser.full_name}`;
-
-      // Create new DM channel
-      const { data: newChannel, error } = await supabase
-        .from("channels")
-        .insert({ name: dmName, type: "dm", created_by: userId })
-        .select()
-        .single();
-
-      if (error || !newChannel) return null;
-
-      // Add both members
-      const { error: membersError } = await supabase.from("channel_members").insert([
-        { channel_id: newChannel.id, user_id: userId },
-        { channel_id: newChannel.id, user_id: otherUserId },
-      ]);
-
-      if (membersError) {
-        // Rollback
-        await supabase.from("channels").delete().eq("id", newChannel.id);
-        return null;
-      }
+      const { channel } = await res.json();
 
       // Refresh channels
       await fetchChannels();
-      return newChannel as Channel;
+      return channel as Channel;
     },
     [userId, dmChannels, fetchChannels]
   );

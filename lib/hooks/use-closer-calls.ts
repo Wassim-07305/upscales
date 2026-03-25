@@ -4,13 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { CloserCall } from "@/lib/types/database";
 
-const supabase = createClient();
+function getSupabase() { return createClient(); }
 
 export function useCloserCalls(filters?: { clientId?: string; status?: string; closerId?: string }) {
   return useQuery({
     queryKey: ["closer-calls", filters],
     queryFn: async () => {
-      let query = supabase
+      let query = getSupabase()
         .from("closer_calls")
         .select("*, lead:leads(full_name), closer:profiles!closer_calls_closer_id_fkey(id, full_name, avatar_url)")
         .order("date", { ascending: false });
@@ -30,7 +30,7 @@ export function useCreateCloserCall() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (call: Partial<CloserCall>) => {
-      const { data, error } = await supabase.from("closer_calls").insert(call).select().single();
+      const { data, error } = await getSupabase().from("closer_calls").insert(call).select().single();
       if (error) throw error;
       return data;
     },
@@ -45,7 +45,7 @@ export function useUpdateCloserCall() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CloserCall> & { id: string }) => {
-      const { error } = await supabase.from("closer_calls").update(updates).eq("id", id);
+      const { error } = await getSupabase().from("closer_calls").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -59,7 +59,7 @@ export function useDeleteCloserCall() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("closer_calls").delete().eq("id", id);
+      const { error } = await getSupabase().from("closer_calls").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

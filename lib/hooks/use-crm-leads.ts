@@ -4,13 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Lead } from "@/lib/types/database";
 
-const supabase = createClient();
+function getSupabase() { return createClient(); }
 
 export function useLeads(filters?: { clientId?: string; status?: string; search?: string }) {
   return useQuery({
     queryKey: ["crm-leads", filters],
     queryFn: async () => {
-      let query = supabase
+      let query = getSupabase()
         .from("leads")
         .select("*")
         .order("sort_order", { ascending: true })
@@ -34,7 +34,7 @@ export function useLeadsByClient(clientId: string | null) {
     queryKey: ["crm-leads", { clientId }],
     queryFn: async () => {
       if (!clientId) return [];
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("leads")
         .select("*")
         .eq("client_id", clientId)
@@ -50,7 +50,7 @@ export function useCreateLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (lead: Partial<Lead>) => {
-      const { data, error } = await supabase.from("leads").insert(lead).select().single();
+      const { data, error } = await getSupabase().from("leads").insert(lead).select().single();
       if (error) throw error;
       return data;
     },
@@ -62,7 +62,7 @@ export function useUpdateLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Lead> & { id: string }) => {
-      const { error } = await supabase.from("leads").update(updates).eq("id", id);
+      const { error } = await getSupabase().from("leads").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["crm-leads"] }),
@@ -73,7 +73,7 @@ export function useDeleteLead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("leads").delete().eq("id", id);
+      const { error } = await getSupabase().from("leads").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["crm-leads"] }),
@@ -84,7 +84,7 @@ export function useLeadStats(clientId?: string) {
   return useQuery({
     queryKey: ["lead-stats", clientId],
     queryFn: async () => {
-      let query = supabase.from("leads").select("status, estimated_value");
+      let query = getSupabase().from("leads").select("status, estimated_value");
       if (clientId) query = query.eq("client_id", clientId);
       const { data, error } = await query;
       if (error) throw error;

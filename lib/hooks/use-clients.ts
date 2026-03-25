@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Client, ClientAssignment } from "@/lib/types/database";
 
-const supabase = createClient();
+function getSupabase() { return createClient(); }
 
 // ─── Fetch clients ──────────────────────────────────────
 
@@ -12,7 +12,7 @@ export function useClients(filters?: { search?: string; status?: string }) {
   return useQuery({
     queryKey: ["clients", filters],
     queryFn: async () => {
-      let query = supabase
+      let query = getSupabase()
         .from("clients")
         .select("*")
         .order("created_at", { ascending: false });
@@ -36,7 +36,7 @@ export function useClient(id: string | null) {
     queryKey: ["client", id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("clients")
         .select("*")
         .eq("id", id)
@@ -54,7 +54,7 @@ export function useCreateClient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (client: Partial<Client>) => {
-      const { data, error } = await supabase.from("clients").insert(client).select().single();
+      const { data, error } = await getSupabase().from("clients").insert(client).select().single();
       if (error) throw error;
       return data;
     },
@@ -66,7 +66,7 @@ export function useUpdateClient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Client> & { id: string }) => {
-      const { error } = await supabase.from("clients").update(updates).eq("id", id);
+      const { error } = await getSupabase().from("clients").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export function useDeleteClient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
+      const { error } = await getSupabase().from("clients").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clients"] }),
@@ -98,7 +98,7 @@ export function useClientAssignments(clientId: string | null) {
     queryKey: ["client-assignments", clientId],
     queryFn: async () => {
       if (!clientId) return [];
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("client_assignments")
         .select("*, profile:profiles(id, full_name, avatar_url)")
         .eq("client_id", clientId);
@@ -113,7 +113,7 @@ export function useAllClientAssignments() {
   return useQuery({
     queryKey: ["all-client-assignments"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("client_assignments")
         .select("*, profile:profiles(id, full_name, avatar_url)");
       if (error) throw error;
@@ -126,7 +126,7 @@ export function useUpsertAssignment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (assignment: { client_id: string; user_id: string; role: string }) => {
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from("client_assignments")
         .upsert(assignment, { onConflict: "client_id,user_id,role" });
       if (error) throw error;
@@ -142,7 +142,7 @@ export function useDeleteAssignment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("client_assignments").delete().eq("id", id);
+      const { error } = await getSupabase().from("client_assignments").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -160,7 +160,7 @@ export function useClosingRates() {
   return useQuery({
     queryKey: ["closing-rates"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("closer_calls")
         .select("client_id, status");
       if (error) throw error;

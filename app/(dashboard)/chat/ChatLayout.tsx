@@ -738,7 +738,7 @@ function MessageBubble({
             </AvatarFallback>
           </Avatar>
         )}
-        <div className={cn("flex-1 min-w-0", isOwn && "flex flex-col items-end")}>
+        <div className={cn("min-w-0", isOwn ? "flex-1 flex flex-col items-end" : "max-w-[80%]")}>
           {/* Reply reference */}
           {parentMsg && (
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1 opacity-70">
@@ -790,11 +790,11 @@ function MessageBubble({
               </Button>
             </div>
           ) : (
-            <div className="relative max-w-[80%]">
+            <div className={cn("relative", isOwn && "max-w-[80%]")}>
               <div
                 className={cn(
-                  "rounded-2xl text-[15px] break-words whitespace-pre-wrap",
-                  isOwn ? "bg-[#1A3A2A] text-white rounded-br-sm" : "bg-muted rounded-bl-sm",
+                  "rounded-2xl text-[15px] break-words whitespace-pre-wrap w-fit",
+                  isOwn ? "bg-[#1A3A2A] text-white rounded-br-sm ml-auto" : "bg-muted rounded-bl-sm",
                   msg.media_url ? "p-1" : "px-3 py-1.5"
                 )}
               >

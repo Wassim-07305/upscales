@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 export async function PUT(
   request: NextRequest,
@@ -23,7 +24,7 @@ export async function PUT(
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

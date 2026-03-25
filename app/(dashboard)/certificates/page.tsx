@@ -54,7 +54,7 @@ export default async function CertificatesPage() {
                     <Award className="h-8 w-8 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">{(cert.formation as any)?.title}</h3>
+                    <h3 className="font-semibold">{(cert.formation as { title: string } | null)?.title}</h3>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />

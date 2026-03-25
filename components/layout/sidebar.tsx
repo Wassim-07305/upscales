@@ -38,7 +38,7 @@ function useUnreadMessages() {
     // Listen for new messages in realtime
     const channel = supabase.channel("sidebar-messages")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        if (payload.new && (payload.new as any).sender_id !== userId) {
+        if (payload.new && (payload.new as { sender_id: string }).sender_id !== userId) {
           setHasUnread(true);
         }
       })

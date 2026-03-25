@@ -29,6 +29,7 @@ import {
 import { Megaphone, Send, Loader2, Users, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 interface BroadcastClientProps {
   userId: string;
@@ -87,7 +88,7 @@ export function BroadcastClient({ userId, stats }: BroadcastClientProps) {
     } else if (target === "prospect") {
       query = query.eq("role", "prospect");
     } else if (target === "admin,moderator") {
-      query = query.in("role", ["admin", "moderator"]);
+      query = query.in("role", ADMIN_ROLES);
     }
 
     const { data: users, error: fetchError } = await query;

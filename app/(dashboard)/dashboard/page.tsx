@@ -358,7 +358,7 @@ export default async function DashboardPage() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
-                      {(fp as any).formation?.title}
+                      {(fp as { formation?: { title: string } }).formation?.title}
                     </p>
                     <span className="text-xs text-muted-foreground">
                       {fp.percent}%
@@ -402,7 +402,7 @@ export default async function DashboardPage() {
                     </p>
                     {session.host && (
                       <p className="text-xs text-muted-foreground">
-                        Par {(session.host as any).full_name}
+                        Par {(session.host as { full_name: string }).full_name}
                       </p>
                     )}
                   </div>

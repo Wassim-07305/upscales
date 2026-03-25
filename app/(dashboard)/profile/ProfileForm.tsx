@@ -50,10 +50,10 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
-  const [isPublic, setIsPublic] = useState((profile as any).is_public !== false);
+  const [isPublic, setIsPublic] = useState((profile as Profile & { is_public?: boolean }).is_public !== false);
   const defaultPrefs = { message: true, post: true, formation: true, session: true, certificate: true, system: true };
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
-    () => ({ ...defaultPrefs, ...((profile as any).notification_preferences || {}) })
+    () => ({ ...defaultPrefs, ...((profile as Profile & { notification_preferences?: Record<string, boolean> }).notification_preferences || {}) })
   );
   const router = useRouter();
   const supabase = createClient();

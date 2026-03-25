@@ -30,6 +30,7 @@ import { showXPToast } from "@/components/gamification/XPToast";
 import { ModuleNotes } from "@/components/formations/ModuleNotes";
 import { ModuleDiscussions } from "@/components/formations/ModuleDiscussions";
 import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 const typeIcons: Record<string, typeof Video> = {
   video_upload: Video,
@@ -180,7 +181,7 @@ export function ModuleContent({
         const { data: admins } = await supabase
           .from("profiles")
           .select("id")
-          .in("role", ["admin", "moderator"]);
+          .in("role", ADMIN_ROLES);
 
         if (admins && admins.length > 0) {
           const { data: studentProfile } = await supabase

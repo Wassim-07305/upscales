@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 export default async function FullscreenLayout({
   children,
@@ -22,7 +23,7 @@ export default async function FullscreenLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
     redirect("/dashboard");
   }
 

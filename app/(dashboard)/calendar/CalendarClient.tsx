@@ -788,7 +788,7 @@ export function CalendarClient({
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>
                         Anime par{" "}
-                        {(selectedSession.host as any).full_name}
+                        {(selectedSession.host as { full_name: string } | null)?.full_name}
                       </span>
                     </div>
                   )}

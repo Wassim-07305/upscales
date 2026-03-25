@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 // DELETE: Remove an AI document and its chunks (cascade)
 export async function DELETE(
@@ -13,7 +14,7 @@ export async function DELETE(
 
   const { data: profile } = await supabase
     .from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

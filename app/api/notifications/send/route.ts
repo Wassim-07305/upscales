@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToUser, sendPushToUsers } from "@/lib/push";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   // Only admin/moderator can send push notifications
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

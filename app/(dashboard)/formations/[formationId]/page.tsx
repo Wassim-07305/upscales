@@ -204,16 +204,16 @@ export default async function FormationDetailPage({
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Formateur</p>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={(formation.creator as any)?.avatar_url || undefined} />
+                    <AvatarImage src={(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.avatar_url || undefined} />
                     <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                      {getInitials((formation.creator as any)?.full_name || "")}
+                      {getInitials((formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.full_name || "")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm font-medium">{(formation.creator as any)?.full_name}</p>
-                    {(formation.creator as any)?.bio && (
+                    <p className="text-sm font-medium">{(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.full_name}</p>
+                    {(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.bio && (
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                        {(formation.creator as any).bio}
+                        {(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null }).bio}
                       </p>
                     )}
                   </div>

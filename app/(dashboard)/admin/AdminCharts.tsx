@@ -100,7 +100,7 @@ export function AdminCharts({ monthlyData, topFormations, recentPosts }: AdminCh
                   <div className="w-2 h-2 rounded-full bg-primary mt-2" />
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">{(post.author as any)?.full_name}</span>
+                      <span className="font-medium">{(post.author as { full_name: string } | null)?.full_name}</span>
                       {" a publié un post"}
                     </p>
                     <p className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>

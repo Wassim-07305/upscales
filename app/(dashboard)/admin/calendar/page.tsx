@@ -148,7 +148,7 @@ export default function AdminCalendarPage() {
         .single();
       if (updated) {
         setSessions((prev) =>
-          prev.map((s) => (s.id === updated.id ? { ...updated, participants_count: (s as any).participants_count } : s))
+          prev.map((s) => (s.id === updated.id ? { ...updated, participants_count: (s as { participants_count?: number }).participants_count } : s))
         );
         toast.success("Session mise à jour");
       }

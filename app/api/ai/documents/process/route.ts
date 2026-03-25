@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { splitTextIntoChunks, estimateTokenCount } from "@/lib/ai/chunker";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
+import { ADMIN_ROLES } from "@/lib/constants/navigation";
 
 export const maxDuration = 120; // 2 minutes pour le traitement des embeddings
 
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("profiles").select("role").eq("id", user.id).single();
-  if (!profile || !["admin", "moderator"].includes(profile.role)) {
+  if (!profile || !ADMIN_ROLES.includes(profile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

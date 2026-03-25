@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         { onConflict: "user_id,formation_id" }
       );
 
-      // Notify user
+      // Notify user (in-app + push)
       await admin.from("notifications").insert({
         user_id: userId,
         type: "formation",
@@ -77,6 +77,9 @@ export async function POST(request: NextRequest) {
         message: "Votre paiement a été accepté. Vous avez maintenant accès à la formation.",
         link: `/formations/${formationId}`,
       });
+
+      const { pushNotify } = await import("@/lib/notifications-push");
+      await pushNotify(userId, "formation", "Paiement confirmé", "Vous avez maintenant accès à la formation.", `/formations/${formationId}`);
 
       // Upgrade prospect to member if needed
       const { data: profile } = await admin

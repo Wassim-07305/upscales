@@ -296,6 +296,18 @@ export function ChatLayout({
       content,
       parent_id: parentId,
     });
+
+    // Fire-and-forget push notification to other channel members
+    fetch("/api/notifications/push-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel_id: activeChannel.id,
+        channel_name: activeChannel.name,
+        sender_name: user.full_name,
+        preview: content.slice(0, 100),
+      }),
+    }).catch(() => {});
   };
 
   const handleEditMessage = async (messageId: string) => {

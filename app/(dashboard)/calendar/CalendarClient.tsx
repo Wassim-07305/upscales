@@ -213,8 +213,8 @@ export function CalendarClient({
       await supabase.from("notifications").insert({
         user_id: userId,
         type: "session",
-        title: `Inscription confirmee : ${session.title}`,
-        message: `Vous etes inscrit a la session du ${formatDateTime(session.start_time)}`,
+        title: `Inscription confirmée : ${session.title}`,
+        message: `Vous êtes inscrit à la session du ${formatDateTime(session.start_time)}`,
         link: "/calendar",
       });
 
@@ -229,9 +229,21 @@ export function CalendarClient({
           user_id: session.host_id,
           type: "session",
           title: `Nouvelle inscription : ${session.title}`,
-          message: `${userProfile?.full_name || "Un utilisateur"} s'est inscrit a votre session`,
+          message: `${userProfile?.full_name || "Un utilisateur"} s'est inscrit à votre session`,
           link: "/admin/calendar",
         });
+
+        // Push notification to host
+        fetch("/api/notifications/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_ids: [session.host_id],
+            title: `📅 Nouvelle inscription : ${session.title}`,
+            body: `${userProfile?.full_name || "Un utilisateur"} s'est inscrit à votre session`,
+            url: "/admin/calendar",
+          }),
+        }).catch(() => {});
       }
 
       toast.success("Inscription confirmee !");

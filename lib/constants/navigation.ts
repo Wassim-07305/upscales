@@ -309,6 +309,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ONLY_ROLES,
   },
   {
+    label: "Ressources",
+    href: "/ressources",
+    icon: FolderOpen,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Utilisateurs",
     href: "/admin/users",
     icon: UsersRound,
@@ -333,7 +339,7 @@ export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin", "/admin/crm", "/admin/formations", "/admin/users"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations", "/ressources", "/admin/users"].includes(i.href)
     ),
   },
   {
@@ -383,7 +389,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin", "/admin/crm", "/admin/formations", "/admin/users"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations", "/ressources", "/admin/users"].includes(i.href)
     ),
   },
   {

@@ -3,13 +3,13 @@ import { redirect } from "next/navigation";
 import { SubNav } from "@/components/layout/sub-nav";
 import { RessourcesClient } from "./RessourcesClient";
 
-const formationsTabs = [
-  { label: "Formations", href: "/admin/formations" },
-  { label: "Playbooks", href: "/admin/playbooks" },
+const ressourcesTabs = [
   { label: "Ressources", href: "/ressources" },
+  { label: "Playbooks", href: "/admin/playbooks" },
   { label: "Pages", href: "/admin/pages" },
   { label: "Exercices", href: "/admin/exercises" },
   { label: "Contenu", href: "/admin/content" },
+  { label: "SOPs", href: "/admin/sops" },
 ];
 
 export default async function RessourcesPage() {
@@ -38,7 +38,7 @@ export default async function RessourcesPage() {
 
   return (
     <>
-      <SubNav tabs={formationsTabs} />
+      <SubNav tabs={ressourcesTabs} />
       <RessourcesClient sops={sops || []} />
     </>
   );

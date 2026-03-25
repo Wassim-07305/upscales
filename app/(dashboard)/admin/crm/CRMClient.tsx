@@ -10,7 +10,7 @@ import {
   useAllClientAssignments,
   useClosingRates,
 } from "@/lib/hooks/use-clients";
-import { useLeads, useLeadStats, useCreateLead, useUpdateLead, useDeleteLead } from "@/lib/hooks/use-crm-leads";
+import { useLeads, useLeadStats } from "@/lib/hooks/use-crm-leads";
 import { useFinanceStats } from "@/lib/hooks/use-finances";
 import type { Client, ClientStatus, Lead } from "@/lib/types/database";
 import {
@@ -48,12 +48,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DndContext,
-  DragOverlay,
+
   closestCorners,
+  DragOverlay,
   useDraggable,
   useDroppable,
-  type DragEndEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   Search,
@@ -72,7 +71,7 @@ import {
   TrendingUp,
   Target,
   GripVertical,
-  Instagram,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/utils/formatters";
@@ -135,21 +134,14 @@ export function CRMClient() {
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
 
-  // Pipeline queries
+  // Pipeline queries (bilan uses leads + finances)
   const { data: allLeads } = useLeads(leadFilters);
   const { data: leadStats } = useLeadStats();
   const { data: financeStats } = useFinanceStats();
-  const createLead = useCreateLead();
-  const updateLead = useUpdateLead();
-  const deleteLead = useDeleteLead();
 
-  // Pipeline state
-  const [leadSearch, setLeadSearch] = useState("");
-  const [leadDialogOpen, setLeadDialogOpen] = useState(false);
-  const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
-  const [leadForm, setLeadForm] = useState({
-    full_name: "", email: "", phone: "", instagram_url: "", source: "instagram", estimated_value: "", notes: "",
-  });
+  // Pipeline state — kanban shows CLIENTS by status
+  const [draggedClient, setDraggedClient] = useState<Client | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   // ─── Derived data ────────────────────────────────────
 
@@ -269,18 +261,18 @@ export function CRMClient() {
 
   // ─── Pipeline helpers (MUST be before any early return) ──
 
-  const filteredLeads = useMemo(() => {
-    if (!allLeads) return [];
-    if (!leadSearch) return allLeads;
-    const q = leadSearch.toLowerCase();
-    return allLeads.filter(
-      (l) =>
-        l.full_name?.toLowerCase().includes(q) ||
-        l.email?.toLowerCase().includes(q) ||
-        l.phone?.includes(q)
-    );
-  }, [allLeads, leadSearch]);
+  // Kanban uses clients by status
+  const clientsByStatus = useMemo(() => {
+    const map: Record<string, Client[]> = {};
+    for (const s of CLIENT_STATUSES) map[s] = [];
+    for (const c of clients || []) {
+      if (map[c.status]) map[c.status].push(c);
+    }
+    return map;
+  }, [clients]);
 
+  // Leads grouped for bilan
+  const filteredLeads = allLeads || [];
   const leadsByStatus = useMemo(() => {
     const map: Record<string, Lead[]> = {};
     for (const s of LEAD_STATUSES) map[s] = [];
@@ -338,50 +330,6 @@ export function CRMClient() {
       </div>
     );
   }
-
-  // ─── Drag & pipeline event handlers ─────────────────
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const lead = filteredLeads.find((l) => l.id === event.active.id);
-    setDraggedLead(lead || null);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setDraggedLead(null);
-    const { active, over } = event;
-    if (!over) return;
-    const newStatus = over.id as string;
-    const leadId = active.id as string;
-    const lead = filteredLeads.find((l) => l.id === leadId);
-    if (!lead || lead.status === newStatus) return;
-    updateLead.mutate({ id: leadId, status: newStatus as Lead["status"] });
-  };
-
-  const handleCreateLead = async () => {
-    if (!leadForm.full_name.trim()) { toast.error("Le nom est obligatoire"); return; }
-    try {
-      await createLead.mutateAsync({
-        full_name: leadForm.full_name.trim(),
-        email: leadForm.email.trim() || null,
-        phone: leadForm.phone.trim() || null,
-        instagram_url: leadForm.instagram_url.trim() || null,
-        source: leadForm.source || null,
-        estimated_value: Number(leadForm.estimated_value) || 0,
-        notes: leadForm.notes.trim() || null,
-        status: "nouveau" as Lead["status"],
-      });
-      toast.success("Lead ajouté");
-      setLeadDialogOpen(false);
-      setLeadForm({ full_name: "", email: "", phone: "", instagram_url: "", source: "instagram", estimated_value: "", notes: "" });
-    } catch { toast.error("Erreur lors de la création"); }
-  };
-
-  const handleDeleteLead = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm("Supprimer ce lead ?")) return;
-    try { await deleteLead.mutateAsync(id); toast.success("Lead supprimé"); }
-    catch { toast.error("Erreur"); }
-  };
 
   // ─── Render ─────────────────────────────────────────
 
@@ -807,95 +755,105 @@ export function CRMClient() {
 
       </>}
 
-      {/* ═══════════════ PIPELINE TAB ═══════════════ */}
+      {/* ═══════════════ PIPELINE TAB (clients par statut) ═══════════════ */}
       {activeTab === "pipeline" && <>
-        {/* Pipeline header */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher un lead..."
-              value={leadSearch}
-              onChange={(e) => setLeadSearch(e.target.value)}
-              className="pl-9 bg-[#141414] border-0"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">
-              {filteredLeads.length} leads — Pipeline: <span className="text-[#C6FF00] font-semibold">{(leadStats?.pipeline_value || 0).toLocaleString("fr-FR")} €</span>
-            </span>
-            <Dialog open={leadDialogOpen} onOpenChange={setLeadDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-[#C6FF00] text-black hover:bg-[#C6FF00]/90">
-                  <Plus className="mr-2 h-4 w-4" /> Nouveau lead
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader><DialogTitle>Nouveau lead</DialogTitle></DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label>Nom *</Label>
-                    <Input value={leadForm.full_name} onChange={(e) => setLeadForm((f) => ({ ...f, full_name: e.target.value }))} className="bg-[#141414] border-0" placeholder="Nom complet" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Email</Label>
-                      <Input value={leadForm.email} onChange={(e) => setLeadForm((f) => ({ ...f, email: e.target.value }))} className="bg-[#141414] border-0" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Téléphone</Label>
-                      <Input value={leadForm.phone} onChange={(e) => setLeadForm((f) => ({ ...f, phone: e.target.value }))} className="bg-[#141414] border-0" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Instagram</Label>
-                      <Input value={leadForm.instagram_url} onChange={(e) => setLeadForm((f) => ({ ...f, instagram_url: e.target.value }))} className="bg-[#141414] border-0" placeholder="@handle" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Source</Label>
-                      <Select value={leadForm.source} onValueChange={(v) => setLeadForm((f) => ({ ...f, source: v }))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{LEAD_SOURCE_LABELS[s]}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Valeur estimée (€)</Label>
-                    <Input type="number" value={leadForm.estimated_value} onChange={(e) => setLeadForm((f) => ({ ...f, estimated_value: e.target.value }))} className="bg-[#141414] border-0" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Notes</Label>
-                    <Textarea value={leadForm.notes} onChange={(e) => setLeadForm((f) => ({ ...f, notes: e.target.value }))} className="bg-[#141414] border-0" rows={3} />
-                  </div>
-                  <Button onClick={handleCreateLead} disabled={createLead.isPending} className="bg-[#C6FF00] text-black hover:bg-[#C6FF00]/90">
-                    {createLead.isPending ? "Création..." : "Ajouter le lead"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">{clients?.length || 0} clients</span>
         </div>
 
-        {/* Kanban board */}
-        <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
-            {LEAD_STATUSES.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                leads={leadsByStatus[status] || []}
-                onDeleteLead={handleDeleteLead}
-                onClickLead={(id) => {}}
-              />
-            ))}
+        <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
+          <DndContext
+            collisionDetection={closestCorners}
+            onDragStart={(e) => {
+              const c = clients?.find((cl) => cl.id === e.active.id);
+              setDraggedClient(c || null);
+            }}
+            onDragEnd={(e) => {
+              setDraggedClient(null);
+              const { active, over } = e;
+              if (!over) return;
+              const newStatus = over.id as string;
+              const clientId = active.id as string;
+              const client = clients?.find((c) => c.id === clientId);
+              if (!client || client.status === newStatus) return;
+              updateClient.mutate({ id: clientId, status: newStatus as ClientStatus });
+            }}
+          >
+            {CLIENT_STATUSES.map((status) => {
+              const cols = clientsByStatus[status] || [];
+              return <ClientKanbanColumn key={status} status={status} clients={cols} onClickClient={setSelectedClient} />;
+            })}
+            <DragOverlay>
+              {draggedClient && <ClientCard client={draggedClient} isDragOverlay />}
+            </DragOverlay>
+          </DndContext>
+        </div>
+
+        {/* Sidebar panel — détail du client sélectionné */}
+        {selectedClient && (
+          <div className="fixed inset-y-0 right-0 w-full max-w-md bg-card border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="font-semibold">{selectedClient.name}</h3>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => { router.push(`/admin/crm/${selectedClient.id}`); setSelectedClient(null); }}>
+                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Voir détail
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSelectedClient(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Statut</span>
+                  <Badge variant="outline" className={cn("text-xs", CLIENT_STATUS_COLORS[selectedClient.status])}>
+                    {CLIENT_STATUS_LABELS[selectedClient.status]}
+                  </Badge>
+                </div>
+                {selectedClient.email && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Email</span>
+                    <span className="text-sm">{selectedClient.email}</span>
+                  </div>
+                )}
+                {selectedClient.phone && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Téléphone</span>
+                    <span className="text-sm">{selectedClient.phone}</span>
+                  </div>
+                )}
+                {selectedClient.niche && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Niche</span>
+                    <span className="text-sm">{selectedClient.niche}</span>
+                  </div>
+                )}
+                {selectedClient.notes && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Notes</span>
+                    <p className="text-sm mt-1 whitespace-pre-wrap bg-muted/50 rounded-lg p-3">{selectedClient.notes}</p>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Manager</span>
+                  <span className="text-sm">{managerFor(selectedClient.id)}</span>
+                </div>
+                {closingRates && closingRates[selectedClient.id] && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Taux closing</span>
+                    <span className="text-sm font-semibold">{closingRates[selectedClient.id].rate}%</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Créé le</span>
+                  <span className="text-sm">{formatDate(selectedClient.created_at)}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <DragOverlay>
-            {draggedLead && <LeadCard lead={draggedLead} isDragOverlay />}
-          </DragOverlay>
-        </DndContext>
+        )}
+        {selectedClient && <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setSelectedClient(null)} />}
       </>}
 
       {/* ═══════════════ BILAN TAB ═══════════════ */}
@@ -1042,19 +1000,18 @@ export function CRMClient() {
 
 // ─── Kanban Column ──────────────────────────────────────
 
-function KanbanColumn({
+// ─── Client Kanban Column ───────────────────────────────
+
+function ClientKanbanColumn({
   status,
-  leads,
-  onDeleteLead,
-  onClickLead,
+  clients,
+  onClickClient,
 }: {
   status: string;
-  leads: Lead[];
-  onDeleteLead: (id: string, e: React.MouseEvent) => void;
-  onClickLead: (id: string) => void;
+  clients: Client[];
+  onClickClient: (client: Client) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
-  const value = leads.reduce((s, l) => s + (l.estimated_value || 0), 0);
 
   return (
     <div
@@ -1064,87 +1021,64 @@ function KanbanColumn({
         isOver && "ring-2 ring-[#C6FF00]/50 bg-[#C6FF00]/5"
       )}
     >
-      <div className="p-3 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: LEAD_STAGE_COLORS[status] }} />
-          <span className="text-sm font-medium">{LEAD_STATUS_LABELS[status]}</span>
-          <Badge variant="outline" className="text-[10px] h-5">{leads.length}</Badge>
-        </div>
-        {value > 0 && <span className="text-[10px] text-muted-foreground">{value.toLocaleString("fr-FR")} €</span>}
+      <div className="p-3 border-b border-border flex items-center gap-2">
+        <Badge variant="outline" className={cn("text-[10px]", CLIENT_STATUS_COLORS[status])}>
+          {CLIENT_STATUS_LABELS[status]}
+        </Badge>
+        <span className="text-xs text-muted-foreground">{clients.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
-        {leads.map((lead) => (
-          <DraggableLeadCard key={lead.id} lead={lead} onDelete={onDeleteLead} />
+        {clients.map((client) => (
+          <DraggableClientCard key={client.id} client={client} onClick={() => onClickClient(client)} />
         ))}
-        {leads.length === 0 && (
-          <div className="py-8 text-center text-xs text-muted-foreground">Aucun lead</div>
+        {clients.length === 0 && (
+          <div className="py-8 text-center text-xs text-muted-foreground">Aucun client</div>
         )}
       </div>
     </div>
   );
 }
 
-// ─── Draggable Lead Card ────────────────────────────────
-
-function DraggableLeadCard({ lead, onDelete }: { lead: Lead; onDelete: (id: string, e: React.MouseEvent) => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
-
+function DraggableClientCard({ client, onClick }: { client: Client; onClick: () => void }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: client.id });
   return (
     <div ref={setNodeRef} className={cn(isDragging && "opacity-40")}>
-      <LeadCard lead={lead} onDelete={onDelete} dragHandleProps={{ ...attributes, ...listeners }} />
+      <ClientCard client={client} dragHandleProps={{ ...attributes, ...listeners }} onClick={onClick} />
     </div>
   );
 }
 
-function LeadCard({
-  lead,
-  onDelete,
+function ClientCard({
+  client,
   isDragOverlay,
   dragHandleProps,
+  onClick,
 }: {
-  lead: Lead;
-  onDelete?: (id: string, e: React.MouseEvent) => void;
+  client: Client;
   isDragOverlay?: boolean;
   dragHandleProps?: Record<string, unknown>;
+  onClick?: () => void;
 }) {
   return (
-    <div className={cn(
-      "rounded-lg border border-border bg-card p-3 space-y-2 group",
-      isDragOverlay && "shadow-xl ring-2 ring-[#C6FF00]/30"
-    )}>
-      <div className="flex items-start gap-2">
-        <button {...(dragHandleProps || {})} className="mt-0.5 cursor-grab active:cursor-grabbing text-muted-foreground">
+    <div
+      onClick={onClick}
+      className={cn(
+        "rounded-lg border border-border bg-card p-3 space-y-1.5 cursor-pointer hover:border-primary/30 transition-colors",
+        isDragOverlay && "shadow-xl ring-2 ring-[#C6FF00]/30"
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <button {...(dragHandleProps || {})} className="cursor-grab active:cursor-grabbing text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <GripVertical className="h-4 w-4" />
         </button>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{lead.full_name}</p>
-          {lead.email && <p className="text-[11px] text-muted-foreground truncate">{lead.email}</p>}
-        </div>
-        {onDelete && (
-          <button onClick={(e) => onDelete(lead.id, e)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-400 transition-all">
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
+        <p className="text-sm font-medium truncate flex-1">{client.name}</p>
       </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        {lead.phone && (
-          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Phone className="h-3 w-3" />{lead.phone}
-          </span>
-        )}
-        {lead.instagram_url && (
-          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Instagram className="h-3 w-3" />
-          </span>
-        )}
-      </div>
-      {(lead.estimated_value || 0) > 0 && (
-        <p className={cn("text-xs font-semibold", (lead.estimated_value || 0) >= 3000 ? "text-[#C6FF00]" : "text-muted-foreground")}>
-          {(lead.estimated_value || 0).toLocaleString("fr-FR")} €
-        </p>
-      )}
-      {lead.next_action && (
-        <p className="text-[10px] text-muted-foreground truncate">→ {lead.next_action}</p>
+      {client.email && <p className="text-[11px] text-muted-foreground truncate pl-6">{client.email}</p>}
+      {client.niche && <p className="text-[10px] text-muted-foreground pl-6">{client.niche}</p>}
+      {client.phone && (
+        <span className="flex items-center gap-1 text-[10px] text-muted-foreground pl-6">
+          <Phone className="h-3 w-3" />{client.phone}
+        </span>
       )}
     </div>
   );

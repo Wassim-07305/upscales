@@ -25,19 +25,7 @@ export default async function UsersPage() {
 
   return (
     <>
-      <SubNav tabs={[
-        { label: "Paramètres", href: "/admin/settings" },
-        { label: "Utilisateurs", href: "/admin/users" },
-        { label: "Équipe", href: "/admin/team" },
-        { label: "Channels", href: "/admin/channels" },
-        { label: "Modération", href: "/admin/moderation" },
-        { label: "Base IA", href: "/admin/ai" },
-        { label: "SOPs", href: "/admin/sops" },
-        { label: "Outils", href: "/admin/tools" },
-        { label: "Audit", href: "/admin/audit" },
-        { label: "Logs", href: "/admin/error-logs" },
-      ]} />
-      <UsersClient
+            <UsersClient
         profiles={profiles || []}
         allTags={tags || []}
         userTags={userTags || []}

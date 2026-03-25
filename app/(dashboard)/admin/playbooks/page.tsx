@@ -26,11 +26,7 @@ export default async function AdminPlaybooksPage() {
 
   return (
     <>
-      <SubNav tabs={[
-        { label: "Formations", href: "/admin/formations" },
-        { label: "Playbooks", href: "/admin/playbooks" },
-        { label: "Ressources", href: "/ressources" }, { label: "Pages", href: "/admin/pages" }, { label: "Exercices", href: "/admin/exercises" }, { label: "Contenu", href: "/admin/content" },
-      ]} />
+      <SubNav tabs={[{ label: "Ressources", href: "/ressources" }, { label: "Playbooks", href: "/admin/playbooks" }, { label: "Pages", href: "/admin/pages" }, { label: "Exercices", href: "/admin/exercises" }, { label: "Contenu", href: "/admin/content" }, { label: "SOPs", href: "/admin/sops" }]} />
       <AdminPlaybooksClient playbooks={playbooks || []} />
     </>
   );

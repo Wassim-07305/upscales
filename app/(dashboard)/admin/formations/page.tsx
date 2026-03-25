@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/utils/roles";
 import { AdminFormationsClient } from "./AdminFormationsClient";
-import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminFormationsPage() {
   const supabase = await createClient();
@@ -37,11 +36,6 @@ export default async function AdminFormationsPage() {
 
   return (
     <>
-      <SubNav tabs={[
-        { label: "Formations", href: "/admin/formations" },
-        { label: "Playbooks", href: "/admin/playbooks" },
-        { label: "Ressources", href: "/ressources" }, { label: "Pages", href: "/admin/pages" }, { label: "Exercices", href: "/admin/exercises" }, { label: "Contenu", href: "/admin/content" },
-      ]} />
       <AdminFormationsClient formations={formationsWithCounts} />
     </>
   );

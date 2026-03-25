@@ -35,7 +35,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <SubNav tabs={[{ label: "ParamÃ¨tres", href: "/admin/settings" }, { label: "Ã‰quipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "ModÃ©ration", href: "/admin/moderation" }, { label: "Outils", href: "/admin/tools" }, { label: "Audit", href: "/admin/audit" }, { label: "Logs", href: "/admin/error-logs" }]} />
+      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Outils", href: "/admin/tools" }, { label: "Audit", href: "/admin/audit" }, { label: "Logs", href: "/admin/error-logs" }]} />
       <SettingsForm
         isGCalEnabled={isGCalEnabled}
         isGCalConnected={isGCalConnected}

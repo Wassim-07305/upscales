@@ -2,12 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SubNav } from "@/components/layout/sub-nav";
 import { ChatLayout } from "./ChatLayout";
-import { isMember } from "@/lib/utils/roles";
-
-const communicationTabs = [
-  { label: "Chat", href: "/chat" },
-  { label: "Annonces", href: "/admin/broadcast" },
-];
+import { isMember, isModerator } from "@/lib/utils/roles";
 
 export default async function ChatPage({
   searchParams,
@@ -38,7 +33,12 @@ export default async function ChatPage({
 
   return (
     <>
-      <SubNav tabs={communicationTabs} />
+      {isModerator(profile.role) && (
+        <SubNav tabs={[
+          { label: "Chat", href: "/chat" },
+          { label: "Annonces", href: "/admin/broadcast" },
+        ]} />
+      )}
       <ChatLayout
         user={profile}
         allUsers={allProfiles || []}

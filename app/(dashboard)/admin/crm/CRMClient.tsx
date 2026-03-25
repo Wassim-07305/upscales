@@ -275,6 +275,29 @@ export function CRMClient() {
     router.push(`/admin/crm/${clientId}`);
   };
 
+  // ─── Pipeline helpers (MUST be before any early return) ──
+
+  const filteredLeads = useMemo(() => {
+    if (!allLeads) return [];
+    if (!leadSearch) return allLeads;
+    const q = leadSearch.toLowerCase();
+    return allLeads.filter(
+      (l) =>
+        l.full_name?.toLowerCase().includes(q) ||
+        l.email?.toLowerCase().includes(q) ||
+        l.phone?.includes(q)
+    );
+  }, [allLeads, leadSearch]);
+
+  const leadsByStatus = useMemo(() => {
+    const map: Record<string, Lead[]> = {};
+    for (const s of LEAD_STATUSES) map[s] = [];
+    for (const l of filteredLeads) {
+      if (map[l.status]) map[l.status].push(l);
+    }
+    return map;
+  }, [filteredLeads]);
+
   // ─── Loading skeleton ───────────────────────────────
 
   if (isLoading) {
@@ -324,28 +347,7 @@ export function CRMClient() {
     );
   }
 
-  // ─── Pipeline helpers ────────────────────────────────
-
-  const filteredLeads = useMemo(() => {
-    if (!allLeads) return [];
-    if (!leadSearch) return allLeads;
-    const q = leadSearch.toLowerCase();
-    return allLeads.filter(
-      (l) =>
-        l.full_name?.toLowerCase().includes(q) ||
-        l.email?.toLowerCase().includes(q) ||
-        l.phone?.includes(q)
-    );
-  }, [allLeads, leadSearch]);
-
-  const leadsByStatus = useMemo(() => {
-    const map: Record<string, Lead[]> = {};
-    for (const s of LEAD_STATUSES) map[s] = [];
-    for (const l of filteredLeads) {
-      if (map[l.status]) map[l.status].push(l);
-    }
-    return map;
-  }, [filteredLeads]);
+  // ─── Drag & pipeline event handlers ─────────────────
 
   const handleDragStart = (event: DragStartEvent) => {
     const lead = filteredLeads.find((l) => l.id === event.active.id);

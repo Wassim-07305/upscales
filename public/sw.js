@@ -87,11 +87,12 @@ self.addEventListener("push", (event) => {
 
   const data = event.data.json();
   const options = {
-    body: data.message || data.body,
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-96x96.png",
+    body: data.body || data.message || "",
+    icon: data.icon || "/icons/icon-192x192.png",
+    badge: data.badge || "/icons/icon-48x48.png",
     vibrate: [100, 50, 100],
-    data: { url: data.link || "/notifications" },
+    data: { url: data.data?.url || data.link || "/notifications" },
+    tag: data.tag || undefined,
     actions: [{ action: "open", title: "Ouvrir" }],
   };
 

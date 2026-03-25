@@ -143,6 +143,21 @@ export function BroadcastClient({ userId, stats }: BroadcastClientProps) {
       totalInserted += batch.length;
     }
 
+    // Envoyer aussi les push notifications
+    try {
+      await fetch("/api/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_ids: users.map((u: { id: string }) => u.id),
+          title: title || "Annonce UPSCALE",
+          body: message,
+          url: link || "/notifications",
+          tag: "broadcast",
+        }),
+      });
+    } catch { /* Push non bloquant */ }
+
     toast.success(`Annonce envoyée à ${totalInserted} utilisateur(s)${newPost ? " + publiée dans la communauté" : ""}`);
     setSent(true);
     setSending(false);

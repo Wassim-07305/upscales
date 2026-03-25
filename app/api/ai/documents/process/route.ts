@@ -41,11 +41,9 @@ export async function POST(request: NextRequest) {
       // Download PDF from Supabase Storage
       const response = await fetch(doc.file_url);
       const buffer = Buffer.from(await response.arrayBuffer());
-      const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const textResult = await parser.getText();
-      await parser.destroy();
-      fullText = textResult.text;
+      const { extractText } = await import("unpdf");
+      const result = await extractText(new Uint8Array(buffer));
+      fullText = Array.isArray(result.text) ? result.text.join("\n") : result.text;
     } else if (doc.source_type === "txt" && doc.file_url) {
       const response = await fetch(doc.file_url);
       fullText = await response.text();

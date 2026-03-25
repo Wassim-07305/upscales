@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const registerSchema = z
   .object({
@@ -41,7 +42,9 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const supabase = createClient();
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const {
     register,
@@ -52,6 +55,10 @@ function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
+    if (turnstileSiteKey && !captchaToken) {
+      toast.error("Veuillez valider le captcha");
+      return;
+    }
     setLoading(true);
     const { error, data: signUpData } = await supabase.auth.signUp({
       email: data.email,
@@ -175,6 +182,15 @@ function RegisterForm() {
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4">
+              {turnstileSiteKey && (
+                <Turnstile
+                  siteKey={turnstileSiteKey}
+                  onSuccess={setCaptchaToken}
+                  onError={() => setCaptchaToken(null)}
+                  onExpire={() => setCaptchaToken(null)}
+                  options={{ theme: "dark", size: "flexible" }}
+                />
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Créer mon compte

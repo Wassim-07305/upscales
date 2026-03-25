@@ -3,7 +3,12 @@ import { redirect } from "next/navigation";
 import { ChatLayout } from "./ChatLayout";
 import { isMember } from "@/lib/utils/roles";
 
-export default async function ChatPage() {
+export default async function ChatPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ dm?: string }>;
+}) {
+  const { dm: dmUserId } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -45,6 +50,7 @@ export default async function ChatPage() {
       dmChannels={dmChannels}
       memberChannelIds={memberChannelIds}
       allUsers={allProfiles || []}
+      initialDmUserId={dmUserId || null}
     />
   );
 }

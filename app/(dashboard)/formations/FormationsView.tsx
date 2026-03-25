@@ -3,6 +3,9 @@
 import { useState, useMemo } from "react";
 import { FormationsFilters, ViewMode, SortOption } from "./FormationsFilters";
 import { FormationGrid, FormationData } from "@/components/formations/FormationGrid";
+import { Button } from "@/components/ui/button";
+
+const PAGE_SIZE = 12;
 
 interface FormationsViewProps {
   formations: FormationData[];
@@ -27,6 +30,7 @@ export function FormationsView({
 }: FormationsViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const sorted = useMemo(() => {
     if (sortBy === "default") return formations;
@@ -62,7 +66,17 @@ export function FormationsView({
         sortBy={sortBy}
         onSortChange={setSortBy}
       />
-      <FormationGrid formations={sorted} userId={userId} viewMode={viewMode} />
+      <FormationGrid formations={sorted.slice(0, visibleCount)} userId={userId} viewMode={viewMode} />
+      {visibleCount < sorted.length && (
+        <div className="flex justify-center mt-8">
+          <Button
+            variant="outline"
+            onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+          >
+            Voir plus ({sorted.length - visibleCount} restante{sorted.length - visibleCount > 1 ? "s" : ""})
+          </Button>
+        </div>
+      )}
     </>
   );
 }

@@ -54,7 +54,16 @@ export async function POST(request: NextRequest) {
   }
 
   // RAG: retrieve relevant context from knowledge base
-  const { context, sources } = await retrieveContext(lastUserText);
+  let context = "";
+  let sources: { document_id: string; title: string; chunk_preview: string }[] = [];
+  try {
+    const rag = await retrieveContext(lastUserText);
+    context = rag.context;
+    sources = rag.sources;
+  } catch (e) {
+    console.error("[AI Chat] RAG retrieval failed:", e);
+    // Continue without context — RAG is not critical
+  }
 
   // Build system prompt with retrieved context
   const systemPrompt = buildSystemPrompt(context);
@@ -85,7 +94,7 @@ export async function POST(request: NextRequest) {
 
   // Stream response from Claude
   const result = streamText({
-    model: anthropic("claude-haiku-4-5-20250501"),
+    model: anthropic("claude-haiku-4-5-20251001"),
     system: systemPrompt,
     messages: modelMessages,
     async onFinish({ text }) {

@@ -30,6 +30,7 @@ import {
   Clapperboard,
   UsersRound,
   Link2,
+  ClipboardCheck,
 } from "lucide-react";
 
 import type { NavItem, NavSection } from "@/lib/types/appshell";
@@ -296,6 +297,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ONLY_ROLES,
   },
   {
+    label: "Audit",
+    href: "/admin/audit",
+    icon: ClipboardCheck,
+    roles: ADMIN_ONLY_ROLES,
+  },
+  {
     label: "Error Logs",
     href: "/admin/error-logs",
     icon: Bug,
@@ -394,7 +401,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/tools", "/admin/error-logs", "/admin/settings"].includes(i.href)
+      ["/admin/tools", "/admin/audit", "/admin/error-logs", "/admin/settings"].includes(i.href)
     ),
   },
 ];
@@ -427,6 +434,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   okrs: "OKRs",
   tasks: "Mes tâches",
   sops: "SOPs",
+  audit: "Audit",
   playbook: "Playbooks",
   playbooks: "Playbooks",
   leads: "Pipeline",

@@ -40,6 +40,7 @@ import {
   AlertTriangle,
   Trash2,
   Download,
+  KeyRound,
 } from "lucide-react";
 import { Profile, Tag, Certificate, CrmNote, UserRole, UserWarning, CoachClient, ClientReport } from "@/lib/types/database";
 import { CoachSection } from "./CoachSection";
@@ -95,6 +96,7 @@ export function StudentDetail({
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [warningDialogOpen, setWarningDialogOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState("");
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -258,6 +260,21 @@ export function StudentDetail({
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!confirm(`Envoyer un email de réinitialisation de mot de passe à ${student.email} ?`)) return;
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(student.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast.error("Erreur : " + error.message);
+    } else {
+      toast.success("Email de réinitialisation envoyé");
+      await logAuditAction("admin_reset_password", "user", student.id);
+    }
+    setLoading(false);
+  };
+
   const availableTags = allTags.filter((t) => !tags.some((ut) => ut.id === t.id));
 
   return (
@@ -391,7 +408,29 @@ export function StudentDetail({
 
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
+                  className="text-white hover:text-white hover:bg-white/10"
+                  onClick={handleResetPassword}
+                  disabled={loading}
+                >
+                  <KeyRound className="h-4 w-4 mr-1" />
+                  Reset MDP
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white hover:text-white hover:bg-white/10"
+                  onClick={() => router.push(`/chat?dm=${student.id}`)}
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Message
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white hover:text-white hover:bg-white/10"
                   onClick={handleExport}
                   disabled={exporting}
                 >
@@ -424,25 +463,34 @@ export function StudentDetail({
               </Badge>
             ))}
             {availableTags.length > 0 ? (
-              <Select
-                value={selectedTag}
-                onValueChange={(val) => {
-                  handleAddTag(val);
-                  setSelectedTag("");
-                }}
-              >
-                <SelectTrigger className="w-[130px] h-7 text-xs">
-                  <Plus className="h-3 w-3 mr-1" />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowTagDropdown(!showTagDropdown)}
+                  className="flex items-center gap-1 h-8 px-3 text-xs border border-dashed border-border rounded-md hover:bg-white/10 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
                   Ajouter tag
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTags.map((tag) => (
-                    <SelectItem key={tag.id} value={tag.id}>
-                      <span style={{ color: tag.color }}>{tag.name}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                </button>
+                {showTagDropdown && (
+                  <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border rounded-lg shadow-xl p-1 min-w-[150px]">
+                    {availableTags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          handleAddTag(tag.id);
+                          setShowTagDropdown(false);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded hover:bg-white/10 transition-colors text-left"
+                      >
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tag.color }} />
+                        <span style={{ color: tag.color }}>{tag.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
               <span className="text-[11px] text-muted-foreground italic">Tous les tags assignés</span>
             )}

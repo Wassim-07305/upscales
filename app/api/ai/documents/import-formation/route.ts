@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { splitTextIntoChunks, stripHtml, estimateTokenCount } from "@/lib/ai/chunker";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
 
+export const maxDuration = 120; // 2 minutes pour le traitement des embeddings
+
 // POST: Import a formation's content into the knowledge base
 export async function POST(request: NextRequest) {
   const supabase = await createClient();

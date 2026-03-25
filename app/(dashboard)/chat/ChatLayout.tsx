@@ -55,6 +55,7 @@ interface ChatLayoutProps {
   dmChannels: Channel[];
   memberChannelIds: string[];
   allUsers: Pick<Profile, "id" | "full_name" | "avatar_url" | "is_online">[];
+  initialDmUserId?: string | null;
 }
 
 export function ChatLayout({
@@ -64,8 +65,10 @@ export function ChatLayout({
   dmChannels,
   memberChannelIds,
   allUsers,
+  initialDmUserId,
 }: ChatLayoutProps) {
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
+  const [dmAutoOpened, setDmAutoOpened] = useState(false);
   const [messages, setMessages] = useState<(Message & { sender?: Profile })[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -456,6 +459,18 @@ export function ChatLayout({
     const otherUser = allUsers.find((u) => u.id === otherUserId);
     if (!otherUser) return;
 
+    // First check local dmChannels (already fetched server-side with correct permissions)
+    const localDM = dmChannels.find((ch) =>
+      ch.name?.includes(otherUser.full_name)
+    );
+    if (localDM) {
+      setActiveChannel(localDM);
+      setShowChannelList(false);
+      setDmSearchOpen(false);
+      return;
+    }
+
+    // Fallback: query DB for DMs with full member info
     const { data: existingDMs } = await supabase
       .from("channels")
       .select("*, channel_members(*)")
@@ -498,6 +513,14 @@ export function ChatLayout({
     }
     setDmSearchOpen(false);
   };
+
+  // Auto-open DM when initialDmUserId is provided (from CRM "Message" button)
+  useEffect(() => {
+    if (initialDmUserId && !dmAutoOpened && allUsers.length > 0) {
+      setDmAutoOpened(true);
+      createDM(initialDmUserId);
+    }
+  }, [initialDmUserId, dmAutoOpened, allUsers]);
 
   const filteredUsers = allUsers.filter((u) =>
     u.full_name?.toLowerCase().includes(dmSearch.toLowerCase())
@@ -690,9 +713,9 @@ export function ChatLayout({
         )}
       >
         {activeChannel ? (
-          <>
+          <div className="flex flex-col h-full overflow-hidden">
             {/* Chat header */}
-            <div className="h-14 border-b border-border flex items-center gap-3 px-4">
+            <div className="h-14 shrink-0 border-b border-border flex items-center gap-3 px-4">
               <Button
                 variant="ghost"
                 size="icon"
@@ -746,30 +769,37 @@ export function ChatLayout({
             )}
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 min-h-0 p-4">
               <div className="space-y-4">
-                {messages.filter((m) => !m.parent_id).map((msg) => {
+                {messages.map((msg) => {
                   const isOwn = msg.sender_id === user.id;
                   const isEditing = editingMessageId === msg.id;
-                  const replies = messages.filter((m) => m.parent_id === msg.id);
+                  const parentMsg = msg.parent_id ? messages.find((m) => m.id === msg.parent_id) : null;
 
                   return (
                     <div key={msg.id}>
                       <div className="group flex items-start gap-3">
                         {!isOwn && (
-                          <Avatar className="h-8 w-8 flex-shrink-0">
+                          <Avatar className="h-9 w-9 flex-shrink-0">
                             <AvatarImage src={msg.sender?.avatar_url || undefined} />
                             <AvatarFallback className="text-xs bg-primary/20 text-primary">
                               {getInitials(msg.sender?.full_name || "")}
                             </AvatarFallback>
                           </Avatar>
                         )}
-                        <div className={cn("flex-1", isOwn && "flex flex-col items-end")}>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-medium">
+                        <div className={cn("flex-1 min-w-0", isOwn && "flex flex-col items-end")}>
+                          {parentMsg && (
+                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1 opacity-70">
+                              <Reply className="h-3 w-3" />
+                              <span>En réponse à <span className="font-medium">{parentMsg.sender_id === user.id ? "vous" : parentMsg.sender?.full_name}</span></span>
+                              <span className="truncate max-w-[200px]">— {parentMsg.content}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold">
                               {isOwn ? "Vous" : msg.sender?.full_name}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {formatMessageDate(msg.created_at)}
                             </span>
                             {(msg as any).is_pinned && (
@@ -783,10 +813,10 @@ export function ChatLayout({
                                 setReplyTo(msg);
                                 inputRef.current?.focus();
                               }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-white/10"
                               title="Répondre"
                             >
-                              <Reply className="h-3.5 w-3.5" />
+                              <Reply className="h-4 w-4" />
                             </button>
                           </div>
 
@@ -820,14 +850,14 @@ export function ChatLayout({
                               </Button>
                             </div>
                           ) : (
-                            <div className="relative inline-block">
+                            <div className="relative max-w-[80%]">
                               <div
                                 className={cn(
-                                  "inline-block rounded-2xl text-sm max-w-[80%] overflow-hidden",
+                                  "rounded-2xl text-[15px] break-words whitespace-pre-wrap",
                                   isOwn
-                                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                                    ? "bg-[#1A3A2A] text-white rounded-br-sm"
                                     : "bg-muted rounded-bl-sm",
-                                  msg.media_url ? "p-1" : "px-3 py-2"
+                                  msg.media_url ? "p-1" : "px-3 py-1.5"
                                 )}
                               >
                                 {msg.media_url && /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(msg.media_url) ? (
@@ -861,27 +891,27 @@ export function ChatLayout({
                               {/* Actions on hover */}
                               {!msg.id.startsWith("temp-") && (
                                 <div className={cn(
-                                  "hidden group-hover:flex items-center gap-0.5 absolute top-1/2 -translate-y-1/2",
-                                  isOwn ? "-left-20" : "-right-20"
+                                  "hidden group-hover:flex items-center gap-1 absolute top-1/2 -translate-y-1/2 bg-card/90 backdrop-blur-sm border border-border rounded-lg px-1 py-0.5 shadow-md",
+                                  isOwn ? "-left-32" : "-right-32"
                                 )}>
                                   <button
                                     onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
-                                    className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                    title="Reagir"
+                                    className="p-1.5 rounded-md hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                                    title="Réagir"
                                   >
-                                    <Smile className="h-3 w-3" />
+                                    <Smile className="h-4 w-4" />
                                   </button>
                                   <button
                                     onClick={() => handleTogglePin(msg.id)}
                                     className={cn(
-                                      "p-1 rounded transition-colors",
+                                      "p-1.5 rounded-md transition-colors",
                                       (msg as any).is_pinned
                                         ? "text-primary hover:bg-primary/10"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        : "text-muted-foreground hover:bg-white/10 hover:text-foreground"
                                     )}
                                     title={(msg as any).is_pinned ? "Désépingler" : "Épingler"}
                                   >
-                                    <Pin className="h-3 w-3" />
+                                    <Pin className="h-4 w-4" />
                                   </button>
                                   {isOwn && (
                                     <>
@@ -890,17 +920,17 @@ export function ChatLayout({
                                           setEditingMessageId(msg.id);
                                           setEditContent(msg.content);
                                         }}
-                                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                        className="p-1.5 rounded-md hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
                                         title="Modifier"
                                       >
-                                        <Pencil className="h-3 w-3" />
+                                        <Pencil className="h-4 w-4" />
                                       </button>
                                       <button
                                         onClick={() => handleDeleteMessage(msg.id)}
-                                        className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                        className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                                         title="Supprimer"
                                       >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-4 w-4" />
                                       </button>
                                     </>
                                   )}
@@ -929,7 +959,7 @@ export function ChatLayout({
                                       <button
                                         key={emoji}
                                         onClick={() => handleToggleReaction(msg.id, emoji)}
-                                        className="text-sm hover:scale-125 transition-transform p-0.5 rounded hover:bg-muted"
+                                        className="text-lg hover:scale-125 transition-transform p-0.5 rounded hover:bg-white/10"
                                       >
                                         {emoji}
                                       </button>
@@ -955,10 +985,10 @@ export function ChatLayout({
                                       key={emoji}
                                       onClick={() => handleToggleReaction(msg.id, emoji)}
                                       className={cn(
-                                        "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] border transition-colors",
+                                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border transition-colors",
                                         userIds.includes(user.id)
-                                          ? "border-primary/40 bg-primary/10"
-                                          : "border-border hover:border-primary/30"
+                                          ? "border-white/20 bg-white/10"
+                                          : "border-border hover:border-white/20 hover:bg-white/5"
                                       )}
                                     >
                                       <span>{emoji}</span>
@@ -972,32 +1002,6 @@ export function ChatLayout({
                         </div>
                       </div>
 
-                      {/* Thread replies */}
-                      {replies.length > 0 && (
-                        <div className="ml-11 mt-1 space-y-1 border-l-2 border-border/50 pl-3">
-                          {replies.map((reply) => {
-                            const isReplyOwn = reply.sender_id === user.id;
-                            return (
-                              <div key={reply.id} className="flex items-start gap-2">
-                                <Avatar className="h-5 w-5 flex-shrink-0">
-                                  <AvatarImage src={reply.sender?.avatar_url || undefined} />
-                                  <AvatarFallback className="text-[8px] bg-primary/20 text-primary">
-                                    {getInitials(reply.sender?.full_name || "")}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <span className="text-[10px] font-medium mr-1.5">
-                                    {isReplyOwn ? "Vous" : reply.sender?.full_name}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {reply.content}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -1024,7 +1028,7 @@ export function ChatLayout({
                 Vous avez bloqué cet utilisateur
               </div>
             ) : (
-            <div className="border-t border-border">
+            <div className="border-t border-border pb-2">
               {replyTo && (
                 <div className="px-3 pt-2 flex items-center gap-2 text-xs text-muted-foreground">
                   <Reply className="h-3 w-3" />
@@ -1104,7 +1108,7 @@ export function ChatLayout({
               </div>
             </div>
             )}
-          </>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">

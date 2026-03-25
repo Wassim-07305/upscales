@@ -8,7 +8,7 @@ import { CommunityFilters } from "./CommunityFilters";
 export default async function CommunityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; q?: string }>;
+  searchParams: Promise<{ filter?: string; q?: string; tag?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -20,6 +20,7 @@ export default async function CommunityPage({
 
   const filter = params?.filter || "recent";
   const searchQuery = params?.q || "";
+  const tagFilter = params?.tag || "";
 
   let query = supabase
     .from("posts")
@@ -28,6 +29,10 @@ export default async function CommunityPage({
 
   if (searchQuery) {
     query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+  }
+
+  if (tagFilter) {
+    query = query.ilike("content", `%#${tagFilter}%`);
   }
 
   if (filter === "popular") {
@@ -62,8 +67,20 @@ export default async function CommunityPage({
 
   // Separate pinned and regular posts
   const allPosts = posts || [];
-  const pinnedPosts = allPosts.filter((p) => p.is_pinned);
-  const regularPosts = allPosts.filter((p) => !p.is_pinned);
+
+  // Extract popular hashtags from all posts
+  const hashtagCounts: Record<string, number> = {};
+  allPosts.forEach((p) => {
+    const matches = (p.content || "").match(/#(\w+)/g);
+    if (matches) matches.forEach((m: string) => {
+      const tag = m.slice(1).toLowerCase();
+      hashtagCounts[tag] = (hashtagCounts[tag] || 0) + 1;
+    });
+  });
+  const popularTags = Object.entries(hashtagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([tag]) => tag);
 
   const canPost = isMember(profile.role);
 
@@ -76,7 +93,7 @@ export default async function CommunityPage({
 
       {canPost && <CreatePost user={profile} />}
 
-      <CommunityFilters currentFilter={filter} currentSearch={searchQuery} />
+      <CommunityFilters currentFilter={filter} currentSearch={searchQuery} currentTag={tagFilter} popularTags={popularTags} />
 
       <PostFeed
         initialPosts={allPosts.map((p) => ({ ...p, user_has_liked: likedPostIds.has(p.id) }))}

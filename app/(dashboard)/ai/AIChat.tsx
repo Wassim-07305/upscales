@@ -57,8 +57,9 @@ export function AIChat({ userId, conversations: initialConversations }: AIChatPr
   } = useChat({
     transport,
     onFinish() {
-      // Reload conversations to pick up new/updated ones
+      // Reload conversations and messages to pick up sources
       loadConversations();
+      if (activeConvId) loadConversationMessages(activeConvId);
     },
     onError() {
       toast.error("Erreur de communication avec l'IA");

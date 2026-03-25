@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { splitTextIntoChunks, estimateTokenCount } from "@/lib/ai/chunker";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
 
+export const maxDuration = 120; // 2 minutes pour le traitement des embeddings
+
 // POST: Process a document — parse, chunk, embed, store
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -15,8 +17,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ error: "Embeddings non configurés (OPENAI_API_KEY manquante)" }, { status: 503 });
+  if (!process.env.VOYAGE_API_KEY) {
+    return NextResponse.json({ error: "Embeddings non configurés (VOYAGE_API_KEY manquante)" }, { status: 503 });
   }
 
   const { documentId } = await request.json();
@@ -93,6 +95,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, chunk_count: chunks.length });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur de traitement";
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[AI Process]", message, stack);
+
+    // Log to error_logs table
+    await supabase.from("error_logs").insert({
+      message: `[AI Process] ${message}`,
+      source: "api-error",
+      severity: "error",
+      stack: stack || null,
+      metadata: { documentId, route: "/api/ai/documents/process" },
+    });
+
     await supabase
       .from("ai_documents")
       .update({ status: "error", error_message: message })

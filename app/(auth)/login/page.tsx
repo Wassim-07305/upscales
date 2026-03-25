@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -30,7 +31,9 @@ export default function LoginPage() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [lockCountdown, setLockCountdown] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const supabase = createClient();
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   // Countdown timer for lockout
   useEffect(() => {
@@ -61,6 +64,11 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     if (isLocked) {
       toast.error(`Trop de tentatives. Réessayez dans ${lockCountdown}s`);
+      return;
+    }
+
+    if (turnstileSiteKey && !captchaToken) {
+      toast.error("Veuillez valider le captcha");
       return;
     }
 
@@ -150,6 +158,15 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4">
+              {turnstileSiteKey && (
+                <Turnstile
+                  siteKey={turnstileSiteKey}
+                  onSuccess={setCaptchaToken}
+                  onError={() => setCaptchaToken(null)}
+                  onExpire={() => setCaptchaToken(null)}
+                  options={{ theme: "dark", size: "flexible" }}
+                />
+              )}
               {isLocked && (
                 <div className="text-center text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
                   Trop de tentatives. Réessayez dans {lockCountdown}s

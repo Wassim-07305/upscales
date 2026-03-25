@@ -27,6 +27,13 @@ export function PostFeed({
   const [posts, setPosts] = useState(initialPosts);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= PAGE_SIZE);
+
+  // Sync with server data when props change (after router.refresh or filter change)
+  const postsKey = initialPosts.map((p) => p.id).join(",");
+  useEffect(() => {
+    setPosts(initialPosts);
+    setHasMore(initialPosts.length >= PAGE_SIZE);
+  }, [postsKey]);
   const observerRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
@@ -104,6 +111,16 @@ export function PostFeed({
     toast.success("Post supprimé");
   }, []);
 
+  const handleTogglePin = useCallback(async (postId: string, pinned: boolean) => {
+    const { error } = await supabase.from("posts").update({ is_pinned: pinned }).eq("id", postId);
+    if (error) {
+      toast.error("Erreur", { description: error.message });
+      return;
+    }
+    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, is_pinned: pinned } : p)));
+    toast.success(pinned ? "Post épinglé" : "Post désépinglé");
+  }, []);
+
   const pinnedPosts = posts.filter((p) => p.is_pinned);
   const regularPosts = posts.filter((p) => !p.is_pinned);
 
@@ -117,6 +134,7 @@ export function PostFeed({
             currentUserId={currentUserId}
             currentUserRole={currentUserRole}
             onDelete={handleDelete}
+            onTogglePin={handleTogglePin}
           />
         ))}
         {regularPosts.map((post) => (
@@ -126,6 +144,7 @@ export function PostFeed({
             currentUserId={currentUserId}
             currentUserRole={currentUserRole}
             onDelete={handleDelete}
+            onTogglePin={handleTogglePin}
           />
         ))}
       </div>

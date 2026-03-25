@@ -8,7 +8,7 @@ import {
   Search,
   Check,
   Trash2,
-  Download,
+  Copy,
   ChevronDown,
   ChevronRight,
   AlertTriangle,
@@ -271,14 +271,11 @@ export function ErrorLogsClient({
       }
     }
 
-    const blob = new Blob([md], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `error-report-${new Date().toISOString().slice(0, 10)}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Rapport exporté");
+    navigator.clipboard.writeText(md).then(() => {
+      toast.success("Rapport copié dans le presse-papiers");
+    }).catch(() => {
+      toast.error("Erreur lors de la copie");
+    });
   }
 
   return (
@@ -297,8 +294,8 @@ export function ErrorLogsClient({
             Actualiser
           </Button>
           <Button variant="outline" size="sm" onClick={exportMarkdown}>
-            <Download className="w-4 h-4 mr-2" />
-            Exporter .md
+            <Copy className="w-4 h-4 mr-2" />
+            Copier .md
           </Button>
         </div>
       </div>

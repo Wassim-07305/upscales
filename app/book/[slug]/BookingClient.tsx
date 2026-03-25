@@ -117,6 +117,7 @@ export default function BookingClient({ page }: BookingClientProps) {
           prospect_name: formData.prospectName,
           prospect_email: formData.prospectEmail,
           prospect_phone: formData.prospectPhone || null,
+          prospect_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           qualification_answers:
             Object.keys(formData.qualificationAnswers).length > 0
               ? formData.qualificationAnswers
@@ -171,6 +172,7 @@ export default function BookingClient({ page }: BookingClientProps) {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
           </span>
           <span className="text-xs text-green-500 font-medium">Créneaux disponibles</span>
+          <span className="text-[10px] text-muted-foreground ml-2">({Intl.DateTimeFormat().resolvedOptions().timeZone})</span>
         </div>
         {page.description && (
           <p className="text-muted-foreground text-sm sm:text-base mt-2 text-center max-w-md">

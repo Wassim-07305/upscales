@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface BroadcastClientProps {
+  userId: string;
   stats: {
     total: number;
     admin: number;
@@ -53,7 +54,7 @@ const TYPE_OPTIONS = [
   { value: "session", label: "Session" },
 ];
 
-export function BroadcastClient({ stats }: BroadcastClientProps) {
+export function BroadcastClient({ userId, stats }: BroadcastClientProps) {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [link, setLink] = useState("");
@@ -97,13 +98,34 @@ export function BroadcastClient({ stats }: BroadcastClientProps) {
       return;
     }
 
-    // Créer les notifications en batch
+    // 1. Créer le post communauté d'abord pour avoir l'ID
+    const linkHtml = link.trim()
+      ? `<p></p><p><a href="${link.trim()}" target="_blank" rel="noopener noreferrer" style="color:#C6FF00;text-decoration:underline;">🔗 ${link.trim()}</a></p>`
+      : "";
+    const postContent = `<p>${message.trim().replace(/\n/g, "</p><p>")}</p>${linkHtml}`;
+    const { data: newPost, error: postError } = await supabase
+      .from("posts")
+      .insert({
+        author_id: userId,
+        type: "announcement",
+        title: title.trim(),
+        content: postContent,
+      })
+      .select("id")
+      .single();
+
+    if (postError) {
+      console.error("[broadcast] Post creation failed:", postError);
+    }
+
+    // 2. Créer les notifications avec le lien vers le post
+    const postLink = newPost ? `/community/${newPost.id}` : (link.trim() || null);
     const notifications = users.map((u) => ({
       user_id: u.id,
       type,
       title: title.trim(),
       message: message.trim(),
-      link: link.trim() || null,
+      link: postLink,
     }));
 
     // Insérer par lots de 100
@@ -121,7 +143,7 @@ export function BroadcastClient({ stats }: BroadcastClientProps) {
       totalInserted += batch.length;
     }
 
-    toast.success(`Annonce envoyée à ${totalInserted} utilisateur(s)`);
+    toast.success(`Annonce envoyée à ${totalInserted} utilisateur(s)${newPost ? " + publiée dans la communauté" : ""}`);
     setSent(true);
     setSending(false);
 

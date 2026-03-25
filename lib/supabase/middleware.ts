@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
     pathname === "/"
   ) {
     // Still refresh the session cookie if it exists
-    await supabase.auth.getUser();
+    try { await supabase.auth.getUser(); } catch {}
     return supabaseResponse;
   }
 
@@ -56,12 +56,17 @@ export async function updateSession(request: NextRequest) {
   }
 
   // For all dashboard routes - check auth
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+  } catch {
+    // If Supabase is unreachable, let the request through
+    // (page-level auth will catch it)
   }
 
   return supabaseResponse;

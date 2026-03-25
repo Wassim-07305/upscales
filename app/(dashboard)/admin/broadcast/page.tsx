@@ -36,6 +36,7 @@ export default async function BroadcastPage() {
 
   return (
     <BroadcastClient
+      userId={user.id}
       stats={{
         total: totalUsers || 0,
         admin: adminCount || 0,

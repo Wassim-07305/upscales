@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         }
         case "posts_created": {
           const { count } = await admin
-            .from("community_posts")
+            .from("posts")
             .select("id", { count: "exact", head: true })
             .eq("author_id", user.id);
           earned = (count ?? 0) >= criteria.count;

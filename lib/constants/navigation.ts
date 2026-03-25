@@ -329,21 +329,27 @@ export const MODERATOR_ADMIN_SECTIONS: NavSection[] = [
     items: ADMIN_NAV_ITEMS.filter((i) => i.href === "/admin"),
   },
   {
-    label: "Gestion",
+    label: "Business",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/admin/crm", "/admin/leads", "/admin/formations", "/admin/pages", "/admin/analytics", "/admin/okrs", "/admin/sops", "/admin/playbooks", "/ressources"].includes(i.href)
+      ["/admin/crm", "/admin/analytics"].includes(i.href)
+    ),
+  },
+  {
+    label: "Contenu",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/formations", "/admin/playbooks", "/ressources"].includes(i.href)
     ),
   },
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation", "/admin/content"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/broadcast"].includes(i.href)
     ),
   },
   {
-    label: "Planning",
+    label: "Organisation",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/calendar", "/admin/booking", "/admin/team"].includes(i.href)
+      ["/tasks", "/admin/calendar", "/admin/booking", "/admin/team", "/admin/okrs"].includes(i.href)
     ),
   },
 ];
@@ -361,9 +367,9 @@ export const STUDENT_SECTIONS: NavSection[] = [
     items: STUDENT_NAV_ITEMS.filter((i) => i.href === "/dashboard"),
   },
   {
-    label: "Apprendre",
+    label: "Formation",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/formations", "/calendar", "/certificates", "/leaderboard", "/progress", "/notes", "/playbook"].includes(i.href)
+      ["/tasks", "/formations", "/calendar", "/certificates", "/progress", "/playbook"].includes(i.href)
     ),
   },
   {
@@ -375,7 +381,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/ressources", "/tools", "/referral", "/notifications", "/settings"].includes(i.href)
+      ["/leaderboard", "/ressources", "/tools", "/referral", "/notifications", "/settings"].includes(i.href)
     ),
   },
 ];
@@ -387,27 +393,33 @@ export const ADMIN_SECTIONS: NavSection[] = [
     items: ADMIN_NAV_ITEMS.filter((i) => i.href === "/admin"),
   },
   {
-    label: "Gestion",
+    label: "Business",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/tasks", "/admin/crm", "/admin/leads", "/admin/formations", "/admin/pages", "/admin/analytics", "/admin/okrs", "/admin/sops", "/admin/playbooks", "/ressources"].includes(i.href)
+      ["/admin/crm", "/admin/analytics"].includes(i.href)
+    ),
+  },
+  {
+    label: "Contenu",
+    items: ADMIN_NAV_ITEMS.filter((i) =>
+      ["/admin/formations", "/admin/playbooks", "/ressources"].includes(i.href)
     ),
   },
   {
     label: "Communication",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/chat", "/community", "/ai", "/admin/ai", "/admin/broadcast", "/admin/channels", "/admin/moderation", "/admin/content"].includes(i.href)
+      ["/chat", "/community", "/ai", "/admin/broadcast"].includes(i.href)
     ),
   },
   {
-    label: "Planning",
+    label: "Organisation",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/calendar", "/admin/booking", "/admin/team"].includes(i.href)
+      ["/tasks", "/admin/calendar", "/admin/booking", "/admin/team", "/admin/okrs"].includes(i.href)
     ),
   },
   {
-    label: "",
+    label: "Admin",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/tools", "/admin/audit", "/admin/error-logs", "/profile", "/admin/settings"].includes(i.href)
+      ["/admin/ai", "/admin/channels", "/admin/moderation", "/admin/sops", "/admin/tools", "/admin/audit", "/admin/error-logs", "/profile", "/admin/settings"].includes(i.href)
     ),
   },
 ];

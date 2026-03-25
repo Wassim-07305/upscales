@@ -309,6 +309,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     roles: ADMIN_ONLY_ROLES,
   },
   {
+    label: "Mon profil",
+    href: "/profile",
+    icon: User,
+    roles: ADMIN_ROLES,
+  },
+  {
     label: "Paramètres",
     href: "/admin/settings",
     icon: Settings,
@@ -401,7 +407,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin/tools", "/admin/audit", "/admin/error-logs", "/admin/settings"].includes(i.href)
+      ["/admin/tools", "/admin/audit", "/admin/error-logs", "/profile", "/admin/settings"].includes(i.href)
     ),
   },
 ];

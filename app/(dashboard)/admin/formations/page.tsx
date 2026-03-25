@@ -40,7 +40,7 @@ export default async function AdminFormationsPage() {
       <SubNav tabs={[
         { label: "Formations", href: "/admin/formations" },
         { label: "Playbooks", href: "/admin/playbooks" },
-        { label: "Ressources", href: "/ressources" },
+        { label: "Ressources", href: "/ressources" }, { label: "Pages", href: "/admin/pages" }, { label: "Exercices", href: "/admin/exercises" }, { label: "Contenu", href: "/admin/content" },
       ]} />
       <AdminFormationsClient formations={formationsWithCounts} />
     </>

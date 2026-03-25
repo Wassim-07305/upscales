@@ -1,7 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { SubNav } from "@/components/layout/sub-nav";
 import ExerciseReviewClient from "./ExerciseReviewClient";
 import type { ExerciseSubmission, SubmissionStatus } from "@/lib/exercises/exercise-types";
+
+const formationsTabs = [
+  { label: "Formations", href: "/admin/formations" },
+  { label: "Playbooks", href: "/admin/playbooks" },
+  { label: "Ressources", href: "/ressources" },
+  { label: "Pages", href: "/admin/pages" },
+  { label: "Exercices", href: "/admin/exercises" },
+  { label: "Contenu", href: "/admin/content" },
+];
 
 export default async function AdminExercisesPage() {
   const supabase = await createClient();
@@ -44,15 +54,18 @@ export default async function AdminExercisesPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Corrections d&apos;exercices</h1>
-        <p className="text-muted-foreground">Corrigez les soumissions de vos eleves</p>
+    <>
+      <SubNav tabs={formationsTabs} />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Corrections d&apos;exercices</h1>
+          <p className="text-muted-foreground">Corrigez les soumissions de vos eleves</p>
+        </div>
+        <ExerciseReviewClient
+          submissions={mapped}
+          coachName={profile.full_name || "Admin"}
+        />
       </div>
-      <ExerciseReviewClient
-        submissions={mapped}
-        coachName={profile.full_name || "Admin"}
-      />
-    </div>
+    </>
   );
 }

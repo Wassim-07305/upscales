@@ -1,7 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
+import { SubNav } from "@/components/layout/sub-nav";
 import { ContentClient } from "./ContentClient";
+
+const formationsTabs = [
+  { label: "Formations", href: "/admin/formations" },
+  { label: "Playbooks", href: "/admin/playbooks" },
+  { label: "Ressources", href: "/ressources" },
+  { label: "Pages", href: "/admin/pages" },
+  { label: "Exercices", href: "/admin/exercises" },
+  { label: "Contenu", href: "/admin/content" },
+];
 
 export default async function ContentPage() {
   const supabase = await createClient();
@@ -25,5 +35,10 @@ export default async function ContentPage() {
     .order("sort_order", { ascending: true })
     .order("publish_date", { ascending: true });
 
-  return <ContentClient videos={videos || []} userId={user.id} />;
+  return (
+    <>
+      <SubNav tabs={formationsTabs} />
+      <ContentClient videos={videos || []} userId={user.id} />
+    </>
+  );
 }

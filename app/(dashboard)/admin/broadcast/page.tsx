@@ -1,7 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/utils/roles";
+import { SubNav } from "@/components/layout/sub-nav";
 import { BroadcastClient } from "./BroadcastClient";
+
+const communicationTabs = [
+  { label: "Chat", href: "/chat" },
+  { label: "Annonces", href: "/admin/broadcast" },
+];
 
 export default async function BroadcastPage() {
   const supabase = await createClient();
@@ -35,7 +41,9 @@ export default async function BroadcastPage() {
   ]);
 
   return (
-    <BroadcastClient
+    <>
+      <SubNav tabs={communicationTabs} />
+      <BroadcastClient
       userId={user.id}
       stats={{
         total: totalUsers || 0,
@@ -44,6 +52,7 @@ export default async function BroadcastPage() {
         member: memberCount || 0,
         prospect: prospectCount || 0,
       }}
-    />
+      />
+    </>
   );
 }

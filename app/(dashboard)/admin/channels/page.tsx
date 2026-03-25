@@ -203,7 +203,7 @@ export default function AdminChannelsPage() {
   if (loading) {
     return (
       <>
-        <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Base IA", href: "/admin/ai" }, { label: "Profil", href: "/profile" }]} />
+        <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Base IA", href: "/admin/ai" }, { label: "SOPs", href: "/admin/sops" }, { label: "Outils", href: "/admin/tools" }, { label: "Audit", href: "/admin/audit" }, { label: "Logs", href: "/admin/error-logs" }, { label: "Profil", href: "/profile" }]} />
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -213,7 +213,7 @@ export default function AdminChannelsPage() {
 
   return (
     <>
-    <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Base IA", href: "/admin/ai" }, { label: "Profil", href: "/profile" }]} />
+    <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Base IA", href: "/admin/ai" }, { label: "SOPs", href: "/admin/sops" }, { label: "Outils", href: "/admin/tools" }, { label: "Audit", href: "/admin/audit" }, { label: "Logs", href: "/admin/error-logs" }, { label: "Profil", href: "/profile" }]} />
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>

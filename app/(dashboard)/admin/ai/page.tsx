@@ -41,7 +41,7 @@ export default async function AdminAIPage() {
         { label: "Channels", href: "/admin/channels" },
         { label: "Modération", href: "/admin/moderation" },
         { label: "Base IA", href: "/admin/ai" },
-        { label: "Profil", href: "/profile" },
+        { label: "SOPs", href: "/admin/sops" }, { label: "Outils", href: "/admin/tools" }, { label: "Audit", href: "/admin/audit" }, { label: "Logs", href: "/admin/error-logs" }, { label: "Profil", href: "/profile" },
       ]} />
       <AIAdminClient
         documents={documents || []}

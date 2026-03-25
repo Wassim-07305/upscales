@@ -4,6 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollText } from "lucide-react";
 import { formatDate } from "@/lib/utils/dates";
+import { SubNav } from "@/components/layout/sub-nav";
+
+const parametresTabs = [
+  { label: "Paramètres", href: "/admin/settings" },
+  { label: "Équipe", href: "/admin/team" },
+  { label: "Channels", href: "/admin/channels" },
+  { label: "Modération", href: "/admin/moderation" },
+  { label: "Base IA", href: "/admin/ai" },
+  { label: "SOPs", href: "/admin/sops" },
+  { label: "Outils", href: "/admin/tools" },
+  { label: "Audit", href: "/admin/audit" },
+  { label: "Logs", href: "/admin/error-logs" },
+  { label: "Profil", href: "/profile" },
+];
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   "user.suspend": { label: "Suspension", color: "bg-destructive/20 text-destructive border-destructive/30" },
@@ -46,9 +60,11 @@ export default async function AuditPage() {
     .limit(100);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+    <>
+      <SubNav tabs={parametresTabs} />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
           <ScrollText className="h-6 w-6 text-primary" />
           Journal d&apos;audit
         </h1>
@@ -121,6 +137,7 @@ export default async function AuditPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

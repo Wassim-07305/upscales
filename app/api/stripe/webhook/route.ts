@@ -95,9 +95,6 @@ export async function POST(request: NextRequest) {
           .eq("id", userId);
       }
 
-      console.log(
-        `[Stripe Webhook] checkout.session.completed: user=${userId} formation=${formationId}`
-      );
       break;
     }
 
@@ -110,9 +107,6 @@ export async function POST(request: NextRequest) {
         .update({ status: "completed" })
         .eq("stripe_payment_intent_id", paymentIntent.id);
 
-      console.log(
-        `[Stripe Webhook] payment_intent.succeeded: ${paymentIntent.id}`
-      );
       break;
     }
 
@@ -137,9 +131,6 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.log(
-        `[Stripe Webhook] payment_intent.payment_failed: ${paymentIntent.id}`
-      );
       break;
     }
 
@@ -157,12 +148,12 @@ export async function POST(request: NextRequest) {
           .eq("stripe_payment_intent_id", paymentIntentId);
       }
 
-      console.log(`[Stripe Webhook] charge.refunded: ${charge.id}`);
+      console.error(`[Stripe Webhook] charge.refunded: ${charge.id}`);
       break;
     }
 
     default:
-      console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+      console.error(`[Stripe Webhook] Unhandled event type: ${event.type}`);
   }
 
   return NextResponse.json({ received: true });

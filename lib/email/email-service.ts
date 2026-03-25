@@ -27,12 +27,6 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
   // Mode developpement — pas de cle API
   if (!apiKey) {
     const devId = `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    console.log("──────────────────────────────────────────");
-    console.log("[EMAIL] Mode developpement (pas de RESEND_API_KEY)");
-    console.log(`  From   : ${from}`);
-    console.log(`  To     : ${payload.to}`);
-    console.log(`  Subject: ${payload.subject}`);
-    console.log("──────────────────────────────────────────");
     return { success: true, id: devId };
   }
 

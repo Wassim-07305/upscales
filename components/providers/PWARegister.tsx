@@ -48,7 +48,7 @@ async function subscribeToPush(registration: ServiceWorkerRegistration) {
       body: JSON.stringify({ subscription: subscription.toJSON() }),
     });
   } catch (err) {
-    console.log("[Push] Subscription failed:", err);
+    console.error("[Push] Subscription failed:", err);
   }
 }
 
@@ -84,7 +84,7 @@ export function PWARegister() {
           }
         })
         .catch((err) => {
-          console.log("SW registration failed:", err);
+          console.error("SW registration failed:", err);
         });
     }
   }, []);

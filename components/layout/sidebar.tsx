@@ -64,18 +64,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { NavSection } from "@/lib/types/appshell";
+import { getInitials } from "@/lib/utils/formatters";
 
 // ─── Helpers ────────────────────────────────────────────────
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 // ─── Props ──────────────────────────────────────────────────
 

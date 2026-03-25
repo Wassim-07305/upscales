@@ -23,7 +23,6 @@ interface PushPayload {
  */
 export async function sendPushToUser(userId: string, payload: PushPayload) {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.log("[Push] VAPID keys not configured, skipping");
     return;
   }
 
@@ -33,7 +32,6 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     .select("endpoint, auth, p256dh")
     .eq("user_id", userId);
 
-  console.log("[Push] Subscriptions for user", userId, ":", subscriptions?.length || 0);
   if (!subscriptions || subscriptions.length === 0) return;
 
   const notification = JSON.stringify({

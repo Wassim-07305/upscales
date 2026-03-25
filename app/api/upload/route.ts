@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
     console.error("[Upload] SUPABASE_SERVICE_ROLE_KEY is missing");
     return NextResponse.json({ error: "Upload non configuré (service role key manquante)" }, { status: 503 });
   }
-  console.log("[Upload] Uploading to bucket:", bucket, "file:", fileName, "size:", file.size);
 
   const admin = createAdminClient();
   const { data, error } = await admin.storage

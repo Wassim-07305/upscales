@@ -75,6 +75,7 @@ import {
   Instagram,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getInitials } from "@/lib/utils/formatters";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils/dates";
 
@@ -100,15 +101,6 @@ const emptyForm: ClientFormState = {
   business_manager: "",
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 // ─── Component ───────────────────────────────────────────
 

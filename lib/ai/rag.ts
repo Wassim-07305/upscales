@@ -23,7 +23,6 @@ export async function retrieveContext(
   // 2. Search for similar chunks via RPC
   const supabase = await createClient();
 
-  console.log("[RAG] Query embedding dimension:", queryEmbedding.length, "threshold:", matchThreshold);
 
   // Supabase expects the vector as a JSON array string for the vector type
   const embeddingStr = `[${queryEmbedding.join(",")}]`;
@@ -39,7 +38,6 @@ export async function retrieveContext(
     return { context: "", sources: [] };
   }
 
-  console.log("[RAG] Chunks found:", chunks?.length || 0, chunks?.[0] ? "similarity=" + (chunks[0] as any).similarity : "");
 
   if (!chunks || chunks.length === 0) {
     return { context: "", sources: [] };

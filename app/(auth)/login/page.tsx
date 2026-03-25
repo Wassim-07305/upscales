@@ -67,10 +67,10 @@ export default function LoginPage() {
       return;
     }
 
-    if (turnstileSiteKey && !captchaToken) {
-      toast.error("Veuillez valider le captcha");
-      return;
-    }
+    // if (turnstileSiteKey && !captchaToken) {
+    //   toast.error("Veuillez valider le captcha");
+    //   return;
+    // }
 
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
@@ -158,6 +158,7 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4 pt-4">
+              {/* Turnstile captcha disabled
               {turnstileSiteKey && (
                 <div className="w-full">
                   <Turnstile
@@ -169,6 +170,7 @@ export default function LoginPage() {
                   />
                 </div>
               )}
+              */}
               {isLocked && (
                 <div className="text-center text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
                   Trop de tentatives. Réessayez dans {lockCountdown}s

@@ -55,10 +55,10 @@ function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
-    if (turnstileSiteKey && !captchaToken) {
-      toast.error("Veuillez valider le captcha");
-      return;
-    }
+    // if (turnstileSiteKey && !captchaToken) {
+    //   toast.error("Veuillez valider le captcha");
+    //   return;
+    // }
     setLoading(true);
     const { error, data: signUpData } = await supabase.auth.signUp({
       email: data.email,
@@ -182,6 +182,7 @@ function RegisterForm() {
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4 pt-4">
+              {/* Turnstile captcha disabled
               {turnstileSiteKey && (
                 <div className="w-full">
                   <Turnstile
@@ -193,6 +194,7 @@ function RegisterForm() {
                   />
                 </div>
               )}
+              */}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Créer mon compte

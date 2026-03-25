@@ -127,11 +127,14 @@ export function CRMClient() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<ClientFormState>(emptyForm);
 
-  // Queries
-  const { data: clients, isLoading } = useClients({
+  // Queries — memoize filter objects to avoid infinite re-renders
+  const clientFilters = useMemo(() => ({
     search: search || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
-  });
+  }), [search, statusFilter]);
+  const leadFilters = useMemo(() => ({}), []);
+
+  const { data: clients, isLoading } = useClients(clientFilters);
   const { data: allAssignments } = useAllClientAssignments();
   const { data: closingRates } = useClosingRates();
 
@@ -141,7 +144,7 @@ export function CRMClient() {
   const deleteClient = useDeleteClient();
 
   // Pipeline queries
-  const { data: allLeads } = useLeads({ search: undefined });
+  const { data: allLeads } = useLeads(leadFilters);
   const { data: leadStats } = useLeadStats();
   const { data: financeStats } = useFinanceStats();
   const createLead = useCreateLead();

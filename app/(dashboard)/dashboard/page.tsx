@@ -150,7 +150,7 @@ export default async function DashboardPage() {
   const firstName = profile.full_name?.split(" ")[0] || "vous";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Suspense>
         <WelcomeConfetti />
       </Suspense>

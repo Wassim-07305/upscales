@@ -157,15 +157,17 @@ export default function LoginPage() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex-col gap-4">
+            <CardFooter className="flex-col gap-4 pt-4">
               {turnstileSiteKey && (
-                <Turnstile
-                  siteKey={turnstileSiteKey}
-                  onSuccess={setCaptchaToken}
-                  onError={() => setCaptchaToken(null)}
-                  onExpire={() => setCaptchaToken(null)}
-                  options={{ theme: "dark", size: "flexible" }}
-                />
+                <div className="w-full">
+                  <Turnstile
+                    siteKey={turnstileSiteKey}
+                    onSuccess={setCaptchaToken}
+                    onError={() => setCaptchaToken(null)}
+                    onExpire={() => setCaptchaToken(null)}
+                    options={{ theme: "dark", size: "flexible" }}
+                  />
+                </div>
               )}
               {isLocked && (
                 <div className="text-center text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">

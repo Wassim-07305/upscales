@@ -181,15 +181,17 @@ function RegisterForm() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex-col gap-4">
+            <CardFooter className="flex-col gap-4 pt-4">
               {turnstileSiteKey && (
-                <Turnstile
-                  siteKey={turnstileSiteKey}
-                  onSuccess={setCaptchaToken}
-                  onError={() => setCaptchaToken(null)}
-                  onExpire={() => setCaptchaToken(null)}
-                  options={{ theme: "dark", size: "flexible" }}
-                />
+                <div className="w-full">
+                  <Turnstile
+                    siteKey={turnstileSiteKey}
+                    onSuccess={setCaptchaToken}
+                    onError={() => setCaptchaToken(null)}
+                    onExpire={() => setCaptchaToken(null)}
+                    options={{ theme: "dark", size: "flexible" }}
+                  />
+                </div>
               )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

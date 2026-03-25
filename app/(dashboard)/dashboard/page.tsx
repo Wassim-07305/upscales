@@ -17,6 +17,17 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
+  // Redirect admins/moderators to admin dashboard
+  const { data: roleCheck } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (roleCheck && (roleCheck.role === "admin" || roleCheck.role === "moderator")) {
+    redirect("/admin");
+  }
+
   // Parallel fetch all data at once
   const [
     { data: profile },

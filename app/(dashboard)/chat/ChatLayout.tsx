@@ -157,10 +157,12 @@ export function ChatLayout({ user, allUsers, initialDmUserId }: ChatLayoutProps)
   // DM partner helper
   const getDmPartner = (channel: ChannelWithMeta) => {
     if (channel.dmPartner) return channel.dmPartner;
-    // Fallback: parse name
+    // Fallback: parse name from channel name "A & B"
     const parts = channel.name.split(" & ");
-    const otherName = parts.find((p) => p !== user.full_name) || parts[1];
-    return allUsers.find((u) => u.full_name === otherName) || null;
+    const otherName = parts.find((p) => p !== user.full_name) || parts[1] || parts[0];
+    const found = allUsers.find((u) => u.full_name === otherName);
+    // Return a minimal partner object even if not found in allUsers
+    return found || { id: "", full_name: otherName || "?", avatar_url: null, is_online: false };
   };
 
   // Is the other user in a DM blocked?

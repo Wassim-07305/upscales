@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,6 +8,55 @@ import { LogOut, PanelLeftClose, PanelLeft, Settings, UserCircle } from "lucide-
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/lib/stores/ui-store";
 import { createClient } from "@/lib/supabase/client";
+
+function useUnreadMessages() {
+  const [hasUnread, setHasUnread] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const supabase = createClient();
+    let userId: string | null = null;
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      userId = user.id;
+
+      // Check for unread: messages created after last visit to /chat
+      const lastVisit = localStorage.getItem("chat_last_visit") || "2000-01-01";
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .gt("created_at", lastVisit);
+
+      if (count && count > 0) setHasUnread(true);
+    }
+
+    init();
+
+    // Listen for new messages in realtime
+    const channel = supabase.channel("sidebar-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        if (payload.new && (payload.new as any).sender_id !== userId) {
+          setHasUnread(true);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  // Reset when visiting /chat
+  useEffect(() => {
+    if (pathname?.startsWith("/chat")) {
+      setHasUnread(false);
+      localStorage.setItem("chat_last_visit", new Date().toISOString());
+    }
+  }, [pathname]);
+
+  return hasUnread;
+}
 import {
   Tooltip,
   TooltipContent,
@@ -64,6 +113,7 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const hasUnreadMessages = useUnreadMessages();
   const {
     sidebarCollapsed: storeCollapsed,
     toggleSidebar,
@@ -191,15 +241,19 @@ export function Sidebar({
                           <div className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand shadow-[0_0_8px_rgba(122,241,122,0.4)]" />
                         )}
 
-                        <Icon
-                          className={cn(
-                            "h-[18px] w-[18px] shrink-0 transition-all duration-200",
-                            isCollapsed ? "" : "mr-3",
-                            isActive &&
-                              "drop-shadow-[0_0_6px_rgba(122,241,122,0.3)]"
+                        <span className="relative shrink-0">
+                          <Icon
+                            className={cn(
+                              "h-[18px] w-[18px] transition-all duration-200",
+                              isActive &&
+                                "drop-shadow-[0_0_6px_rgba(122,241,122,0.3)]"
+                            )}
+                          />
+                          {item.href === "/chat" && hasUnreadMessages && (
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-sidebar" />
                           )}
-                        />
-                        <span className={cn(isCollapsed && "md:hidden")}>
+                        </span>
+                        <span className={cn(isCollapsed ? "md:hidden" : "")}>
                           {item.label}
                         </span>
                       </Link>

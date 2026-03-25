@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
     const rag = await retrieveContext(lastUserText);
     context = rag.context;
     sources = rag.sources;
+    console.log("[AI Chat] RAG context length:", context.length, "sources:", sources.length);
   } catch (e) {
     console.error("[AI Chat] RAG retrieval failed:", e);
     // Continue without context — RAG is not critical

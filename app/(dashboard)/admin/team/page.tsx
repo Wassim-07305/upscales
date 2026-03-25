@@ -28,7 +28,7 @@ export default async function TeamPage() {
 
   return (
     <>
-      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Profil", href: "/profile" }]} />
+      <SubNav tabs={[{ label: "Paramètres", href: "/admin/settings" }, { label: "Équipe", href: "/admin/team" }, { label: "Channels", href: "/admin/channels" }, { label: "Modération", href: "/admin/moderation" }, { label: "Base IA", href: "/admin/ai" }, { label: "Profil", href: "/profile" }]} />
       <TeamClient
         timeEntries={timeEntries || []}
         meetings={meetings || []}

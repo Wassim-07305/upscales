@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/utils/roles";
 import { AIAdminClient } from "./AIAdminClient";
+import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminAIPage() {
   const supabase = await createClient();
@@ -33,9 +34,19 @@ export default async function AdminAIPage() {
   ]);
 
   return (
-    <AIAdminClient
-      documents={documents || []}
-      formations={formations || []}
-    />
+    <>
+      <SubNav tabs={[
+        { label: "Paramètres", href: "/admin/settings" },
+        { label: "Équipe", href: "/admin/team" },
+        { label: "Channels", href: "/admin/channels" },
+        { label: "Modération", href: "/admin/moderation" },
+        { label: "Base IA", href: "/admin/ai" },
+        { label: "Profil", href: "/profile" },
+      ]} />
+      <AIAdminClient
+        documents={documents || []}
+        formations={formations || []}
+      />
+    </>
   );
 }

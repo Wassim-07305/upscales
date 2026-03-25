@@ -14,7 +14,7 @@ export async function retrieveContext(
   query: string,
   options?: { matchThreshold?: number; matchCount?: number }
 ): Promise<RetrievedContext> {
-  const matchThreshold = options?.matchThreshold ?? 0.7;
+  const matchThreshold = options?.matchThreshold ?? 0.3;
   const matchCount = options?.matchCount ?? 5;
 
   // 1. Generate embedding for the user query

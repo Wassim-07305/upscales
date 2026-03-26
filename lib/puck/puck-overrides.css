@@ -1,4 +1,5 @@
 /* Puck dark theme overrides — match Upscale neon theme */
+/* Class format: _ComponentName_hash_number (e.g. _PuckHeader_15xnq_1) */
 
 :root {
   --puck-color-azure-01: #0D0D0D;
@@ -35,116 +36,163 @@
 
 /* ─── Header ─────────────────────────────────────────── */
 
-[class*="Puck-header"] {
+[class*="PuckHeader"] {
   background-color: #111111 !important;
   border-color: #2A2A2A !important;
-  border-bottom-width: 1px !important;
+  border-bottom: 1px solid #2A2A2A !important;
 }
 
-/* Header title */
-[class*="Puck-header"] h1,
-[class*="Puck-header"] span,
-[class*="Puck-header"] p {
+/* Header title & text */
+[class*="PuckHeader-title"],
+[class*="PuckHeader"] span,
+[class*="PuckHeader"] p {
   color: #ffffff !important;
 }
 
 /* Header path link (back button) */
-[class*="Puck-header"] a {
+[class*="PuckHeader-path"] a,
+[class*="PuckHeader"] a {
   color: #C6FF00 !important;
   text-decoration: none !important;
   font-weight: 500 !important;
 }
 
-[class*="Puck-header"] a:hover {
+[class*="PuckHeader"] a:hover {
   color: #d4ff33 !important;
 }
 
-/* All header icons — make them bright */
-[class*="Puck-header"] svg {
+/* All header icons — bright */
+[class*="PuckHeader"] svg {
   color: #cccccc !important;
 }
 
-[class*="Puck-header"] button:hover svg {
+[class*="PuckHeader"] button:hover svg {
   color: #ffffff !important;
 }
 
-/* Header buttons (undo, redo, responsive, etc.) */
-[class*="Puck-header"] button {
+/* Header toggle buttons (sidebar, responsive) */
+[class*="PuckHeader-toggle"],
+[class*="PuckHeader-leftSideBarToggle"],
+[class*="PuckHeader-rightSideBarToggle"],
+[class*="PuckHeader-menuButton"] {
   color: #cccccc !important;
-  background-color: transparent !important;
-  border-color: #333333 !important;
-  border-radius: 6px !important;
 }
 
-[class*="Puck-header"] button:hover {
+[class*="PuckHeader-toggle"]:hover,
+[class*="PuckHeader-menuButton"]:hover {
+  color: #ffffff !important;
   background-color: #1C1C1C !important;
-  color: #ffffff !important;
 }
 
-/* Publish button → neon accent, override the generic button style */
-[class*="Puck-header"] button[class*="publish"],
-[class*="Puck-headerActions"] > button:last-child {
+/* Header tools area (zoom, responsive toggles) */
+[class*="PuckHeader-tools"] button,
+[class*="PuckHeader-tools"] > * {
+  color: #cccccc !important;
+}
+
+[class*="PuckHeader-tools"] button:hover {
+  color: #ffffff !important;
+  background-color: #1C1C1C !important;
+}
+
+/* ─── Publish / action buttons ───────────────────────── */
+
+/* Primary button (Publish) — Puck uses _Button--primary */
+[class*="Button--primary"] {
   background-color: #C6FF00 !important;
   color: #0D0D0D !important;
   font-weight: 600 !important;
   border-radius: 8px !important;
   border-color: #C6FF00 !important;
-  padding: 6px 16px !important;
 }
 
-[class*="Puck-header"] button[class*="publish"]:hover,
-[class*="Puck-headerActions"] > button:last-child:hover {
+[class*="Button--primary"]:hover {
   background-color: #d4ff33 !important;
+}
+
+[class*="Button--primary"] svg {
   color: #0D0D0D !important;
 }
 
-[class*="Puck-header"] button[class*="publish"] svg,
-[class*="Puck-headerActions"] > button:last-child svg {
-  color: #0D0D0D !important;
+/* Secondary button */
+[class*="Button--secondary"] {
+  background-color: #1C1C1C !important;
+  color: #cccccc !important;
+  border-color: #333333 !important;
 }
 
-/* Zoom dropdown / select in header */
-[class*="Puck-header"] select,
-[class*="Puck-header"] [class*="select"] {
+[class*="Button--secondary"]:hover {
+  background-color: #252525 !important;
+  color: #ffffff !important;
+}
+
+/* ─── Canvas controls (zoom, responsive) ─────────────── */
+
+[class*="PuckCanvas-controls"] {
   background-color: #1C1C1C !important;
   border-color: #333333 !important;
+  border-radius: 8px !important;
+}
+
+[class*="PuckCanvas-controls"] button {
   color: #cccccc !important;
+}
+
+[class*="PuckCanvas-controls"] button:hover {
+  color: #ffffff !important;
+  background-color: #252525 !important;
+}
+
+[class*="PuckCanvas-controls"] select {
+  background-color: #1C1C1C !important;
+  color: #cccccc !important;
+  border-color: #333333 !important;
   border-radius: 6px !important;
-  font-size: 12px !important;
 }
 
 /* ─── Preview area ───────────────────────────────────── */
 
-[class*="PuckLayout-frame"],
+[class*="PuckCanvas"],
+[class*="PuckPreview"],
 [class*="Puck-portal"] {
   background-color: #0D0D0D !important;
-  color: #ffffff !important;
 }
 
-[class*="PuckLayout-frame"] iframe {
+[class*="PuckPreview-frame"] iframe,
+[class*="PuckCanvas-root"] {
   background-color: #0D0D0D !important;
 }
 
 /* ─── Sidebars ───────────────────────────────────────── */
 
-[class*="SidebarSection"],
-[class*="Puck-leftSidebar"],
-[class*="Puck-rightSidebar"] {
+[class*="PuckLayout-inner"] {
+  background-color: #0D0D0D !important;
+}
+
+[class*="SidebarSection"] {
   background-color: #111111 !important;
   border-color: #2A2A2A !important;
 }
 
 /* Sidebar section titles */
 [class*="SidebarSection-title"] {
-  color: #999999 !important;
+  color: #888888 !important;
   text-transform: uppercase !important;
   font-size: 10px !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.08em !important;
 }
 
 /* ─── Component list ─────────────────────────────────── */
 
-[class*="ComponentList-item"] {
+[class*="ComponentList"] {
+  background-color: #111111 !important;
+}
+
+[class*="ComponentList-content"] {
+  gap: 4px !important;
+}
+
+[class*="ComponentList"] [class*="Button"] {
   background-color: #161616 !important;
   border-color: #2A2A2A !important;
   color: #cccccc !important;
@@ -152,22 +200,30 @@
   transition: all 0.15s ease !important;
 }
 
-[class*="ComponentList-item"]:hover {
+[class*="ComponentList"] [class*="Button"]:hover {
   border-color: #C6FF00 !important;
   background-color: #1a1a1a !important;
   color: #ffffff !important;
 }
 
-[class*="ComponentList-item"] svg {
+[class*="ComponentList"] [class*="Button"] svg {
   color: #888888 !important;
 }
 
-[class*="ComponentList-item"]:hover svg {
+[class*="ComponentList"] [class*="Button"]:hover svg {
   color: #C6FF00 !important;
 }
 
 /* ─── Form fields (props panel) ──────────────────────── */
 
+[class*="PuckFields"] label,
+[class*="Puck"] label {
+  color: #aaaaaa !important;
+}
+
+[class*="PuckFields"] input,
+[class*="PuckFields"] textarea,
+[class*="PuckFields"] select,
 [class*="Puck"] input,
 [class*="Puck"] textarea,
 [class*="Puck"] select {
@@ -182,7 +238,7 @@
 [class*="Puck"] select:focus {
   border-color: #C6FF00 !important;
   outline: none !important;
-  box-shadow: 0 0 0 1px #C6FF0040 !important;
+  box-shadow: 0 0 0 1px rgba(198, 255, 0, 0.25) !important;
 }
 
 [class*="Puck"] input::placeholder,
@@ -190,23 +246,34 @@
   color: #555555 !important;
 }
 
-[class*="Puck"] label {
+/* ─── ActionBar (component hover actions) ────────────── */
+
+[class*="ActionBar"] {
+  background-color: #1C1C1C !important;
+  border-color: #333333 !important;
+  border-radius: 6px !important;
+}
+
+[class*="ActionBar-action"] {
+  color: #cccccc !important;
+}
+
+[class*="ActionBar-action"]:hover {
+  color: #ffffff !important;
+  background-color: #252525 !important;
+}
+
+[class*="ActionBar-label"] {
   color: #aaaaaa !important;
+  font-size: 11px !important;
 }
 
 /* ─── Dropzone ───────────────────────────────────────── */
 
-[class*="DropZone"],
-[class*="DraggableComponent-overlay"] {
+[class*="DropZone"] {
   background-color: transparent !important;
 }
 
-[class*="DropZone--isAreaSelected"],
-[class*="DropZone-content"] {
-  background-color: #0D0D0D !important;
-}
-
-/* Component hover in preview */
 [class*="DraggableComponent"]:hover {
   outline-color: #C6FF00 !important;
 }
@@ -215,23 +282,7 @@
   outline-color: #C6FF00 !important;
 }
 
-/* ─── Drag overlay ───────────────────────────────────── */
-
-[class*="DraggableComponent-actions"] {
-  background-color: #1C1C1C !important;
-  border-color: #333333 !important;
-}
-
-[class*="DraggableComponent-actions"] button {
-  color: #cccccc !important;
-}
-
-[class*="DraggableComponent-actions"] button:hover {
-  color: #ffffff !important;
-  background-color: #252525 !important;
-}
-
-/* ─── Scrollbar styling ──────────────────────────────── */
+/* ─── Scrollbar ──────────────────────────────────────── */
 
 [class*="Puck"] ::-webkit-scrollbar {
   width: 6px;

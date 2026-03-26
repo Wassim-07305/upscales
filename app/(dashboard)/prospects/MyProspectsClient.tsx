@@ -22,7 +22,7 @@ import {
   Users, Target, TrendingUp, AlertCircle, BarChart3, List, Kanban,
   GripVertical, Calendar, DollarSign,
 } from "lucide-react";
-import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent, type DragOverEvent, rectIntersection } from "@dnd-kit/core";
+import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent, rectIntersection, type CollisionDetection } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils/dates";
@@ -253,9 +253,8 @@ function PipelineTab({ userId }: { userId: string }) {
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState<LeadFormState>(emptyForm);
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
-  const [overColumn, setOverColumn] = useState<ClientScopeStatus | null>(null);
 
-  const statuses = CLIENT_SCOPE_STATUSES as readonly string[];
+  const statusSet = new Set<string>(CLIENT_SCOPE_STATUSES);
 
   const leadsByStatus = useMemo(() => {
     const map: Record<string, Lead[]> = {};
@@ -266,33 +265,18 @@ function PipelineTab({ userId }: { userId: string }) {
     return map;
   }, [leads]);
 
-  // Find which column a droppable ID belongs to
-  const resolveColumn = (overId: string): ClientScopeStatus | null => {
-    // Direct column match
-    if (statuses.includes(overId)) return overId as ClientScopeStatus;
-    // overId is a lead ID — find which column it's in
-    const lead = leads?.find((l) => l.id === overId);
-    if (lead) return lead.client_status;
-    return null;
-  };
-
-  const handleDragOver = (event: DragOverEvent) => {
-    const { over } = event;
-    if (!over) { setOverColumn(null); return; }
-    setOverColumn(resolveColumn(over.id as string) || null);
+  // Only match droppable columns, ignore draggable cards
+  const columnOnlyCollision: CollisionDetection = (args) => {
+    const collisions = rectIntersection(args);
+    return collisions.filter((c) => statusSet.has(c.id as string));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const targetColumn = overColumn;
     setDraggedLead(null);
-    setOverColumn(null);
-
     const { active, over } = event;
     if (!over) return;
 
-    const newStatus = resolveColumn(over.id as string) || targetColumn;
-    if (!newStatus) return;
-
+    const newStatus = over.id as ClientScopeStatus;
     const leadId = active.id as string;
     const lead = leads?.find((l) => l.id === leadId);
     if (!lead || lead.client_status === newStatus) return;
@@ -341,7 +325,7 @@ function PipelineTab({ userId }: { userId: string }) {
         )}
       </div>
 
-      <DndContext collisionDetection={rectIntersection} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={columnOnlyCollision} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
           {CLIENT_SCOPE_STATUSES.map((status) => (
             <PipelineColumn key={status} status={status} leads={leadsByStatus[status] || []} onClickLead={openLeadDetail} />

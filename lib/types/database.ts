@@ -193,6 +193,152 @@ export interface ChannelMember {
   is_muted: boolean;
 }
 
+// ─── CRM Types ──────────────────────────────────────────
+
+export type ClientStatus = "actif" | "inactif" | "archivé" | "en_attente";
+export type ClientScopeStatus = "contacté" | "qualifié" | "proposé" | "closé" | "perdu";
+export type LeadStatus = "à_relancer" | "booké" | "no_show" | "pas_intéressé" | "en_cours" | "données_saisies";
+export type AssignmentRole = "coach" | "setter" | "closer" | "monteur" | "cm" | "manager";
+export type CallType = "manuel" | "iclosed" | "calendly" | "booking" | "autre";
+export type CallStatus = "planifié" | "réalisé" | "annulé" | "no_show" | "reporté";
+export type CloserCallStatus = "closé" | "non_closé" | "non_categorise" | "perdu" | "annule" | "no_show" | "paiement_echoue" | "paiement_reussi" | "follow_up" | "r2";
+export type FinancialEntryType = "ca" | "récurrent" | "charge" | "prestataire";
+export type FinancialSubType = "new_cash" | "mensualite" | "contracte" | "collecte";
+export type FinancialRecurrence = "mensuel" | "trimestriel" | "annuel";
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  niche: string | null;
+  notes: string | null;
+  business_manager: string | null;
+  status: ClientStatus;
+  is_internal: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientAssignment {
+  id: string;
+  client_id: string;
+  user_id: string;
+  role: AssignmentRole;
+  coach_fee: number | null;
+  assigned_at: string;
+  profile?: Profile;
+}
+
+export interface Lead {
+  id: string;
+  client_id: string | null;
+  assigned_to: string | null;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  instagram_url: string | null;
+  source: string | null;
+  status: LeadStatus;
+  client_status: ClientScopeStatus;
+  ca_contracte: number;
+  ca_collecte: number;
+  duree_collecte: number | null;
+  commission_setter: number;
+  commission_closer: number;
+  nombre_paiements: number;
+  call_time: string | null;
+  estimated_value: number;
+  notes: string | null;
+  next_action: string | null;
+  next_action_date: string | null;
+  date_relance: string | null;
+  column_id: string | null;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  client?: { id: string; name: string } | null;
+  assigned_profile?: Profile | null;
+}
+
+export interface CallCalendarEntry {
+  id: string;
+  client_id: string | null;
+  lead_id: string | null;
+  assigned_to: string | null;
+  date: string;
+  time: string | null;
+  type: CallType;
+  status: CallStatus;
+  link: string | null;
+  notes: string | null;
+  created_at: string;
+  client?: { id: string; name: string } | null;
+  lead?: { full_name: string } | null;
+  assignee?: Profile | null;
+}
+
+export interface CloserCall {
+  id: string;
+  client_id: string | null;
+  lead_id: string | null;
+  closer_id: string | null;
+  date: string;
+  status: CloserCallStatus;
+  revenue: number;
+  nombre_paiements: number;
+  link: string | null;
+  debrief: string | null;
+  notes: string | null;
+  objection: string | null;
+  follow_up_date: string | null;
+  prospect_name: string | null;
+  created_at: string;
+  client?: { id: string; name: string } | null;
+  lead?: { full_name: string } | null;
+  closer?: Profile | null;
+}
+
+export interface FinancialEntry {
+  id: string;
+  client_id: string | null;
+  type: FinancialEntryType;
+  sub_type: FinancialSubType | null;
+  label: string | null;
+  amount: number;
+  prestataire: string | null;
+  is_paid: boolean;
+  date: string;
+  recurrence: FinancialRecurrence | null;
+  created_at: string;
+  client?: { id: string; name: string } | null;
+}
+
+export interface PaymentSchedule {
+  id: string;
+  financial_entry_id: string | null;
+  lead_id: string | null;
+  client_id: string | null;
+  amount: number;
+  due_date: string;
+  is_paid: boolean;
+  paid_at: string | null;
+  created_at: string;
+  client?: { id: string; name: string } | null;
+}
+
+export interface PipelineColumn {
+  id: string;
+  client_id: string;
+  name: string;
+  color: string;
+  position: number;
+  is_terminal: boolean;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
   channel_id: string;
@@ -611,39 +757,6 @@ export interface CoachClient {
   product: string | null;
   notes: string | null;
   plan_content: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================
-// Leads (Pipeline Setter)
-// ============================================
-export type LeadStatus = "nouveau" | "qualifie" | "appel_booke" | "en_reflexion" | "close" | "perdu" | "no_show";
-
-export interface Lead {
-  id: string;
-  full_name: string;
-  email: string | null;
-  phone: string | null;
-  instagram_url: string | null;
-  source: string | null;
-  status: LeadStatus;
-  estimated_value: number;
-  notes: string | null;
-  next_action: string | null;
-  next_action_date: string | null;
-  assigned_to: string | null;
-  created_by: string | null;
-  client_id: string | null;
-  column_id: string | null;
-  date_relance: string | null;
-  heure: string | null;
-  ca_contracte: number;
-  ca_collecte: number;
-  duree_collecte: number | null;
-  commission_setter: number;
-  commission_closer: number;
-  sort_order: number;
   created_at: string;
   updated_at: string;
 }

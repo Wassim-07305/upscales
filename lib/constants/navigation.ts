@@ -26,7 +26,6 @@ import {
   ListTodo,
   FolderOpen,
   ClipboardList,
-  Kanban,
   Clapperboard,
   UsersRound,
   Link2,
@@ -174,12 +173,6 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "CRM",
     href: "/admin/crm",
     icon: Users,
-    roles: ADMIN_ROLES,
-  },
-  {
-    label: "Pipeline",
-    href: "/admin/leads",
-    icon: Kanban,
     roles: ADMIN_ROLES,
   },
   {

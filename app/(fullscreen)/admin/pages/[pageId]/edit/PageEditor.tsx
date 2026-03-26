@@ -1,10 +1,24 @@
 "use client";
 
-import { Puck, type Data } from "@measured/puck";
+import dynamic from "next/dynamic";
+import type { Data } from "@measured/puck";
 import "@measured/puck/puck.css";
+import "@/lib/puck/puck-overrides.css";
 import { puckConfig } from "@/lib/puck/config";
 import { toast } from "sonner";
-import "@/lib/puck/puck-overrides.css";
+import { Loader2 } from "lucide-react";
+
+const Puck = dynamic(
+  () => import("@measured/puck").then((mod) => mod.Puck),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-screen flex items-center justify-center bg-[#0D0D0D]">
+        <Loader2 className="h-8 w-8 animate-spin text-neon" />
+      </div>
+    ),
+  }
+);
 
 interface PageEditorProps {
   pageId: string;

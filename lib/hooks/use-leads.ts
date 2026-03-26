@@ -95,7 +95,9 @@ export function useCreateLead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["all-leads"] });
+      qc.invalidateQueries({ queryKey: ["my-leads"] });
       qc.invalidateQueries({ queryKey: ["lead-stats"] });
+      qc.invalidateQueries({ queryKey: ["my-lead-stats"] });
       toast.success("Lead créé");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -112,7 +114,9 @@ export function useUpdateLead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["all-leads"] });
+      qc.invalidateQueries({ queryKey: ["my-leads"] });
       qc.invalidateQueries({ queryKey: ["lead-stats"] });
+      qc.invalidateQueries({ queryKey: ["my-lead-stats"] });
       toast.success("Lead mis à jour");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -129,7 +133,9 @@ export function useDeleteLead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["all-leads"] });
+      qc.invalidateQueries({ queryKey: ["my-leads"] });
       qc.invalidateQueries({ queryKey: ["lead-stats"] });
+      qc.invalidateQueries({ queryKey: ["my-lead-stats"] });
       toast.success("Lead supprimé");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -150,7 +156,9 @@ export function useBulkCreateLeads() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["all-leads"] });
+      qc.invalidateQueries({ queryKey: ["my-leads"] });
       qc.invalidateQueries({ queryKey: ["lead-stats"] });
+      qc.invalidateQueries({ queryKey: ["my-lead-stats"] });
       toast.success("Leads importés");
     },
     onError: (e: Error) => toast.error(e.message),

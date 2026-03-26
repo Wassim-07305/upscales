@@ -48,7 +48,18 @@ export function PageEditorMember({
   }
 
   return (
-    <div className="h-screen">
+    <div className="h-screen puck-dark-theme">
+      <style>{`
+        .puck-dark-theme [class*="SidebarSection-title"] [class*="Heading"] { color: #aaaaaa !important; }
+        .puck-dark-theme [class*="Heading"][class*="Heading"] { color: #ffffff !important; }
+        .puck-dark-theme [class*="Input-label"] [class*="Heading"] { color: #cccccc !important; }
+        .puck-dark-theme [class*="Input-label"] { color: #cccccc !important; }
+        .puck-dark-theme [class*="ViewportControls-zoomSelect"] { background-color: #1C1C1C !important; color: #cccccc !important; border-color: #333 !important; }
+        .puck-dark-theme [class*="ViewportButton"] svg { color: #cccccc !important; }
+        .puck-dark-theme [class*="ViewportButton"]:hover svg { color: #fff !important; }
+        .puck-dark-theme [class*="IconButton"] svg { color: #cccccc !important; }
+        .puck-dark-theme [class*="IconButton"]:hover svg { color: #fff !important; }
+      `}</style>
       <Puck
         config={puckConfig}
         data={initialData}

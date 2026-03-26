@@ -57,11 +57,25 @@
   text-decoration: none !important;
   font-weight: 600 !important;
   font-size: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+/* Add ← arrow before the path text */
+[class*="PuckHeader-path"] a::before {
+  content: "←" !important;
+  font-size: 16px !important;
 }
 
 [class*="PuckHeader-path"]:hover,
+[class*="PuckHeader-path"] a:hover,
 [class*="PuckHeader"] a:hover {
   color: #d4ff33 !important;
+  background-color: rgba(198, 255, 0, 0.08) !important;
 }
 
 /* All header icons — bright */
@@ -104,13 +118,19 @@
 [class*="Button--primary"] {
   background-color: #C6FF00 !important;
   color: #0D0D0D !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
   border-color: #C6FF00 !important;
+  padding: 8px 20px !important;
+  font-size: 14px !important;
+  box-shadow: 0 0 20px rgba(198, 255, 0, 0.2) !important;
+  transition: all 0.2s ease !important;
 }
 
 [class*="Button--primary"]:hover {
   background-color: #d4ff33 !important;
+  box-shadow: 0 0 30px rgba(198, 255, 0, 0.35) !important;
+  transform: translateY(-1px) !important;
 }
 
 [class*="Button--primary"] svg {
@@ -214,12 +234,27 @@
   border-color: #2A2A2A !important;
 }
 
-/* Sidebar section titles */
-[class*="SidebarSection-title"] {
-  color: #888888 !important;
+/* Sidebar section titles — force visibility */
+[class*="SidebarSection-title"],
+[class*="SidebarSection-title"] *,
+[class*="SidebarSection-heading"],
+[class*="SidebarSection-heading"] * {
+  color: #aaaaaa !important;
   text-transform: uppercase !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
   letter-spacing: 0.08em !important;
+}
+
+/* Sidebar section title buttons (collapse chevron) */
+[class*="SidebarSection-title"] button,
+[class*="SidebarSection-title"] svg {
+  color: #888888 !important;
+}
+
+[class*="SidebarSection-title"] button:hover,
+[class*="SidebarSection-title"] button:hover svg {
+  color: #ffffff !important;
 }
 
 /* ─── Component list ─────────────────────────────────── */

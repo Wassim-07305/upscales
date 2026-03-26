@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { MyPagesClient } from "./MyPagesClient";
+import { MyPagesWrapper } from "./MyPagesWrapper";
 
 export default async function MyPagesPage() {
   const supabase = await createClient();
@@ -15,5 +15,5 @@ export default async function MyPagesPage() {
     .eq("created_by", user.id)
     .order("created_at", { ascending: false });
 
-  return <MyPagesClient pages={pages || []} />;
+  return <MyPagesWrapper pages={pages || []} />;
 }

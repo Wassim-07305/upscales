@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SubNav } from "@/components/layout/sub-nav";
+import { isModerator } from "@/lib/utils/roles";
 
 const ROLE_LABELS: Record<string, string> = {
   setter: "Setter",
@@ -13,6 +15,20 @@ const ROLE_LABELS: Record<string, string> = {
   all: "Tous les rôles",
 };
 
+const adminTabs = [
+  { label: "Ressources", href: "/ressources" },
+  { label: "Playbooks", href: "/admin/playbooks" },
+  { label: "Pages", href: "/admin/pages" },
+  { label: "Exercices", href: "/admin/exercises" },
+  { label: "Contenu", href: "/admin/content" },
+  { label: "SOPs", href: "/admin/sops" },
+];
+
+const memberTabs = [
+  { label: "Ressources", href: "/ressources" },
+  { label: "Playbooks", href: "/playbook" },
+];
+
 export default async function PlaybooksListPage() {
   const supabase = await createClient();
   const {
@@ -20,6 +36,16 @@ export default async function PlaybooksListPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) redirect("/login");
+
+  const tabs = isModerator(profile.role) ? adminTabs : memberTabs;
 
   const { data: playbooks } = await supabase
     .from("playbooks")
@@ -30,6 +56,8 @@ export default async function PlaybooksListPage() {
   const list = playbooks || [];
 
   return (
+    <>
+    <SubNav tabs={tabs} />
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Playbooks</h1>
@@ -75,5 +103,6 @@ export default async function PlaybooksListPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

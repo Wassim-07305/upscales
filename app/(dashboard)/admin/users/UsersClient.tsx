@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, UserRole, Tag } from "@/lib/types/database";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ interface UsersClientProps {
 }
 
 export function UsersClient({ profiles: initialProfiles, allTags, userTags, isAdmin }: UsersClientProps) {
+  const router = useRouter();
   const [profiles, setProfiles] = useState(initialProfiles);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -207,7 +209,7 @@ export function UsersClient({ profiles: initialProfiles, allTags, userTags, isAd
                 {filtered.map((user) => {
                   const tags = tagsByUser[user.id] || [];
                   return (
-                    <tr key={user.id} className="hover:bg-accent/50 transition-colors">
+                    <tr key={user.id} onClick={() => router.push(`/admin/users/${user.id}`)} className="hover:bg-accent/50 transition-colors cursor-pointer">
                       <td className="p-3">
                         <div className="flex items-center gap-3">
                           <div className="relative">

@@ -50,13 +50,16 @@
 }
 
 /* Header path link (back button) */
+[class*="PuckHeader-path"],
 [class*="PuckHeader-path"] a,
 [class*="PuckHeader"] a {
   color: #C6FF00 !important;
   text-decoration: none !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
 }
 
+[class*="PuckHeader-path"]:hover,
 [class*="PuckHeader"] a:hover {
   color: #d4ff33 !important;
 }
@@ -126,28 +129,65 @@
   color: #ffffff !important;
 }
 
-/* ─── Canvas controls (zoom, responsive) ─────────────── */
+/* ─── Viewport controls (responsive icons + zoom) ────── */
 
-[class*="PuckCanvas-controls"] {
+[class*="ViewportControls"] {
   background-color: #1C1C1C !important;
   border-color: #333333 !important;
   border-radius: 8px !important;
 }
 
-[class*="PuckCanvas-controls"] button {
+[class*="ViewportControls-divider"] {
+  background-color: #333333 !important;
+}
+
+/* Viewport buttons (mobile, tablet, desktop icons) */
+[class*="ViewportButton"] {
   color: #cccccc !important;
 }
 
-[class*="PuckCanvas-controls"] button:hover {
+[class*="ViewportButton"]:hover {
   color: #ffffff !important;
   background-color: #252525 !important;
 }
 
-[class*="PuckCanvas-controls"] select {
+[class*="ViewportButton"] svg {
+  color: #cccccc !important;
+}
+
+[class*="ViewportButton"]:hover svg {
+  color: #ffffff !important;
+}
+
+/* Zoom dropdown select */
+[class*="ViewportControls-zoomSelect"],
+[class*="ViewportControls"] select {
   background-color: #1C1C1C !important;
   color: #cccccc !important;
   border-color: #333333 !important;
   border-radius: 6px !important;
+  -webkit-appearance: none !important;
+}
+
+/* IconButton (generic icon buttons in header) */
+[class*="IconButton"] {
+  color: #cccccc !important;
+}
+
+[class*="IconButton"]:hover {
+  color: #ffffff !important;
+  background-color: #1C1C1C !important;
+}
+
+[class*="IconButton"] svg {
+  color: inherit !important;
+}
+
+/* PuckCanvas controls fallback */
+[class*="PuckCanvas-controls"] {
+  background-color: #1C1C1C !important;
+  border-color: #333333 !important;
+  border-radius: 8px !important;
 }
 
 /* ─── Preview area ───────────────────────────────────── */
@@ -216,9 +256,12 @@
 
 /* ─── Form fields (props panel) ──────────────────────── */
 
+/* Field labels — must be clearly readable */
+[class*="Input-label"],
 [class*="PuckFields"] label,
 [class*="Puck"] label {
-  color: #aaaaaa !important;
+  color: #cccccc !important;
+  font-weight: 500 !important;
 }
 
 [class*="PuckFields"] input,

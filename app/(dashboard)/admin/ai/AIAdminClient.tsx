@@ -33,15 +33,9 @@ import {
   Clock,
 } from "lucide-react";
 
-interface Formation {
-  id: string;
-  title: string;
-  status: string;
-}
-
 interface AIAdminClientProps {
   documents: AIDocument[];
-  formations: Formation[];
+  formations: Pick<import("@/lib/types/database").Formation, "id" | "title" | "status">[];
 }
 
 const STATUS_CONFIG = {

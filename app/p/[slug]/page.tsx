@@ -86,12 +86,12 @@ export default async function LandingPage({ params, searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white">
-      {isPreview && (
+      {isPreview && !page.is_active && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-[#FFB800] text-black text-center text-sm py-1.5 font-medium">
           Mode prévisualisation — Cette page n&apos;est pas encore publiée
         </div>
       )}
-      <div className={isPreview ? "pt-8" : ""}>
+      <div className={isPreview && !page.is_active ? "pt-8" : ""}>
         <PuckRenderer data={puckData} />
       </div>
     </main>

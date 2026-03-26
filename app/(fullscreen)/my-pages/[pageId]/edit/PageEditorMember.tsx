@@ -51,7 +51,7 @@ export function PageEditorMember({
   }
 
   return (
-    <div className="h-screen puck-dark-theme flex flex-col">
+    <div className="h-screen puck-dark-theme">
       <style>{`
         .puck-dark-theme [class*="SidebarSection-title"] [class*="Heading"] { color: #aaaaaa !important; }
         .puck-dark-theme [class*="Heading"][class*="Heading"] { color: #ffffff !important; }
@@ -63,24 +63,27 @@ export function PageEditorMember({
         .puck-dark-theme [class*="IconButton"] svg { color: #cccccc !important; }
         .puck-dark-theme [class*="IconButton"]:hover svg { color: #fff !important; }
       `}</style>
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#2A2A2A] bg-[#111111] shrink-0">
-        <button
-          onClick={() => router.push("/my-pages")}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-[#C6FF00] hover:bg-[#C6FF00]/10 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Mes Pages
-        </button>
-        <span className="text-[#333]">|</span>
-        <span className="text-sm font-semibold text-white truncate">{pageTitle}</span>
-      </div>
-      <div className="flex-1">
-        <Puck
-          config={puckConfig}
-          data={initialData}
-          onPublish={handlePublish}
-        />
-      </div>
+      <Puck
+        config={puckConfig}
+        data={initialData}
+        onPublish={handlePublish}
+        renderHeader={({ children }) => (
+          <div>
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#2A2A2A] bg-[#111111]">
+              <button
+                onClick={() => router.push("/my-pages")}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-[#C6FF00] hover:bg-[#C6FF00]/10 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Mes Pages
+              </button>
+              <span className="text-[#333]">|</span>
+              <span className="text-sm font-semibold text-white truncate">{pageTitle}</span>
+            </div>
+            {children}
+          </div>
+        )}
+      />
     </div>
   );
 }

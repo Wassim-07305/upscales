@@ -114,23 +114,20 @@
 
 /* ─── Publish / action buttons ───────────────────────── */
 
-/* Primary button (Publish) — Puck uses _Button--primary */
+/* Primary button (Publish) — clean white style */
 [class*="Button--primary"] {
-  background-color: #C6FF00 !important;
+  background-color: #ffffff !important;
   color: #0D0D0D !important;
-  font-weight: 700 !important;
-  border-radius: 10px !important;
-  border-color: #C6FF00 !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border-color: #ffffff !important;
   padding: 8px 20px !important;
-  font-size: 14px !important;
-  box-shadow: 0 0 20px rgba(198, 255, 0, 0.2) !important;
+  font-size: 13px !important;
   transition: all 0.2s ease !important;
 }
 
 [class*="Button--primary"]:hover {
-  background-color: #d4ff33 !important;
-  box-shadow: 0 0 30px rgba(198, 255, 0, 0.35) !important;
-  transform: translateY(-1px) !important;
+  background-color: #e0e0e0 !important;
 }
 
 [class*="Button--primary"] svg {

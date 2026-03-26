@@ -234,11 +234,17 @@
   border-color: #2A2A2A !important;
 }
 
-/* Sidebar section titles — force visibility */
+/* Sidebar section titles — force visibility on ALL children */
 [class*="SidebarSection-title"],
-[class*="SidebarSection-title"] *,
-[class*="SidebarSection-heading"],
-[class*="SidebarSection-heading"] * {
+[class*="SidebarSection-title"] span,
+[class*="SidebarSection-title"] div,
+[class*="SidebarSection-title"] p,
+[class*="SidebarSection-title"] h1,
+[class*="SidebarSection-title"] h2,
+[class*="SidebarSection-title"] h3,
+[class*="SidebarSection-title"] h4,
+[class*="SidebarSection-title"] h5,
+[class*="SidebarSection-title"] [class*="Heading"] {
   color: #aaaaaa !important;
   text-transform: uppercase !important;
   font-size: 11px !important;
@@ -254,6 +260,11 @@
 
 [class*="SidebarSection-title"] button:hover,
 [class*="SidebarSection-title"] button:hover svg {
+  color: #ffffff !important;
+}
+
+/* Right sidebar — PAGE title and labels */
+[class*="Puck"] [class*="Heading"] {
   color: #ffffff !important;
 }
 
@@ -293,7 +304,10 @@
 
 /* Field labels — must be clearly readable */
 [class*="Input-label"],
+[class*="Input-label"] span,
+[class*="Input-label"] [class*="Heading"],
 [class*="PuckFields"] label,
+[class*="PuckFields"] label span,
 [class*="Puck"] label {
   color: #cccccc !important;
   font-weight: 500 !important;

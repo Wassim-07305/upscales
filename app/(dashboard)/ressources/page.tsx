@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SubNav } from "@/components/layout/sub-nav";
-import { RessourcesClient } from "./RessourcesClient";
+import { RessourcesHub } from "./RessourcesHub";
 import { isModerator } from "@/lib/utils/roles";
 
 const adminTabs = [
@@ -13,17 +13,9 @@ const adminTabs = [
   { label: "SOPs", href: "/admin/sops" },
 ];
 
-const memberTabs = [
-  { label: "Ressources", href: "/ressources" },
-  { label: "Playbooks", href: "/playbook" },
-];
-
 export default async function RessourcesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase
@@ -34,20 +26,37 @@ export default async function RessourcesPage() {
 
   if (!profile) redirect("/login");
 
-  const tabs = isModerator(profile.role) ? adminTabs : memberTabs;
+  const isAdmin = isModerator(profile.role);
 
-  // RLS filters by role automatically
-  const { data: sops } = await supabase
-    .from("sops")
-    .select("*")
-    .eq("is_published", true)
-    .order("department", { ascending: true })
-    .order("order", { ascending: true });
+  const [{ data: sops }, { data: playbooks }, { data: tools }] = await Promise.all([
+    supabase
+      .from("sops")
+      .select("*")
+      .eq("is_published", true)
+      .order("department", { ascending: true })
+      .order("order", { ascending: true }),
+    supabase
+      .from("playbooks")
+      .select("id, title, slug, description, target_role, icon")
+      .eq("is_published", true)
+      .order("order", { ascending: true }),
+    supabase
+      .from("tool_links")
+      .select("*")
+      .eq("is_published", true)
+      .order("category")
+      .order("order", { ascending: true }),
+  ]);
 
   return (
     <>
-      <SubNav tabs={tabs} />
-      <RessourcesClient sops={sops || []} />
+      {isAdmin && <SubNav tabs={adminTabs} />}
+      <RessourcesHub
+        sops={sops || []}
+        playbooks={playbooks || []}
+        tools={tools || []}
+        isAdmin={isAdmin}
+      />
     </>
   );
 }

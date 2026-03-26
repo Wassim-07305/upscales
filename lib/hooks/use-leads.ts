@@ -157,6 +157,55 @@ export function useBulkCreateLeads() {
   });
 }
 
+// ─── My Leads (member's own leads) ──────────────────────
+
+export function useMyLeads(userId: string) {
+  return useQuery({
+    queryKey: ["my-leads", userId],
+    queryFn: async () => {
+      const { data, error } = await db()
+        .from("leads")
+        .select("*")
+        .eq("created_by", userId)
+        .order("updated_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data || []) as Lead[];
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useMyLeadStats(userId: string) {
+  return useQuery({
+    queryKey: ["my-lead-stats", userId],
+    queryFn: async () => {
+      const { data, error } = await db()
+        .from("leads")
+        .select("status, client_status, ca_contracte, ca_collecte, date_relance")
+        .eq("created_by", userId);
+      if (error) throw error;
+
+      const leads = data || [];
+      const today = new Date().toISOString().split("T")[0];
+      return {
+        total: leads.length,
+        a_relancer: leads.filter((l) => l.status === "à_relancer").length,
+        booke: leads.filter((l) => l.status === "booké").length,
+        close: leads.filter((l) => l.client_status === "closé").length,
+        perdu: leads.filter((l) => l.client_status === "perdu").length,
+        ca_contracte: leads.reduce((s, l) => s + (Number(l.ca_contracte) || 0), 0),
+        ca_collecte: leads.reduce((s, l) => s + (Number(l.ca_collecte) || 0), 0),
+        pipeline_value: leads
+          .filter((l) => l.client_status !== "perdu" && l.client_status !== "closé")
+          .reduce((s, l) => s + (Number(l.ca_contracte) || 0), 0),
+        relances_overdue: leads.filter((l) => l.date_relance && l.date_relance <= today && l.client_status !== "closé" && l.client_status !== "perdu").length,
+      };
+    },
+    enabled: !!userId,
+  });
+}
+
 // ─── Lead Stats ─────────────────────────────────────────
 
 export function useLeadStats(clientId?: string) {

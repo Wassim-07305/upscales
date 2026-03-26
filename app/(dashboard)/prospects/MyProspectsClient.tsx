@@ -22,7 +22,7 @@ import {
   Users, Target, TrendingUp, AlertCircle, BarChart3, List, Kanban,
   GripVertical, Calendar, DollarSign,
 } from "lucide-react";
-import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent, rectIntersection, type CollisionDetection } from "@dnd-kit/core";
+import { DndContext, closestCorners, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils/dates";
@@ -254,8 +254,6 @@ function PipelineTab({ userId }: { userId: string }) {
   const [leadForm, setLeadForm] = useState<LeadFormState>(emptyForm);
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
 
-  const statusSet = new Set<string>(CLIENT_SCOPE_STATUSES);
-
   const leadsByStatus = useMemo(() => {
     const map: Record<string, Lead[]> = {};
     for (const s of CLIENT_SCOPE_STATUSES) map[s] = [];
@@ -265,17 +263,10 @@ function PipelineTab({ userId }: { userId: string }) {
     return map;
   }, [leads]);
 
-  // Only match droppable columns, ignore draggable cards
-  const columnOnlyCollision: CollisionDetection = (args) => {
-    const collisions = rectIntersection(args);
-    return collisions.filter((c) => statusSet.has(c.id as string));
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
     setDraggedLead(null);
     const { active, over } = event;
     if (!over) return;
-
     const newStatus = over.id as ClientScopeStatus;
     const leadId = active.id as string;
     const lead = leads?.find((l) => l.id === leadId);
@@ -325,7 +316,7 @@ function PipelineTab({ userId }: { userId: string }) {
         )}
       </div>
 
-      <DndContext collisionDetection={columnOnlyCollision} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={closestCorners} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
           {CLIENT_SCOPE_STATUSES.map((status) => (
             <PipelineColumn key={status} status={status} leads={leadsByStatus[status] || []} onClickLead={openLeadDetail} />

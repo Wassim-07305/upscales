@@ -372,7 +372,7 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/prospects", "/playbook", "/ressources", "/tools"].includes(i.href)
+      ["/prospects", "/ressources", "/tools"].includes(i.href)
     ),
   },
   {

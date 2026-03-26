@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Data } from "@measured/puck";
 import { createClient } from "@/lib/supabase/server";
-import { PuckRenderer } from "./PuckRenderer";
+import { PuckRendererWrapper } from "./PuckRendererWrapper";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -92,7 +92,7 @@ export default async function LandingPage({ params, searchParams }: PageProps) {
         </div>
       )}
       <div className={isPreview && !page.is_active ? "pt-8" : ""}>
-        <PuckRenderer data={puckData} />
+        <PuckRendererWrapper data={puckData} />
       </div>
     </main>
   );

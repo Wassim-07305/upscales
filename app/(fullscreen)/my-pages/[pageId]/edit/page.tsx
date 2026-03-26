@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PageEditorMember } from "./PageEditorMember";
+import { EditorWrapper } from "./EditorWrapper";
 import type { Data } from "@measured/puck";
 
 interface PageProps {
@@ -34,7 +34,7 @@ export default async function MyPageEditPage({ params }: PageProps) {
   };
 
   return (
-    <PageEditorMember
+    <EditorWrapper
       pageId={page.id}
       initialData={initialData}
       pageTitle={page.title}

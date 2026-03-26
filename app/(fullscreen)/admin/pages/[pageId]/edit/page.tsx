@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PageEditor } from "./PageEditor";
+import { AdminEditorWrapper } from "./AdminEditorWrapper";
 import type { Data } from "@measured/puck";
 
 interface PageProps {
@@ -26,5 +26,5 @@ export default async function EditLandingPage({ params }: PageProps) {
     root: { props: {} },
   };
 
-  return <PageEditor pageId={page.id} initialData={initialData} pageTitle={page.title} />;
+  return <AdminEditorWrapper pageId={page.id} initialData={initialData} pageTitle={page.title} />;
 }

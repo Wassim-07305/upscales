@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, Sun, Moon, Monitor, User, LogOut, Search } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/lib/stores/ui-store";
 import { createClient } from "@/lib/supabase/client";
@@ -173,6 +174,7 @@ export function Header({
           onClick={() => setNotificationsPanelOpen(true)}
           className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           title="Notifications"
+          aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -186,12 +188,15 @@ export function Header({
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setUserMenuOpen((v) => !v)}
+            aria-label="Menu utilisateur"
             className="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-muted"
           >
             {avatarUrl ? (
-              <img
+              <Image
                 src={avatarUrl}
                 alt={userName}
+                width={32}
+                height={32}
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (

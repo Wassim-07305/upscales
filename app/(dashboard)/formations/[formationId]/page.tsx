@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +10,38 @@ import { BookOpen, Clock, Users, UserCircle } from "lucide-react";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
+import Image from "next/image";
 import { EnrollButton } from "./EnrollButton";
 import { FormationReviews } from "./FormationReviews";
 import { Suspense } from "react";
 import { PaymentToast } from "./PaymentToast";
 import { Star } from "lucide-react";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ formationId: string }>;
+}): Promise<Metadata> {
+  const { formationId } = await params;
+  const supabase = await createClient();
+  const { data: formation } = await supabase
+    .from("formations")
+    .select("title, description, thumbnail_url")
+    .eq("id", formationId)
+    .single();
+
+  if (!formation) return { title: "Formation — UPSCALE" };
+
+  return {
+    title: `${formation.title} — UPSCALE`,
+    description: formation.description || "Montez en compétences avec UPSCALE",
+    openGraph: {
+      title: formation.title,
+      description: formation.description || undefined,
+      images: formation.thumbnail_url ? [formation.thumbnail_url] : undefined,
+    },
+  };
+}
 
 export default async function FormationDetailPage({
   params,
@@ -88,15 +116,16 @@ export default async function FormationDetailPage({
         <PaymentToast />
       </Suspense>
       {/* Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
-        {formation.thumbnail_url ? (
-          <img
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 h-48 md:h-64">
+        {formation.thumbnail_url && (
+          <Image
             src={formation.thumbnail_url}
             alt={formation.title}
-            className="w-full h-48 md:h-64 object-cover opacity-50"
+            fill
+            sizes="(max-width: 768px) 100vw, 896px"
+            className="object-cover opacity-50"
+            priority
           />
-        ) : (
-          <div className="h-48 md:h-64" />
         )}
         <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-background/90 to-transparent">
           <div className="flex items-center gap-2 mb-2">
@@ -198,29 +227,32 @@ export default async function FormationDetailPage({
           </Card>
 
           {/* Instructor */}
-          {formation.creator && (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Formateur</p>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                      {getInitials((formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.full_name || "")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.full_name}</p>
-                    {(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null } | null)?.bio && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                        {(formation.creator as { full_name: string; avatar_url: string | null; bio: string | null }).bio}
-                      </p>
-                    )}
+          {formation.creator && (() => {
+            const creator = formation.creator as { full_name: string; avatar_url: string | null; bio: string | null };
+            return (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Formateur</p>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={creator.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                        {getInitials(creator.full_name || "")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{creator.full_name}</p>
+                      {creator.bio && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                          {creator.bio}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       </div>
     </div>

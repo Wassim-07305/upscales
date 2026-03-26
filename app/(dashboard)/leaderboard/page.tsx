@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Star, Zap, Crown } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -106,10 +107,11 @@ export default async function LeaderboardPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/20 text-primary font-bold text-lg flex-shrink-0">
               {currentProfile?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={currentProfile.avatar_url}
                   alt=""
+                  width={48}
+                  height={48}
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
@@ -209,10 +211,11 @@ export default async function LeaderboardPage() {
                     {/* Avatar */}
                     <div className="flex items-center justify-center h-9 w-9 rounded-full bg-muted text-sm font-medium flex-shrink-0">
                       {profile?.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           src={profile.avatar_url}
                           alt=""
+                          width={36}
+                          height={36}
                           className="h-9 w-9 rounded-full object-cover"
                         />
                       ) : (

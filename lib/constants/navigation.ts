@@ -117,6 +117,12 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: MEMBERS_UP,
   },
   {
+    label: "Mes Prospects",
+    href: "/prospects",
+    icon: Target,
+    roles: MEMBERS_UP,
+  },
+  {
     label: "Ressources",
     href: "/ressources",
     icon: FolderOpen,
@@ -366,6 +372,12 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
+      ["/prospects", "/ressources", "/tools"].includes(i.href)
+    ),
+  },
+  {
+    label: "",
+    items: STUDENT_NAV_ITEMS.filter((i) =>
       ["/notifications", "/settings"].includes(i.href)
     ),
   },
@@ -376,7 +388,7 @@ export const ADMIN_SECTIONS: NavSection[] = [
   {
     label: "",
     items: ADMIN_NAV_ITEMS.filter((i) =>
-      ["/admin", "/admin/crm", "/admin/formations", "/ressources", "/admin/users"].includes(i.href)
+      ["/admin", "/admin/crm", "/admin/formations", "/ressources", "/admin/tools", "/admin/users"].includes(i.href)
     ),
   },
   {
@@ -433,6 +445,7 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   leads: "Pipeline",
   content: "Contenu",
   team: "Équipe",
+  prospects: "Mes Prospects",
   tools: "Liens & Outils",
   ressources: "Ressources",
   "error-logs": "Error Logs",

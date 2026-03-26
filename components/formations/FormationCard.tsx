@@ -11,6 +11,7 @@ import { BookOpen, Clock, Users, Star, Heart } from "lucide-react";
 import { DifficultyLevel, Formation } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice, truncate } from "@/lib/utils/formatters";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -92,10 +93,12 @@ export function FormationCard({
         {/* Thumbnail */}
         <div className="relative h-40 bg-gradient-to-br from-primary/15 via-turquoise/5 to-transparent overflow-hidden">
           {formation.thumbnail_url ? (
-            <img
+            <Image
               src={formation.thumbnail_url}
               alt={formation.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              fill
+              sizes="(max-width: 768px) 100vw, 400px"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -107,6 +110,7 @@ export function FormationCard({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
                 className={cn(
                   "h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60",
                   isFavorite && "text-red-500 hover:text-red-400"

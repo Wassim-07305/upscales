@@ -1,7 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { isModerator } from "@/lib/utils/roles";
-import { AnalyticsCharts } from "./AnalyticsCharts";
+import dynamic from "next/dynamic";
+
+const AnalyticsCharts = dynamic(() => import("./AnalyticsCharts").then((m) => m.AnalyticsCharts), {
+  loading: () => (
+    <div className="grid md:grid-cols-2 gap-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="h-[350px] rounded-xl bg-muted/50 animate-pulse" />
+      ))}
+    </div>
+  ),
+});
 import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AnalyticsPage() {

@@ -41,6 +41,7 @@ import { timeAgo } from "@/lib/utils/dates";
 import { getInitials } from "@/lib/utils/formatters";
 import { getRoleBadgeColor, getRoleLabel, isModerator } from "@/lib/utils/roles";
 import { createClient } from "@/lib/supabase/client";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -304,7 +305,9 @@ export function PostCard({
             {post.type === "video" ? (
               <video src={post.media_url} controls className="w-full max-h-96" />
             ) : (
-              <img src={post.media_url} alt="" className="w-full max-h-96 object-cover" />
+              <div className="relative w-full" style={{ maxHeight: "24rem" }}>
+                <Image src={post.media_url} alt="" width={800} height={400} className="w-full object-cover" sizes="(max-width: 768px) 100vw, 640px" />
+              </div>
             )}
           </div>
         )}
@@ -313,6 +316,7 @@ export function PostCard({
         <div className="flex items-center gap-4 pt-2 border-t border-border">
           <button
             onClick={handleLike}
+            aria-label={liked ? "Ne plus aimer" : "Aimer"}
             className={cn(
               "flex items-center gap-1.5 text-sm transition-colors",
               liked ? "text-destructive" : "text-muted-foreground hover:text-destructive"
@@ -329,6 +333,7 @@ export function PostCard({
             <span>{post.comments_count}</span>
           </Link>
           <button
+            aria-label="Copier le lien"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto"
             onClick={async () => {
               const url = `${window.location.origin}/community/${post.id}`;

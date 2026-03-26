@@ -51,6 +51,7 @@ import {
 import { DifficultyLevel, Formation, FormationStatus } from "@/lib/types/database";
 import { formatDate } from "@/lib/utils/dates";
 import { toast } from "sonner";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { logAuditAction } from "@/lib/actions/audit";
@@ -318,10 +319,9 @@ export function AdminFormationsClient({
                   <tr key={f.id} className="hover:bg-accent/50 transition-colors">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="relative w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {f.thumbnail_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={f.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                            <Image src={f.thumbnail_url} alt="" fill sizes="40px" className="object-cover" />
                           ) : (
                             <BookOpen className="h-4 w-4 text-primary" />
                           )}
@@ -330,26 +330,9 @@ export function AdminFormationsClient({
                       </div>
                     </td>
                     <td className="p-3">
-                      <Select
-                        value={f.status}
-                        onValueChange={async (v) => {
-                          await supabase.from("formations").update({ status: v }).eq("id", f.id);
-                          await logAuditAction("formation.update", "formation", f.id, { status_from: f.status, status_to: v });
-                          setFormations((prev) => prev.map((x) => x.id === f.id ? { ...x, status: v as FormationStatus } : x));
-                          toast.success("Statut mis à jour");
-                        }}
-                      >
-                        <SelectTrigger className="w-[120px] h-7 border-0 p-0">
-                          <Badge variant="outline" className={cn("text-[10px] cursor-pointer", statusColors[f.status])}>
-                            {f.status === "draft" ? "Brouillon" : f.status === "published" ? "Publié" : "Archivé"}
-                          </Badge>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Brouillon</SelectItem>
-                          <SelectItem value="published">Publié</SelectItem>
-                          <SelectItem value="archived">Archivé</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Badge variant="outline" className={cn("text-[10px]", statusColors[f.status])}>
+                        {f.status === "draft" ? "Brouillon" : f.status === "published" ? "Publié" : "Archivé"}
+                      </Badge>
                     </td>
                     <td className="p-3 hidden md:table-cell">
                       {f.difficulty && (

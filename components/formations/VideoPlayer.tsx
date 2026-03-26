@@ -5,6 +5,16 @@ import { Play, Pause, Volume2, VolumeX, Maximize, PictureInPicture2 } from "luci
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
+function getEmbedUrl(url: string): string | null {
+  // YouTube
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  return null;
+}
+
 interface VideoPlayerProps {
   url: string;
   startPosition?: number;
@@ -13,6 +23,23 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ url, startPosition = 0, onTimeUpdate, onComplete }: VideoPlayerProps) {
+  const embedUrl = getEmbedUrl(url);
+
+  // YouTube / Vimeo → iframe embed
+  if (embedUrl) {
+    return (
+      <div className="relative bg-black rounded-xl overflow-hidden">
+        <iframe
+          src={embedUrl}
+          className="w-full aspect-video"
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  // Direct video file → native player
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);

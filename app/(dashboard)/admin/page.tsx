@@ -4,7 +4,17 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, CalendarDays, MessageCircle, TrendingUp, Activity } from "lucide-react";
 import { isModerator } from "@/lib/utils/roles";
-import { AdminCharts } from "./AdminCharts";
+import dynamic from "next/dynamic";
+
+const AdminCharts = dynamic(() => import("./AdminCharts").then((m) => m.AdminCharts), {
+  loading: () => (
+    <div className="grid md:grid-cols-2 gap-6">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className={`h-[350px] rounded-xl bg-muted/50 animate-pulse ${i === 3 ? "md:col-span-2" : ""}`} />
+      ))}
+    </div>
+  ),
+});
 import { SubNav } from "@/components/layout/sub-nav";
 
 export default async function AdminDashboardPage() {

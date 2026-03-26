@@ -11,6 +11,7 @@ import { BookOpen, Clock, Users, Star, Heart } from "lucide-react";
 import { DifficultyLevel } from "@/lib/types/database";
 import { formatDuration } from "@/lib/utils/dates";
 import { formatPrice } from "@/lib/utils/formatters";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { FormationData } from "./FormationGrid";
@@ -72,10 +73,12 @@ export function FormationListItem({ formation, userId }: FormationListItemProps)
             {/* Thumbnail */}
             <div className="relative h-20 w-32 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-primary/15 via-turquoise/5 to-transparent">
               {formation.thumbnail_url ? (
-                <img
+                <Image
                   src={formation.thumbnail_url}
                   alt={formation.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fill
+                  sizes="128px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -161,6 +164,7 @@ export function FormationListItem({ formation, userId }: FormationListItemProps)
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
                 className={cn(
                   "h-8 w-8",
                   isFavorite && "text-red-500 hover:text-red-400"

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { Render, type Data } from "@measured/puck";
+import type { Data } from "@measured/puck";
 import { createClient } from "@/lib/supabase/server";
-import { puckConfig } from "@/lib/puck/config";
+import { PuckRenderer } from "./PuckRenderer";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -12,24 +12,18 @@ interface PageProps {
 async function getPage(slug: string, isPreview: boolean) {
   const supabase = await createClient();
 
-  // Preview mode: admin can see draft pages
+  // Preview mode: owner or admin can see draft pages
   if (isPreview) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
+      // Try fetching as owner first (RLS allows created_by = auth.uid())
+      const { data: ownPage } = await supabase
+        .from("landing_pages")
+        .select("id, slug, title, description, og_image_url, puck_data, is_active")
+        .eq("slug", slug)
         .single();
 
-      if (profile?.role === "admin") {
-        const { data } = await supabase
-          .from("landing_pages")
-          .select("id, slug, title, description, og_image_url, puck_data, is_active")
-          .eq("slug", slug)
-          .single();
-        return data;
-      }
+      if (ownPage) return ownPage;
     }
   }
 
@@ -98,7 +92,7 @@ export default async function LandingPage({ params, searchParams }: PageProps) {
         </div>
       )}
       <div className={isPreview ? "pt-8" : ""}>
-        <Render config={puckConfig} data={puckData} />
+        <PuckRenderer data={puckData} />
       </div>
     </main>
   );

@@ -67,20 +67,18 @@ export function PageEditorMember({
         config={puckConfig}
         data={initialData}
         onPublish={handlePublish}
+        headerTitle={pageTitle}
         renderHeader={({ children }) => (
-          <div>
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#2A2A2A] bg-[#111111]">
-              <button
-                onClick={() => router.push("/my-pages")}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-[#C6FF00] hover:bg-[#C6FF00]/10 transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Mes Pages
-              </button>
-              <span className="text-[#333]">|</span>
-              <span className="text-sm font-semibold text-white truncate">{pageTitle}</span>
-            </div>
-            {children}
+          <div className="flex items-center">
+            <button
+              onClick={() => router.push("/my-pages")}
+              className="flex items-center gap-2 px-3 py-1.5 mx-2 rounded-lg text-sm font-medium text-[#C6FF00] hover:bg-[#C6FF00]/10 transition-colors cursor-pointer shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Mes Pages
+            </button>
+            <span className="text-[#333] mr-2">|</span>
+            <div className="flex-1">{children}</div>
           </div>
         )}
       />

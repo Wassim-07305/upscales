@@ -76,12 +76,34 @@ export function MyPagesClient({ pages: initialPages }: MyPagesClientProps) {
 
     try {
       const supabase = createClient();
+      const defaultPuckData = {
+        root: { props: {} },
+        content: [
+          {
+            type: "Hero",
+            props: {
+              id: `hero-${Date.now()}`,
+              headline: title,
+              subtitle: description || "Décrivez votre offre ici.",
+              ctaText: "En savoir plus",
+              ctaUrl: "#",
+              secondaryCtaText: "",
+              secondaryCtaUrl: "",
+              backgroundImageUrl: "",
+              alignment: "center",
+              accentColor: "#C6FF00",
+            },
+          },
+        ],
+      };
+
       const { data, error } = await supabase
         .from("landing_pages")
         .insert({
           title,
           slug,
           description: description || null,
+          puck_data: defaultPuckData,
         })
         .select()
         .single();

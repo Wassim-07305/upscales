@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Booking } from "@/lib/types/database";
@@ -9,12 +10,16 @@ interface BookingKPIsProps {
 }
 
 export function BookingKPIs({ bookings }: BookingKPIsProps) {
-  const today = new Date().toISOString().split("T")[0];
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    setToday(new Date().toISOString().split("T")[0]);
+  }, []);
 
   const total = bookings.length;
-  const upcoming = bookings.filter(
-    (b) => b.date >= today && b.status === "confirme"
-  ).length;
+  const upcoming = today
+    ? bookings.filter((b) => b.date >= today && b.status === "confirme").length
+    : 0;
   const completed = bookings.filter((b) => b.status === "realise").length;
   const noShow = bookings.filter((b) => b.status === "no_show").length;
 

@@ -22,7 +22,7 @@ import {
   Users, Target, TrendingUp, AlertCircle, BarChart3, List, Kanban,
   GripVertical, Calendar, DollarSign,
 } from "lucide-react";
-import { DndContext, closestCorners, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, pointerWithin, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils/dates";
@@ -210,14 +210,7 @@ function ListeTab({ userId }: { userId: string }) {
                       {(lead.ca_contracte || 0) > 0 && <span className="text-primary font-medium">{lead.ca_contracte.toLocaleString("fr-FR")} €</span>}
                     </div>
                   </div>
-                  <Select value={lead.status} onValueChange={(v) => updateLead.mutate({ id: lead.id, status: v as LeadStatus })}>
-                    <SelectTrigger className="w-[130px] h-7 border-0 p-0">
-                      <Badge variant="outline" className={cn("text-[10px] cursor-pointer", LEAD_STATUS_COLORS[lead.status])}>{LEAD_STATUS_LABELS[lead.status] || lead.status}</Badge>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(LEAD_STATUS_LABELS).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <Badge variant="outline" className={cn("text-[10px]", LEAD_STATUS_COLORS[lead.status])}>{LEAD_STATUS_LABELS[lead.status] || lead.status}</Badge>
                   <span className="text-xs text-muted-foreground hidden md:block w-20 text-right">{formatDate(lead.created_at)}</span>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(lead)} aria-label="Modifier"><Pencil className="h-3.5 w-3.5" /></Button>
@@ -323,7 +316,7 @@ function PipelineTab({ userId }: { userId: string }) {
         )}
       </div>
 
-      <DndContext collisionDetection={closestCorners} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={pointerWithin} onDragStart={(e) => setDraggedLead(leads?.find((l) => l.id === e.active.id) || null)} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
           {CLIENT_SCOPE_STATUSES.map((status) => (
             <PipelineColumn key={status} status={status} leads={leadsByStatus[status] || []} onClickLead={openLeadDetail} />

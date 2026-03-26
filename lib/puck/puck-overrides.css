@@ -86,3 +86,35 @@
   background-color: #0D0D0D !important;
   border-color: #1C1C1C !important;
 }
+
+/* Header path link (back button) */
+[class*="Puck-header"] a {
+  color: #999999 !important;
+  text-decoration: none !important;
+}
+
+[class*="Puck-header"] a:hover {
+  color: #ffffff !important;
+}
+
+/* Preview iframe body dark bg */
+[class*="PuckLayout-frame"] iframe {
+  background-color: #0D0D0D !important;
+}
+
+/* Dropzone area dark */
+[class*="DropZone"],
+[class*="DraggableComponent-overlay"] {
+  background-color: transparent !important;
+}
+
+/* Empty dropzone hint */
+[class*="DropZone--isAreaSelected"],
+[class*="DropZone-content"] {
+  background-color: #0D0D0D !important;
+}
+
+/* Component drag overlay */
+[class*="DraggableComponent"]:hover {
+  outline-color: #C6FF00 !important;
+}

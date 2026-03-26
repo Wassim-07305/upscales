@@ -84,13 +84,47 @@ export function MyPagesClient({ pages: initialPages }: MyPagesClientProps) {
             props: {
               id: `hero-${Date.now()}`,
               headline: title,
-              subtitle: description || "Décrivez votre offre ici.",
-              ctaText: "En savoir plus",
+              subtitle: description || "Décrivez votre offre en quelques mots.",
+              ctaText: "Réserver un appel",
               ctaUrl: "#",
-              secondaryCtaText: "",
-              secondaryCtaUrl: "",
+              secondaryCtaText: "En savoir plus",
+              secondaryCtaUrl: "#about",
               backgroundImageUrl: "",
               alignment: "center",
+              accentColor: "#C6FF00",
+            },
+          },
+          {
+            type: "Spacer",
+            props: {
+              id: `spacer-${Date.now()}`,
+              height: 40,
+            },
+          },
+          {
+            type: "RichText",
+            props: {
+              id: `text-${Date.now()}`,
+              content: "<h2>Pourquoi nous choisir ?</h2><p>Remplacez ce texte par votre argumentaire. Expliquez ce que vous proposez et pourquoi vos prospects devraient vous faire confiance.</p>",
+              maxWidth: 800,
+              alignment: "center",
+            },
+          },
+          {
+            type: "Spacer",
+            props: {
+              id: `spacer2-${Date.now()}`,
+              height: 40,
+            },
+          },
+          {
+            type: "CTA",
+            props: {
+              id: `cta-${Date.now()}`,
+              headline: "Prêt à passer à l'action ?",
+              description: "Réservez votre appel gratuit dès maintenant.",
+              ctaText: "Réserver",
+              ctaUrl: "#",
               accentColor: "#C6FF00",
             },
           },

@@ -3,22 +3,23 @@
 import { Puck, type Data } from "@measured/puck";
 import "@measured/puck/puck.css";
 import { puckConfig } from "@/lib/puck/config";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import "@/lib/puck/puck-overrides.css";
 
-interface PageEditorProps {
+interface PageEditorMemberProps {
   pageId: string;
   initialData: Data;
   pageTitle: string;
 }
 
-export function PageEditor({ pageId, initialData, pageTitle }: PageEditorProps) {
-  const router = useRouter();
-
+export function PageEditorMember({
+  pageId,
+  initialData,
+  pageTitle,
+}: PageEditorMemberProps) {
   async function handlePublish(data: Data) {
     try {
-      const res = await fetch(`/api/pages/${pageId}`, {
+      const res = await fetch(`/api/my-pages/${pageId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ puck_data: data }),
@@ -39,7 +40,7 @@ export function PageEditor({ pageId, initialData, pageTitle }: PageEditorProps) 
         data={initialData}
         onPublish={handlePublish}
         headerTitle={pageTitle}
-        headerPath={`/admin/pages`}
+        headerPath={`/my-pages`}
       />
     </div>
   );

@@ -12,7 +12,6 @@ import {
   Brain,
   Globe,
   Settings,
-  Bell,
   BarChart3,
   Trophy,
   Gift,
@@ -123,6 +122,18 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     roles: MEMBERS_UP,
   },
   {
+    label: "Mes Pages",
+    href: "/my-pages",
+    icon: FileText,
+    roles: MEMBERS_UP,
+  },
+  {
+    label: "Mes Réservations",
+    href: "/my-booking",
+    icon: CalendarCheck,
+    roles: MEMBERS_UP,
+  },
+  {
     label: "Ressources",
     href: "/ressources",
     icon: FolderOpen,
@@ -138,12 +149,6 @@ export const STUDENT_NAV_ITEMS: NavItem[] = [
     label: "Parrainage",
     href: "/referral",
     icon: Gift,
-    roles: ALL_ROLES,
-  },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: Bell,
     roles: ALL_ROLES,
   },
   {
@@ -372,13 +377,13 @@ export const STUDENT_SECTIONS: NavSection[] = [
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/prospects", "/ressources"].includes(i.href)
+      ["/prospects", "/my-pages", "/my-booking", "/ressources"].includes(i.href)
     ),
   },
   {
     label: "",
     items: STUDENT_NAV_ITEMS.filter((i) =>
-      ["/notifications", "/settings"].includes(i.href)
+      ["/settings"].includes(i.href)
     ),
   },
 ];
@@ -452,6 +457,8 @@ export const BREADCRUMB_LABELS: Record<string, string> = {
   users: "Utilisateurs",
   settings: "Paramètres",
   edit: "Modifier",
+  "my-pages": "Mes Pages",
+  "my-booking": "Mes Réservations",
 };
 
 // ─── Quick links (Cmd+K command palette) ────────────────────

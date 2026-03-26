@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "UPSCALE — Plateforme de Formation",
-  description: "Montez en compétences avec UPSCALE",
+  description: "Plateforme de formation en ligne pour développer vos compétences en vente, closing et business. Cours, coaching, communauté et outils.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -43,7 +43,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "UPSCALE",
     title: "UPSCALE — Plateforme de Formation",
-    description: "Montez en compétences avec UPSCALE",
+    description: "Plateforme de formation en ligne pour développer vos compétences en vente, closing et business.",
+    images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512 }],
+  },
+  twitter: {
+    card: "summary",
+    title: "UPSCALE — Plateforme de Formation",
+    description: "Plateforme de formation en ligne pour développer vos compétences en vente, closing et business.",
   },
   icons: {
     icon: [

@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const CRON_SECRET = process.env.CRON_SECRET;
-
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
-    return NextResponse.json({ error: "Non autorise" }, { status: 401 });
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   try {

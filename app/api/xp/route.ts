@@ -61,7 +61,46 @@ export async function POST(request: NextRequest) {
   let targetUserId: string;
 
   if (action === "referral_signup" && referrerId) {
-    targetUserId = referrerId as string;
+    const referrerIdStr = referrerId as string;
+
+    // Empêcher l'auto-parrainage
+    if (referrerIdStr === user.id) {
+      return NextResponse.json(
+        { error: "Auto-parrainage non autorisé" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier que l'utilisateur n'a pas déjà utilisé un parrainage
+    const { data: existingReferral } = await admin
+      .from("xp_logs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("action", "referral_signup")
+      .maybeSingle();
+
+    if (existingReferral) {
+      return NextResponse.json(
+        { error: "Parrainage déjà utilisé" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier que le parrain existe dans profiles
+    const { data: referrerProfile } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("id", referrerIdStr)
+      .maybeSingle();
+
+    if (!referrerProfile) {
+      return NextResponse.json(
+        { error: "Parrain introuvable" },
+        { status: 400 }
+      );
+    }
+
+    targetUserId = referrerIdStr;
   } else if (!user) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   } else {

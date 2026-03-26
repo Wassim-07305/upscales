@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    middlewareClientMaxBodySize: "50mb",
+    proxyClientMaxBodySize: "50mb",
   },
   headers: async () => [
     {

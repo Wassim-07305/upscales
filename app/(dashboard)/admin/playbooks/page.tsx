@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { isModerator } from "@/lib/utils/roles";
 import { AdminPlaybooksClient } from "./AdminPlaybooksClient";
 import { SubNav } from "@/components/layout/sub-nav";
 
@@ -17,7 +18,7 @@ export default async function AdminPlaybooksPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   const { data: playbooks } = await supabase
     .from("playbooks")

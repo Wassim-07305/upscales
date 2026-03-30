@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/utils/roles";
+import { isModerator } from "@/lib/utils/roles";
 import { SubNav } from "@/components/layout/sub-nav";
 import { BroadcastClient } from "./BroadcastClient";
 
@@ -23,7 +23,7 @@ export default async function BroadcastPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !isAdmin(profile.role)) redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   // Récupérer les stats pour le ciblage
   const [

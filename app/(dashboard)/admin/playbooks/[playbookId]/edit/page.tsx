@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { isModerator } from "@/lib/utils/roles";
 import { PlaybookEditor } from "./PlaybookEditor";
 
 export default async function PlaybookEditPage({
@@ -21,7 +22,7 @@ export default async function PlaybookEditPage({
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   const { data: playbook } = await supabase
     .from("playbooks")

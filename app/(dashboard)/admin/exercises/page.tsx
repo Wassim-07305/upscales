@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { isModerator } from "@/lib/utils/roles";
 import { SubNav } from "@/components/layout/sub-nav";
 import ExerciseReviewClient from "./ExerciseReviewClient";
 import type { ExerciseSubmission, SubmissionStatus } from "@/lib/exercises/exercise-types";
@@ -24,7 +25,7 @@ export default async function AdminExercisesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   const { data: submissions } = await supabase
     .from("exercise_submissions")

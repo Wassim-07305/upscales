@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/utils/roles";
+import { isModerator } from "@/lib/utils/roles";
 import { AdminFormationsClient } from "./AdminFormationsClient";
 
 export default async function AdminFormationsPage() {
@@ -17,7 +17,7 @@ export default async function AdminFormationsPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !isAdmin(profile.role)) redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   const { data: formations } = await supabase
     .from("formations")

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { isAdmin } from "@/lib/utils/roles";
+import { isModerator } from "@/lib/utils/roles";
 import { FormationEditor } from "./FormationEditor";
 
 export default async function EditFormationPage({
@@ -22,7 +22,7 @@ export default async function EditFormationPage({
     .eq("id", user.id)
     .single();
 
-  if (!profile || !isAdmin(profile.role)) redirect("/dashboard");
+  if (!profile || !isModerator(profile.role)) redirect("/dashboard");
 
   const { data: formation } = await supabase
     .from("formations")

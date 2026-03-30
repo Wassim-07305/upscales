@@ -442,6 +442,8 @@ export function ModuleContent({
                 }
               }
             }}
+            onNext={nextModule ? () => router.push(`/formations/${formationId}/${nextModule.id}`) : undefined}
+            nextModuleTitle={nextModule?.title}
           />
         )}
 

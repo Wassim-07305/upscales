@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Profile } from "@/lib/types/database";
+import type { Profile, CrmNote, Tag, UserTag } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/utils/formatters";
 import { formatDate } from "@/lib/utils/dates";
@@ -15,11 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ChevronLeft, Mail, Phone, Calendar, Shield, Zap, Trophy, Award,
   BookOpen, Ban, RotateCcw, Key, Save, Loader2, UserCircle,
+  Tag as TagIcon, StickyNote, Plus, X,
 } from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -60,6 +62,90 @@ export function UserDetailClient({ profile: initialProfile, isAdmin, enrollments
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Notes & Tags state
+  const [userTags, setUserTags] = useState<(UserTag & { tag: Tag })[]>([]);
+  const [crmNotes, setCrmNotes] = useState<(CrmNote & { author?: Profile })[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [newTagName, setNewTagName] = useState("");
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+  const [savingTag, setSavingTag] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    async function loadNotesAndTags() {
+      const [{ data: tagsData }, { data: notesData }, { data: allTagsData }] = await Promise.all([
+        supabase.from("user_tags").select("*, tag:tags(*)").eq("user_id", profile.id),
+        supabase.from("crm_notes").select("*, author:profiles!crm_notes_author_id_fkey(id, full_name, avatar_url, role, email, bio, phone, created_at, updated_at, last_seen_at, is_online, onboarding_completed, notification_preferences, is_suspended, suspended_at, suspended_reason)").eq("student_id", profile.id).order("created_at", { ascending: false }),
+        supabase.from("tags").select("*").order("name"),
+      ]);
+      if (tagsData) setUserTags(tagsData as (UserTag & { tag: Tag })[]);
+      if (notesData) setCrmNotes(notesData as (CrmNote & { author?: Profile })[]);
+      if (allTagsData) setAllTags(allTagsData);
+    }
+    loadNotesAndTags();
+  }, [profile.id, isAdmin, supabase]);
+
+  const handleAddTag = async (tag: Tag) => {
+    if (userTags.some((ut) => ut.tag_id === tag.id)) return;
+    setSavingTag(true);
+    const { data, error } = await supabase
+      .from("user_tags")
+      .insert({ user_id: profile.id, tag_id: tag.id })
+      .select("*, tag:tags(*)")
+      .single();
+    if (!error && data) {
+      setUserTags((prev) => [...prev, data as UserTag & { tag: Tag }]);
+      toast.success(`Tag "${tag.name}" ajouté`);
+    } else {
+      toast.error("Erreur lors de l'ajout du tag");
+    }
+    setSavingTag(false);
+  };
+
+  const handleCreateAndAddTag = async () => {
+    const name = newTagName.trim();
+    if (!name) return;
+    setSavingTag(true);
+    const { data: existing } = await supabase.from("tags").select("*").eq("name", name).maybeSingle();
+    const tag: Tag | null = existing ?? (await supabase.from("tags").insert({ name, color: "#C6FF00" }).select("*").single()).data;
+    if (tag) {
+      if (!allTags.find((t) => t.id === tag.id)) setAllTags((prev) => [...prev, tag]);
+      await handleAddTag(tag);
+    }
+    setNewTagName("");
+    setSavingTag(false);
+  };
+
+  const handleRemoveTag = async (userTagId: string) => {
+    const { error } = await supabase.from("user_tags").delete().eq("id", userTagId);
+    if (!error) {
+      setUserTags((prev) => prev.filter((ut) => ut.id !== userTagId));
+      toast.success("Tag retiré");
+    }
+  };
+
+  const handleAddNote = async () => {
+    const content = newNoteContent.trim();
+    if (!content) return;
+    setSavingNote(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSavingNote(false); return; }
+    const { data, error } = await supabase
+      .from("crm_notes")
+      .insert({ student_id: profile.id, author_id: user.id, content })
+      .select("*, author:profiles!crm_notes_author_id_fkey(id, full_name, avatar_url, role, email, bio, phone, created_at, updated_at, last_seen_at, is_online, onboarding_completed, notification_preferences, is_suspended, suspended_at, suspended_reason)")
+      .single();
+    if (!error && data) {
+      setCrmNotes((prev) => [data as CrmNote & { author?: Profile }, ...prev]);
+      setNewNoteContent("");
+      toast.success("Note ajoutée");
+    } else {
+      toast.error("Erreur lors de l'ajout de la note");
+    }
+    setSavingNote(false);
+  };
 
   const completedFormations = enrollments.filter((e) => e.completed_at);
   const inProgressFormations = enrollments.filter((e) => !e.completed_at);
@@ -180,6 +266,7 @@ export function UserDetailClient({ profile: initialProfile, isAdmin, enrollments
           <TabsTrigger value="infos">Informations</TabsTrigger>
           <TabsTrigger value="formations">Formations</TabsTrigger>
           {isAdmin && <TabsTrigger value="admin">Administration</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="notes-tags">Notes & Tags</TabsTrigger>}
         </TabsList>
 
         {/* INFOS TAB */}
@@ -363,6 +450,126 @@ export function UserDetailClient({ profile: initialProfile, isAdmin, enrollments
                   {savingPassword ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Key className="h-4 w-4 mr-2" />}
                   Réinitialiser
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* NOTES & TAGS TAB */}
+        {isAdmin && (
+          <TabsContent value="notes-tags" className="space-y-6">
+            {/* Tags */}
+            <Card className="bg-[#141414] border-white/10">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TagIcon className="h-4 w-4 text-[#C6FF00]" />Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2 min-h-[32px]">
+                  {userTags.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Aucun tag assigné</p>
+                  )}
+                  {userTags.map((ut) => (
+                    <Badge
+                      key={ut.id}
+                      variant="outline"
+                      className="flex items-center gap-1 pr-1"
+                      style={{ borderColor: ut.tag?.color || "#C6FF00", color: ut.tag?.color || "#C6FF00" }}
+                    >
+                      {ut.tag?.name}
+                      <button
+                        onClick={() => handleRemoveTag(ut.id)}
+                        className="ml-1 rounded-full hover:bg-white/10 p-0.5"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                {allTags.filter((t) => !userTags.some((ut) => ut.tag_id === t.id)).length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-muted-foreground">Ajouter un tag existant :</p>
+                    <div className="flex flex-wrap gap-2">
+                      {allTags
+                        .filter((t) => !userTags.some((ut) => ut.tag_id === t.id))
+                        .map((tag) => (
+                          <button
+                            key={tag.id}
+                            onClick={() => handleAddTag(tag)}
+                            disabled={savingTag}
+                            className="text-xs rounded-full border border-white/20 px-2 py-0.5 text-muted-foreground hover:border-[#C6FF00] hover:text-[#C6FF00] transition-colors disabled:opacity-50"
+                          >
+                            + {tag.name}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                    placeholder="Créer un nouveau tag..."
+                    className="bg-black/30 border-white/10 h-8 text-sm"
+                    onKeyDown={(e) => { if (e.key === "Enter") handleCreateAndAddTag(); }}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCreateAndAddTag}
+                    disabled={savingTag || !newTagName.trim()}
+                    className="h-8 px-2"
+                  >
+                    {savingTag ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CRM Notes */}
+            <Card className="bg-[#141414] border-white/10">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <StickyNote className="h-4 w-4 text-[#C6FF00]" />Notes CRM
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Textarea
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    placeholder="Ajouter une note..."
+                    className="bg-black/30 border-white/10 min-h-[80px] text-sm resize-none"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleAddNote}
+                    disabled={savingNote || !newNoteContent.trim()}
+                    className="bg-[#C6FF00] text-black hover:bg-[#C6FF00]/90"
+                  >
+                    {savingNote ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
+                    Ajouter la note
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {crmNotes.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Aucune note pour cet utilisateur</p>
+                  )}
+                  {crmNotes.map((note) => (
+                    <div key={note.id} className="rounded-lg bg-white/5 border border-white/10 p-3 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-[#C6FF00]">
+                          {note.author?.full_name || "Admin"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(note.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-white/80 whitespace-pre-wrap">{note.content}</p>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

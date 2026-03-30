@@ -27,7 +27,7 @@ import { DndContext, closestCorners, DragOverlay, useDraggable, useDroppable, ty
 import {
   Search, Plus, Pencil, Trash2, Users, Phone, Mail, Building2, ExternalLink,
   Kanban, List, BarChart3, DollarSign, TrendingUp, Target, GripVertical, X,
-  Calendar, AlertCircle, ArrowUpRight,
+  Calendar, AlertCircle, ArrowUpRight, FileDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/utils/formatters";
@@ -135,6 +135,33 @@ function ClientListTab() {
     return rates.length ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
   }, [closingRates]);
 
+  const handleExportCSV = () => {
+    const headers = ["Nom", "Email", "Téléphone", "Niche", "Statut", "Manager", "Taux de closing"];
+    const rows = clients.map((client) => {
+      const rate = closingRates?.[client.id]?.rate ?? "";
+      const manager = assignmentsByClient[client.id]?.find((a) => a.role === "manager")?.name || "";
+      return [
+        client.name,
+        client.email || "",
+        client.phone || "",
+        client.niche || "",
+        CLIENT_STATUS_LABELS[client.status as ClientStatus] || client.status,
+        manager,
+        rate !== "" ? `${rate}%` : "",
+      ];
+    });
+    const escape = (v: string) => /[,"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    const csv = [headers, ...rows].map((r) => r.map(String).map(escape).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `clients-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${clients.length} client(s) exporté(s)`);
+  };
+
   const openCreate = () => { setEditingClient(null); setForm(emptyClientForm); setDialogOpen(true); };
   const openEdit = (c: Client, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -179,6 +206,9 @@ function ClientListTab() {
             {CLIENT_STATUSES.map((s) => <SelectItem key={s} value={s}>{CLIENT_STATUS_LABELS[s]}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={handleExportCSV} disabled={clients.length === 0} className="border-white/10">
+          <FileDown className="mr-2 h-4 w-4" />Exporter CSV
+        </Button>
         <Button onClick={openCreate} className="bg-[#C6FF00] text-black hover:bg-[#C6FF00]/90"><Plus className="mr-2 h-4 w-4" />Nouveau client</Button>
       </div>
 

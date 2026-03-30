@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Loader2,
   Camera,
@@ -24,6 +25,7 @@ import {
   CalendarDays,
   Award,
   Bell,
+  Globe,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Profile } from "@/lib/types/database";
@@ -43,6 +45,8 @@ const profileSchema = z.object({
       "Numéro de téléphone invalide"
     )
     .optional(),
+  timezone: z.string().optional(),
+  language: z.enum(["fr", "en"]).optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -61,6 +65,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -68,6 +74,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       full_name: profile.full_name,
       bio: profile.bio || "",
       phone: profile.phone || "",
+      timezone: profile.timezone || "Europe/Paris",
+      language: (profile.language as "fr" | "en") || "fr",
     },
   });
 
@@ -79,6 +87,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         full_name: data.full_name,
         bio: data.bio || null,
         phone: data.phone || null,
+        timezone: data.timezone || null,
+        language: data.language || null,
       })
       .eq("id", profile.id);
 
@@ -198,6 +208,51 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               {errors.phone && (
                 <p className="text-xs text-destructive">{errors.phone.message}</p>
               )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Globe className="h-3.5 w-3.5" />Fuseau horaire
+                </Label>
+                <Select
+                  value={watch("timezone") || "Europe/Paris"}
+                  onValueChange={(val) => setValue("timezone", val)}
+                >
+                  <SelectTrigger className="bg-[#141414]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Europe/Paris">Europe/Paris (UTC+1/+2)</SelectItem>
+                    <SelectItem value="Europe/London">Europe/London (UTC+0/+1)</SelectItem>
+                    <SelectItem value="Europe/Berlin">Europe/Berlin (UTC+1/+2)</SelectItem>
+                    <SelectItem value="Europe/Madrid">Europe/Madrid (UTC+1/+2)</SelectItem>
+                    <SelectItem value="America/New_York">America/New_York (UTC-5/-4)</SelectItem>
+                    <SelectItem value="America/Chicago">America/Chicago (UTC-6/-5)</SelectItem>
+                    <SelectItem value="America/Los_Angeles">America/Los_Angeles (UTC-8/-7)</SelectItem>
+                    <SelectItem value="America/Montreal">America/Montréal (UTC-5/-4)</SelectItem>
+                    <SelectItem value="Africa/Casablanca">Africa/Casablanca (UTC+1)</SelectItem>
+                    <SelectItem value="Africa/Tunis">Africa/Tunis (UTC+1)</SelectItem>
+                    <SelectItem value="Indian/Reunion">Indian/Réunion (UTC+4)</SelectItem>
+                    <SelectItem value="Pacific/Tahiti">Pacific/Tahiti (UTC-10)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Langue</Label>
+                <Select
+                  value={watch("language") || "fr"}
+                  onValueChange={(val) => setValue("language", val as "fr" | "en")}
+                >
+                  <SelectTrigger className="bg-[#141414]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Button type="submit" disabled={loading}>

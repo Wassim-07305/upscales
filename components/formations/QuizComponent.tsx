@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, Loader2, History, Lightbulb, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, History, Lightbulb, Clock, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Quiz, QuizQuestion, QuizOption, QuizAttempt } from "@/lib/types/database";
 import { timeAgo } from "@/lib/utils/dates";
@@ -30,9 +30,11 @@ interface QuizComponentProps {
   quiz: Quiz;
   questions: (QuizQuestion & { options: QuizOption[] })[];
   onComplete?: (passed: boolean) => void;
+  onNext?: () => void;
+  nextModuleTitle?: string;
 }
 
-export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: QuizComponentProps) {
+export function QuizComponent({ quiz, questions: rawQuestions, onComplete, onNext, nextModuleTitle }: QuizComponentProps) {
   const [questions, setQuestions] = useState(() =>
     shuffleArray(rawQuestions).map((q) => ({
       ...q,
@@ -417,6 +419,15 @@ export function QuizComponent({ quiz, questions: rawQuestions, onComplete }: Qui
           className="w-full"
         >
           Retenter le quiz
+        </Button>
+      )}
+      {submitted && passed && onNext && (
+        <Button
+          onClick={onNext}
+          className="w-full bg-[#C6FF00] text-black hover:bg-[#C6FF00]/90"
+        >
+          <ArrowRight className="mr-2 h-4 w-4" />
+          {nextModuleTitle ? nextModuleTitle : "Module suivant"}
         </Button>
       )}
     </div>

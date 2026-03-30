@@ -26,6 +26,8 @@ export interface Profile {
   is_suspended: boolean;
   suspended_at: string | null;
   suspended_reason: string | null;
+  timezone: string | null;
+  language: string | null;
 }
 
 export interface UserWarning {

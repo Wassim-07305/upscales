@@ -52,7 +52,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ use
   return (
     <UserDetailClient
       profile={targetProfile}
-      isAdmin={currentProfile.role === "admin"}
+      isAdmin={isModerator(currentProfile.role)}
       enrollments={enrollments || []}
       certificates={certificates || []}
       postCount={postCount || 0}

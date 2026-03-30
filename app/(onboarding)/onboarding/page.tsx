@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -206,6 +207,14 @@ export default function OnboardingPage() {
         .from("profiles")
         .update({ onboarding_completed: true })
         .eq("id", userId);
+
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ["#C6FF00", "#7FFFD4", "#ffffff", "#a3e635"],
+      });
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       router.push("/dashboard?welcome=1");
       router.refresh();

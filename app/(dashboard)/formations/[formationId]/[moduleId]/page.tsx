@@ -24,15 +24,21 @@ export default async function ModulePage({
 
   if (!module) notFound();
 
-  // Check access
-  const { data: enrollment } = await supabase
-    .from("formation_enrollments")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("formation_id", formationId)
-    .single();
+  // Check access (fetch enrollment + profile in parallel)
+  const [{ data: enrollment }, { data: currentProfile }] = await Promise.all([
+    supabase
+      .from("formation_enrollments")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("formation_id", formationId)
+      .single(),
+    supabase.from("profiles").select("role").eq("id", user.id).single(),
+  ]);
 
-  if (!enrollment && !module.is_preview) redirect(`/formations/${formationId}`);
+  const isAdminOrModerator =
+    currentProfile?.role === "admin" || currentProfile?.role === "moderator";
+
+  if (!enrollment && !module.is_preview && !isAdminOrModerator) redirect(`/formations/${formationId}`);
 
   // Fetch progress
   const { data: progress } = await supabase
@@ -64,7 +70,7 @@ export default async function ModulePage({
     .eq("formation_id", formationId);
 
   // Fetch user's note and discussions for this module
-  const [{ data: moduleNote }, { data: discussions }, { data: currentProfile }] = await Promise.all([
+  const [{ data: moduleNote }, { data: discussions }] = await Promise.all([
     supabase
       .from("module_notes")
       .select("content")
@@ -76,11 +82,6 @@ export default async function ModulePage({
       .select("*, author:profiles(full_name, avatar_url, role)")
       .eq("module_id", moduleId)
       .order("created_at", { ascending: false }),
-    supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single(),
   ]);
 
   // Organize discussions: nest replies under parents

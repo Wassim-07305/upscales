@@ -2,12 +2,15 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, useAllClientAssignments, useClosingRates } from "@/lib/hooks/use-clients";
 import { useAllLeads, useUpdateLead, useLeadStats, useCreateLead, useDeleteLead } from "@/lib/hooks/use-leads";
 import { useFinanceStats } from "@/lib/hooks/use-finances";
 import { usePipelineColumns } from "@/lib/hooks/use-pipeline";
 import { useClientsList } from "@/lib/hooks/use-clients";
 import type { Client, ClientStatus, Lead, PipelineColumn, ClientScopeStatus } from "@/lib/types/database";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   CLIENT_STATUSES, CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS,
   LEAD_SOURCES, LEAD_SOURCE_LABELS, LEAD_SOURCE_COLORS,
@@ -27,7 +30,7 @@ import { DndContext, closestCorners, DragOverlay, useDraggable, useDroppable, ty
 import {
   Search, Plus, Pencil, Trash2, Users, Phone, Mail, Building2, ExternalLink,
   Kanban, List, BarChart3, DollarSign, TrendingUp, Target, GripVertical, X,
-  Calendar, AlertCircle, ArrowUpRight, FileDown,
+  Calendar, AlertCircle, ArrowUpRight, FileDown, UserCircle, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/lib/utils/formatters";
@@ -102,6 +105,7 @@ export function CRMClient() {
 
 function ClientListTab() {
   const router = useRouter();
+  const [listView, setListView] = useState<"clients" | "membres">("clients");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -190,10 +194,32 @@ function ClientListTab() {
     try { await deleteClient.mutateAsync(c.id); } catch { /* toast handled */ }
   };
 
-  if (isLoading) return <div className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-[400px] rounded-xl" /></div>;
+  if (isLoading && listView === "clients") return <div className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-[400px] rounded-xl" /></div>;
 
   return (
     <>
+      {/* Sub-toggle Clients / Membres & Prospects */}
+      <div className="flex gap-1 rounded-lg bg-muted/50 p-1 w-fit">
+        {([
+          { value: "clients" as const, label: "Clients", icon: Building2 },
+          { value: "membres" as const, label: "Membres & Prospects", icon: UserCircle },
+        ]).map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            onClick={() => setListView(value)}
+            className={cn(
+              "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-all",
+              listView === value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {listView === "membres" && <MembresListView />}
+      {listView === "clients" && <>
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -306,6 +332,132 @@ function ClientListTab() {
           </div>
         </DialogContent>
       </Dialog>
+      </>}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEMBRES LIST VIEW — Platform users (member/prospect)
+// ═══════════════════════════════════════════════════════════
+
+function MembresListView() {
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "prospect" | "member">("all");
+
+  const { data: membres, isLoading } = useQuery({
+    queryKey: ["crm-membres"],
+    queryFn: async () => {
+      const db = createSupabaseClient();
+      const [{ data: profiles }, { data: leads }, { data: calls }] = await Promise.all([
+        db.from("profiles").select("id, full_name, email, role, avatar_url, created_at").in("role", ["member", "prospect"]).order("created_at", { ascending: false }),
+        db.from("leads").select("assigned_to"),
+        db.from("closer_calls").select("closer_id, status, revenue"),
+      ]);
+      return (profiles || []).map((p) => {
+        const userLeads = (leads || []).filter((l) => l.assigned_to === p.id);
+        const userCalls = (calls || []).filter((c) => c.closer_id === p.id);
+        const closedCalls = userCalls.filter((c) => c.status === "closé" || c.status === "paiement_reussi");
+        return {
+          ...p,
+          leads_count: userLeads.length,
+          calls_count: userCalls.length,
+          ca_total: closedCalls.reduce((s, c) => s + (Number(c.revenue) || 0), 0),
+          taux_closing: userCalls.length > 0 ? Math.round((closedCalls.length / userCalls.length) * 100) : null,
+        };
+      });
+    },
+  });
+
+  const filtered = useMemo(() => {
+    let list = membres || [];
+    if (roleFilter !== "all") list = list.filter((m) => m.role === roleFilter);
+    if (search) list = list.filter((m) =>
+      m.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      m.email?.toLowerCase().includes(search.toLowerCase())
+    );
+    return list;
+  }, [membres, roleFilter, search]);
+
+  if (isLoading) return <div className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-[400px] rounded-xl" /></div>;
+
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Rechercher par nom ou email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-[#141414] border-0" />
+        </div>
+        <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as typeof roleFilter)}>
+          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="prospect">Prospects</SelectItem>
+            <SelectItem value="member">Membres</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPICard icon={Users} label="Total" value={filtered.length} color="text-[#C6FF00]" bg="bg-[#C6FF00]/10" />
+        <KPICard icon={Target} label="Prospects" value={(membres || []).filter((m) => m.role === "prospect").length} color="text-amber-400" bg="bg-amber-500/10" />
+        <KPICard icon={UserCircle} label="Membres" value={(membres || []).filter((m) => m.role === "member").length} color="text-turquoise" bg="bg-turquoise/10" />
+        <KPICard icon={DollarSign} label="CA total" value={`${(membres || []).reduce((s, m) => s + m.ca_total, 0).toLocaleString("fr-FR")} €`} color="text-emerald-400" bg="bg-emerald-500/10" />
+      </div>
+
+      {filtered.length === 0 ? (
+        <Card><CardContent className="flex flex-col items-center justify-center py-16">
+          <UserCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+          <p className="text-muted-foreground text-sm">Aucun résultat</p>
+        </CardContent></Card>
+      ) : (
+        <Card><CardContent className="p-0"><div className="overflow-x-auto">
+          <table className="w-full">
+            <thead><tr className="border-b border-border">
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground">Utilisateur</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground">Rôle</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Prospects</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Calls</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">CA</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden lg:table-cell">Closing</th>
+              <th className="text-left p-3 text-xs font-medium text-muted-foreground hidden md:table-cell">Inscrit le</th>
+              <th className="p-3" />
+            </tr></thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map((m) => (
+                <tr key={m.id} onClick={() => router.push(`/admin/users/${m.id}`)} className="hover:bg-accent/50 transition-colors cursor-pointer">
+                  <td className="p-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={m.avatar_url || undefined} />
+                        <AvatarFallback className="bg-[#C6FF00]/20 text-[#C6FF00] text-xs">{getInitials(m.full_name || m.email || "")}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{m.full_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    <Badge variant="outline" className={cn("text-[10px]", m.role === "prospect" ? "text-amber-400 border-amber-400/30 bg-amber-400/10" : "text-turquoise border-turquoise/30 bg-turquoise/10")}>
+                      {m.role === "prospect" ? "Prospect" : "Membre"}
+                    </Badge>
+                  </td>
+                  <td className="p-3 hidden md:table-cell"><span className="text-sm">{m.leads_count}</span></td>
+                  <td className="p-3 hidden lg:table-cell"><span className="text-sm">{m.calls_count}</span></td>
+                  <td className="p-3 hidden lg:table-cell"><span className="text-sm text-emerald-400">{m.ca_total > 0 ? `${m.ca_total.toLocaleString("fr-FR")} €` : "—"}</span></td>
+                  <td className="p-3 hidden lg:table-cell">
+                    {m.taux_closing !== null ? <span className={cn("text-sm font-medium", m.taux_closing >= 50 ? "text-emerald-400" : m.taux_closing >= 25 ? "text-amber-400" : "text-red-400")}>{m.taux_closing}%</span> : <span className="text-xs text-muted-foreground">—</span>}
+                  </td>
+                  <td className="p-3 hidden md:table-cell"><span className="text-xs text-muted-foreground">{m.created_at ? formatDate(m.created_at) : "—"}</span></td>
+                  <td className="p-3"><ExternalLink className="h-3.5 w-3.5 text-muted-foreground" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div></CardContent></Card>
+      )}
     </>
   );
 }
@@ -316,6 +468,7 @@ function ClientListTab() {
 
 function PipelineTab() {
   const [clientFilter, setClientFilter] = useState("all");
+  const [prospectsOpen, setProspectsOpen] = useState(true);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [editingLead, setEditingLead] = useState(false);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
@@ -323,6 +476,13 @@ function PipelineTab() {
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
 
   const { data: clientsList } = useClientsList();
+  const { data: platformProspects } = useQuery({
+    queryKey: ["crm-platform-prospects"],
+    queryFn: async () => {
+      const { data } = await createSupabaseClient().from("profiles").select("id, full_name, email, avatar_url, created_at").eq("role", "prospect").order("created_at", { ascending: false }).limit(20);
+      return data || [];
+    },
+  });
   const leadsFilters = useMemo(() => (clientFilter !== "all" ? { clientId: clientFilter } : {}), [clientFilter]);
   const { data: leads, isLoading } = useAllLeads(leadsFilters);
   const { data: stats } = useLeadStats(clientFilter !== "all" ? clientFilter : undefined);
@@ -436,6 +596,40 @@ function PipelineTab() {
           </div>
         )}
       </div>
+
+      {/* Prospects plateforme */}
+      {(platformProspects || []).length > 0 && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5">
+          <button
+            onClick={() => setProspectsOpen((o) => !o)}
+            className="w-full flex items-center justify-between p-3 text-sm font-medium text-amber-400"
+          >
+            <div className="flex items-center gap-2">
+              <UserCircle className="h-4 w-4" />
+              Nouveaux prospects plateforme
+              <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-400/30 bg-amber-400/10">{platformProspects?.length}</Badge>
+            </div>
+            {prospectsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+          {prospectsOpen && (
+            <div className="flex gap-2 overflow-x-auto pb-3 px-3">
+              {platformProspects?.map((p) => (
+                <a key={p.id} href={`/admin/users/${p.id}`} className="flex-shrink-0 w-[180px] rounded-lg border border-border bg-card p-3 hover:border-amber-400/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={p.avatar_url || undefined} />
+                      <AvatarFallback className="text-[10px] bg-amber-400/20 text-amber-400">{getInitials(p.full_name || p.email || "")}</AvatarFallback>
+                    </Avatar>
+                    <p className="text-xs font-medium truncate flex-1">{p.full_name || "—"}</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground truncate">{p.email}</p>
+                  {p.created_at && <p className="text-[10px] text-muted-foreground mt-1">{formatDate(p.created_at)}</p>}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <DndContext collisionDetection={closestCorners} onDragStart={(e) => { setDraggedLead(leads?.find((l) => l.id === e.active.id) || null); }} onDragEnd={handleDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">

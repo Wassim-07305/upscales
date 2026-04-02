@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn, getInitials } from "@/lib/utils";
 import { Search, Hash, Lock, Check, Bot } from "lucide-react";
-import { ALEXIA_BOT_ID } from "@/components/messaging/alexia-mention";
+import { MATIA_BOT_ID } from "@/components/messaging/matia-mention";
 
 interface ProfileRow {
   id: string;
@@ -78,10 +78,10 @@ export function CreateChannelModal({
       const q = memberSearch.toLowerCase();
       profiles = profiles.filter((p) => p.full_name.toLowerCase().includes(q));
     }
-    // AlexIA toujours en premier
+    // MatIA toujours en premier
     return [...profiles].sort((a, b) => {
-      if (a.id === ALEXIA_BOT_ID) return -1;
-      if (b.id === ALEXIA_BOT_ID) return 1;
+      if (a.id === MATIA_BOT_ID) return -1;
+      if (b.id === MATIA_BOT_ID) return 1;
       return 0;
     });
   }, [allProfiles, memberSearch]);
@@ -298,7 +298,7 @@ export function CreateChannelModal({
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
                         {profile.full_name}
-                        {profile.id === ALEXIA_BOT_ID && (
+                        {profile.id === MATIA_BOT_ID && (
                           <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-violet-600 bg-violet-500/10 px-1.5 py-0.5 rounded-md">
                             <Bot className="w-3 h-3" />
                             IA
@@ -306,7 +306,7 @@ export function CreateChannelModal({
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground capitalize">
-                        {profile.id === ALEXIA_BOT_ID
+                        {profile.id === MATIA_BOT_ID
                           ? "Repond automatiquement aux messages"
                           : (roleLabels[profile.role] ?? profile.role)}
                       </p>

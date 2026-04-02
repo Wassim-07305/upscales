@@ -112,7 +112,7 @@ Fichiers concernes :
 - `src/app/api/ai/chat/route.ts`
 - `src/app/api/ai/insights/route.ts`
 - `src/app/api/ai/call-summary/route.ts`
-- `src/app/api/ai/alexia/chat/route.ts`
+- `src/app/api/ai/matia/chat/route.ts`
 - `src/app/(public)/cgv/page.tsx`
 - `src/app/(public)/confidentialite/page.tsx`
 - `src/app/(public)/mentions-legales/page.tsx`

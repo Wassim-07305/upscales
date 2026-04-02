@@ -8,7 +8,7 @@ interface AdminMentionProps {
 }
 
 /**
- * Badge visuel affiche quand un message contient @AlexIA.
+ * Badge visuel affiche quand un message contient @MatIA.
  * Pour l'instant, c'est uniquement du UI, pas de backend RAG.
  */
 export function AdminMentionBadge({ className }: AdminMentionProps) {
@@ -23,28 +23,28 @@ export function AdminMentionBadge({ className }: AdminMentionProps) {
       )}
     >
       <Bot className="w-3 h-3" />
-      AlexIA
+      MatIA
       <Sparkles className="w-2.5 h-2.5 text-violet-400" />
     </span>
   );
 }
 
 /**
- * Detecte si un texte contient une mention @AlexIA.
+ * Detecte si un texte contient une mention @MatIA.
  */
 export function containsAdminMention(text: string): boolean {
-  return /@alexia\b/i.test(text);
+  return /@matia\b/i.test(text);
 }
 
 /**
- * Remplace @AlexIA dans le texte par un placeholder pour le rendu.
+ * Remplace @MatIA dans le texte par un placeholder pour le rendu.
  * Retourne les segments avec les mentions marquees.
  */
 export function parseAdminMentions(
   text: string,
-): Array<{ type: "text" | "alexia"; content: string }> {
-  const parts: Array<{ type: "text" | "alexia"; content: string }> = [];
-  const regex = /@alexia\b/gi;
+): Array<{ type: "text" | "matia"; content: string }> {
+  const parts: Array<{ type: "text" | "matia"; content: string }> = [];
+  const regex = /@matia\b/gi;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -52,7 +52,7 @@ export function parseAdminMentions(
     if (match.index > lastIndex) {
       parts.push({ type: "text", content: text.slice(lastIndex, match.index) });
     }
-    parts.push({ type: "alexia", content: match[0] });
+    parts.push({ type: "matia", content: match[0] });
     lastIndex = match.index + match[0].length;
   }
 
@@ -63,20 +63,20 @@ export function parseAdminMentions(
   return parts.length > 0 ? parts : [{ type: "text", content: text }];
 }
 
-/** UUID deterministe du profil bot AlexIA en base de donnees */
-export const ALEXIA_BOT_ID = "00000000-0000-0000-0000-a1e01a000001";
+/** UUID deterministe du profil bot MatIA en base de donnees */
+export const MATIA_BOT_ID = "00000000-0000-0000-0000-a1e01a000001";
 
-/** Verifie si un ID correspond au bot AlexIA */
+/** Verifie si un ID correspond au bot MatIA */
 export function isAdminBotId(id: string): boolean {
-  return id === ALEXIA_BOT_ID;
+  return id === MATIA_BOT_ID;
 }
 
 /**
  * Suggestion d'autocompletion dans le champ mention.
  */
-export const ALEXIA_MEMBER_OPTION = {
-  id: ALEXIA_BOT_ID,
-  full_name: "AlexIA",
+export const MATIA_MEMBER_OPTION = {
+  id: MATIA_BOT_ID,
+  full_name: "MatIA",
   avatar_url: null,
   role: "bot" as const,
 };

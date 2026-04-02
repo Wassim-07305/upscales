@@ -240,7 +240,7 @@ function highlightSearchQuery(
 
 function renderRichText(text: string, searchQuery?: string): React.ReactNode[] {
   const pattern =
-    /(@(?:tous|channel|coachs|AlexIA|[A-Za-zÀ-ÿ][\w]*(?:\s[A-Z\u00C0-\u00DC][\w]*){0,2}))(?=[\s,.:!?]|$)|(\*\*(.+?)\*\*)|(__(.+?)__)|(_(.+?)_)|(~~(.+?)~~)|(`(.+?)`)|(\[(.+?)\]\((.+?)\))|(https?:\/\/[^\s<>"{}|\\^`[\]]+)|(#urgent\b)/g;
+    /(@(?:tous|channel|coachs|MatIA|[A-Za-zÀ-ÿ][\w]*(?:\s[A-Z\u00C0-\u00DC][\w]*){0,2}))(?=[\s,.:!?]|$)|(\*\*(.+?)\*\*)|(__(.+?)__)|(_(.+?)_)|(~~(.+?)~~)|(`(.+?)`)|(\[(.+?)\]\((.+?)\))|(https?:\/\/[^\s<>"{}|\\^`[\]]+)|(#urgent\b)/g;
 
   const parts: React.ReactNode[] = [];
   let lastIdx = 0;

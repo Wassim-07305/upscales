@@ -9,8 +9,8 @@ import { playUrgentSound } from "@/lib/sounds";
 import { toast } from "sonner";
 import {
   containsAdminMention,
-  ALEXIA_BOT_ID,
-} from "@/components/messaging/alexia-mention";
+  MATIA_BOT_ID,
+} from "@/components/messaging/matia-mention";
 
 export function useMessages(channelId: string | null) {
   const supabase = useSupabase();
@@ -43,16 +43,16 @@ export function useMessages(channelId: string | null) {
     enabled: !!channelId,
   });
 
-  // Verifie si AlexIA est membre du canal courant (pour auto-reponse)
-  const alexiaMemberQuery = useQuery({
-    queryKey: ["alexia-member", channelId],
+  // Verifie si MatIA est membre du canal courant (pour auto-reponse)
+  const matiaMemberQuery = useQuery({
+    queryKey: ["matia-member", channelId],
     queryFn: async () => {
       if (!channelId) return false;
       const { data } = await supabase
         .from("channel_members")
         .select("id")
         .eq("channel_id", channelId)
-        .eq("profile_id", ALEXIA_BOT_ID)
+        .eq("profile_id", MATIA_BOT_ID)
         .maybeSingle();
       return !!data;
     },
@@ -221,7 +221,7 @@ export function useMessages(channelId: string | null) {
             (members ?? []) as unknown as { profile_id: string }[]
           )
             .map((m) => m.profile_id)
-            .filter((id) => id !== ALEXIA_BOT_ID);
+            .filter((id) => id !== MATIA_BOT_ID);
           if (recipientIds.length > 0) {
             const senderName = user.user_metadata?.full_name ?? "Quelqu'un";
             const preview =
@@ -261,17 +261,17 @@ export function useMessages(channelId: string | null) {
         }
       }
 
-      // Auto-reponse AlexIA : si elle est membre du canal OU si @alexia mentionnee
-      const isAdminMember = alexiaMemberQuery.data ?? false;
+      // Auto-reponse MatIA : si elle est membre du canal OU si @matia mentionnee
+      const isAdminMember = matiaMemberQuery.data ?? false;
       const hasMention = containsAdminMention(variables.content);
 
       if (channelId && (isAdminMember || hasMention)) {
         try {
           const messageForAI = hasMention
-            ? variables.content.replace(/@alexia\b/gi, "").trim()
+            ? variables.content.replace(/@matia\b/gi, "").trim()
             : variables.content;
 
-          const res = await fetch("/api/ai/alexia/chat", {
+          const res = await fetch("/api/ai/matia/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -283,8 +283,8 @@ export function useMessages(channelId: string | null) {
             const data = await res.json();
             if (data.response) {
               if (isAdminMember) {
-                // Inserer en tant qu'AlexIA via endpoint dedie
-                await fetch("/api/ai/alexia/channel-reply", {
+                // Inserer en tant qu'MatIA via endpoint dedie
+                await fetch("/api/ai/matia/channel-reply", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -297,10 +297,10 @@ export function useMessages(channelId: string | null) {
                 await supabase.from("messages").insert({
                   channel_id: channelId,
                   sender_id: user!.id,
-                  content: `🤖 **AlexIA** :\n${data.response}`,
+                  content: `🤖 **MatIA** :\n${data.response}`,
                   content_type: "text",
                   is_ai_generated: true,
-                  metadata: { bot: "alexia" },
+                  metadata: { bot: "matia" },
                 } as never);
               }
             }

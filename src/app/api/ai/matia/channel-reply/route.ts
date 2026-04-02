@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ALEXIA_BOT_ID } from "@/components/messaging/alexia-mention";
+import { MATIA_BOT_ID } from "@/components/messaging/matia-mention";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -22,28 +22,28 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
-  // Verifier qu'AlexIA est membre du canal
+  // Verifier qu'MatIA est membre du canal
   const { data: membership } = await admin
     .from("channel_members")
     .select("id")
     .eq("channel_id", channelId)
-    .eq("profile_id", ALEXIA_BOT_ID)
+    .eq("profile_id", MATIA_BOT_ID)
     .maybeSingle();
 
   if (!membership) {
     return NextResponse.json(
-      { error: "AlexIA n'est pas membre de ce canal" },
+      { error: "MatIA n'est pas membre de ce canal" },
       { status: 403 },
     );
   }
 
   const { error } = await admin.from("messages").insert({
     channel_id: channelId,
-    sender_id: ALEXIA_BOT_ID,
+    sender_id: MATIA_BOT_ID,
     content,
     content_type: "text",
     is_ai_generated: true,
-    metadata: { bot: "alexia" },
+    metadata: { bot: "matia" },
   });
 
   if (error) {

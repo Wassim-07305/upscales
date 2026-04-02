@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non autorise" }, { status: 401 });
   }
 
-  const { business_type, current_revenue, goals, how_found_alexia } =
+  const { business_type, current_revenue, goals, how_found_matia } =
     await request.json();
 
   const admin = createAdminClient();
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         business_type,
         current_revenue,
         goals,
-        how_found_alexia,
+        how_found_matia,
       },
     })
     .eq("id", user.id);
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     {
       profile_id: user.id,
       niche: business_type,
-      acquisition_source: how_found_alexia,
+      acquisition_source: how_found_matia,
       goals,
       current_revenue: REVENUE_MAP[current_revenue] ?? 0,
     },
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     success: true,
-    saved: { business_type, current_revenue, goals, how_found_alexia },
+    saved: { business_type, current_revenue, goals, how_found_matia },
     errors: {
       profile: profileErr?.message ?? null,
       details: detailsErr?.message ?? null,

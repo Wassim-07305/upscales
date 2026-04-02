@@ -451,7 +451,7 @@ export function useOnboardingForm() {
       business_type: string;
       current_revenue: string;
       goals: string;
-      how_found_alexia: string;
+      how_found_matia: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
@@ -463,7 +463,7 @@ export function useOnboardingForm() {
           business_type: formData.business_type,
           current_revenue: formData.current_revenue,
           goals: formData.goals,
-          how_found_alexia: formData.how_found_alexia,
+          how_found_matia: formData.how_found_matia,
         }),
       });
       if (!saveRes.ok) {

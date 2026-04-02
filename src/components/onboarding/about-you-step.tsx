@@ -17,7 +17,7 @@ const aboutYouSchema = z.object({
   business_type: z.string().min(1, "Selectionne ta niche"),
   current_revenue: z.string().min(1, "Indique ta tranche de revenus"),
   goals: z.string().min(3, "Decris tes objectifs"),
-  how_found_alexia: z.string().min(1, "Dis-nous comment tu nous as trouve"),
+  how_found_matia: z.string().min(1, "Dis-nous comment tu nous as trouve"),
 });
 
 export type AboutYouFormData = z.infer<typeof aboutYouSchema>;
@@ -74,14 +74,14 @@ export function AboutYouStep({
       business_type: "",
       current_revenue: "",
       goals: "",
-      how_found_alexia: "",
+      how_found_matia: "",
       ...defaultValues,
     },
   });
 
   const selectedBusiness = watch("business_type");
   const selectedRevenue = watch("current_revenue");
-  const selectedSource = watch("how_found_alexia");
+  const selectedSource = watch("how_found_matia");
 
   return (
     <motion.form
@@ -180,7 +180,7 @@ export function AboutYouStep({
             <button
               key={source.value}
               type="button"
-              onClick={() => setValue("how_found_alexia", source.value)}
+              onClick={() => setValue("how_found_matia", source.value)}
               className={cn(
                 "rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-200",
                 selectedSource === source.value
@@ -192,10 +192,10 @@ export function AboutYouStep({
             </button>
           ))}
         </div>
-        <input type="hidden" {...register("how_found_alexia")} />
-        {errors.how_found_alexia && (
+        <input type="hidden" {...register("how_found_matia")} />
+        {errors.how_found_matia && (
           <p className="mt-1.5 text-xs text-lime-300">
-            {errors.how_found_alexia.message}
+            {errors.how_found_matia.message}
           </p>
         )}
       </div>

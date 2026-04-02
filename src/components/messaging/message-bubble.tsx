@@ -17,7 +17,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { AiResponseBadge } from "@/components/ai/ai-response-badge";
-import { isAdminBotId } from "@/components/messaging/alexia-mention";
+import { isAdminBotId } from "@/components/messaging/matia-mention";
 import type { EnrichedMessage } from "@/types/messaging";
 
 interface MessageBubbleProps {

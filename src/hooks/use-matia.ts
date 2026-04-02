@@ -80,7 +80,7 @@ export function useCoachAIConfig() {
   return useQuery({
     queryKey: ["coach-ai-config"],
     queryFn: async () => {
-      const res = await fetch("/api/ai/alexia/config");
+      const res = await fetch("/api/ai/matia/config");
       if (!res.ok) throw new Error("Erreur chargement config");
       const { config } = await res.json();
       return config as AIConfig;
@@ -92,7 +92,7 @@ export function useUpdateAIConfig() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (config: Partial<AIConfig>) => {
-      const res = await fetch("/api/ai/alexia/config", {
+      const res = await fetch("/api/ai/matia/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
@@ -151,7 +151,7 @@ export function useClientMemories() {
   });
 }
 
-// ─── AlexIA Chat (RAG-powered) ───────────────────────────────────────────────
+// ─── MatIA Chat (RAG-powered) ───────────────────────────────────────────────
 
 export function useSendAdminMessage() {
   return useMutation({
@@ -162,14 +162,14 @@ export function useSendAdminMessage() {
       message: string;
       conversation_id: string | null;
     }) => {
-      const res = await fetch("/api/ai/alexia/chat", {
+      const res = await fetch("/api/ai/matia/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, conversation_id }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erreur AlexIA");
+        throw new Error(data.error || "Erreur MatIA");
       }
       const { response } = await res.json();
       return response as string;

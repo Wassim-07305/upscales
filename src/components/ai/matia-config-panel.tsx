@@ -1,21 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCoachAIConfig, useUpdateAIConfig } from "@/hooks/use-alexia";
+import { useCoachAIConfig, useUpdateAIConfig } from "@/hooks/use-matia";
 import { Loader2, Save } from "lucide-react";
 
 export function AdminConfigPanel() {
   const { data: config, isLoading } = useCoachAIConfig();
   const update = useUpdateAIConfig();
 
-  const [aiName, setAiName] = useState("AlexIA");
+  const [aiName, setAiName] = useState("MatIA");
   const [instructions, setInstructions] = useState("");
   const [tone, setTone] = useState("professionnel");
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
     if (config) {
-      setAiName(config.ai_name || "AlexIA");
+      setAiName(config.ai_name || "MatIA");
       setInstructions(config.system_instructions || "");
       setTone(config.tone || "professionnel");
       setGreeting(config.greeting_message || "");
@@ -46,7 +46,7 @@ export function AdminConfigPanel() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <h2 className="text-lg font-display font-semibold text-foreground">
-          Configuration d&apos;AlexIA
+          Configuration d&apos;MatIA
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
           Personnalise le comportement et le ton de ton assistant IA.
@@ -80,7 +80,7 @@ export function AdminConfigPanel() {
           <input
             value={greeting}
             onChange={(e) => setGreeting(e.target.value)}
-            placeholder="Bonjour ! Je suis AlexIA, l'assistante de ton coach..."
+            placeholder="Bonjour ! Je suis MatIA, l'assistante de ton coach..."
             className={inputClass}
           />
         </div>
@@ -100,7 +100,7 @@ export function AdminConfigPanel() {
             className="w-full px-4 py-3 bg-muted/50 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none transition-shadow"
           />
           <p className="text-[10px] text-muted-foreground mt-1">
-            Ces instructions seront ajoutees au prompt systeme d&apos;AlexIA
+            Ces instructions seront ajoutees au prompt systeme d&apos;MatIA
           </p>
         </div>
 

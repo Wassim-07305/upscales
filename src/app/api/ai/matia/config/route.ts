@@ -21,11 +21,11 @@ export async function GET() {
 
   return NextResponse.json({
     config: data ?? {
-      ai_name: "AlexIA",
+      ai_name: "MatIA",
       system_instructions: "",
       tone: "professionnel",
       greeting_message:
-        "Bonjour ! Je suis AlexIA, l'assistante de ton coach. Comment puis-je t'aider ?",
+        "Bonjour ! Je suis MatIA, l'assistante de ton coach. Comment puis-je t'aider ?",
     },
   });
 }
@@ -48,7 +48,7 @@ export async function PUT(request: Request) {
     .upsert(
       {
         coach_id: user.id,
-        ai_name: body.ai_name ?? "AlexIA",
+        ai_name: body.ai_name ?? "MatIA",
         system_instructions: body.system_instructions ?? "",
         tone: body.tone ?? "professionnel",
         greeting_message: body.greeting_message ?? "",

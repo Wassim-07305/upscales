@@ -72,7 +72,7 @@ const lockedFeatures = [
   },
   {
     name: "Assistant IA",
-    description: "AlexIA, ton coach intelligent",
+    description: "MatIA, ton coach intelligent",
     icon: Bot,
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",

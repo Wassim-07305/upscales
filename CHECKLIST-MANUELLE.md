@@ -368,7 +368,7 @@ n'est pas présent dans la sidebar + charge a l'infini
 
 ---
 
-## 23. AlexIA — IA (`/admin/ai`)
+## 23. MatIA — IA (`/admin/ai`)
 
 - [ ] **Modal de consentement RGPD** au premier acces (pas d'auto-accept)
 - [ ] Apres acceptation : interface de chat
@@ -483,7 +483,7 @@ n'est pas présent dans la sidebar + charge a l'infini
 ## 32. Navigation Admin check de ton coté
 
 - [ ] **Sidebar** : 4 sections (Pilotage, Contenu, Business, Administration)
-- [ ] **Items** : Dashboard, CRM, Personnes, Appels, Messagerie, Finances, Formation, Feed, Ressources, AlexIA, Formulaires, Booking, Appels Closing, Facturation, Gamification, Annonces, Miro, Integrations, Monitoring, Documentation API, Reglages
+- [ ] **Items** : Dashboard, CRM, Personnes, Appels, Messagerie, Finances, Formation, Feed, Ressources, MatIA, Formulaires, Booking, Appels Closing, Facturation, Gamification, Annonces, Miro, Integrations, Monitoring, Documentation API, Reglages
 - [ ] **Pas de doublon** "Parametres" en bas de sidebar
 - [ ] **Collapse sidebar** : icones seules + tooltips
 - [ ] **Mobile bottom nav** : Dashboard, CRM, Messagerie, Formation, Facturation
@@ -498,7 +498,7 @@ n'est pas présent dans la sidebar + charge a l'infini
 - [ ] Dashboard : KPIs en 2 colonnes
 - [ ] CRM : onglets scrollables, pipeline scroll horizontal
 - [ ] Messagerie : sidebar slide-in
-- [ ] AlexIA : sidebar masquee, chat plein ecran
+- [ ] MatIA : sidebar masquee, chat plein ecran
 - [ ] Billing : header en colonne
 - [ ] Calendar : vue jour forcee, semaine cachee
 
@@ -537,7 +537,7 @@ n'est pas présent dans la sidebar + charge a l'infini
 | Facturation     | 20       |     |      |
 | Communaute      | 15       |     |      |
 | Booking         | 10       |     |      |
-| AlexIA          | 9        |     |      |
+| MatIA          | 9        |     |      |
 | Ressources      | 7        |     |      |
 | Parametres      | 8        |     |      |
 | Invitations     | 5        |     |      |

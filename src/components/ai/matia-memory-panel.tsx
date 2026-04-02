@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useClientMemories } from "@/hooks/use-alexia";
+import { useClientMemories } from "@/hooks/use-matia";
 import { cn } from "@/lib/utils";
 import {
   Brain,
@@ -31,7 +31,7 @@ export function AdminMemoryPanel() {
           Memoire personnes
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          AlexIA memorise les informations cles de chaque personne pour
+          MatIA memorise les informations cles de chaque personne pour
           personnaliser ses reponses.
         </p>
       </div>

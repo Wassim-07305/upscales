@@ -70,7 +70,7 @@ export const adminNavigation: NavItem[] = [
   },
   { name: "Communaute", href: "/admin/community", icon: Users },
   { name: "Ressources", href: "/admin/resources", icon: FolderOpen },
-  { name: "AlexIA", href: "/admin/ai", icon: Bot },
+  { name: "MatIA", href: "/admin/ai", icon: Bot },
   { name: "Formulaires", href: "/admin/forms", icon: FileText },
 
   // ── Business ──
@@ -113,7 +113,7 @@ export const coachNavigation: NavItem[] = [
     icon: GraduationCap,
     section: "Contenu",
   },
-  { name: "AlexIA", href: "/coach/ai", icon: Bot },
+  { name: "MatIA", href: "/coach/ai", icon: Bot },
   { name: "Formulaires", href: "/coach/forms", icon: FileText },
   { name: "Booking", href: "/coach/booking", icon: CalendarCheck },
   { name: "Communaute", href: "/coach/community", icon: Users },
@@ -180,7 +180,7 @@ export const clientNavigation: NavItem[] = [
   },
   { name: "Journal & Suivi", href: "/client/journal", icon: PenLine },
   { name: "Classement", href: "/client/leaderboard", icon: Crown },
-  { name: "AlexIA", href: "/client/ai", icon: Bot },
+  { name: "MatIA", href: "/client/ai", icon: Bot },
   { name: "Ressources", href: "/client/resources", icon: FolderOpen },
 
   // ── Business ──

@@ -19,9 +19,9 @@ import {
   PanelLeftOpen,
   Settings,
 } from "lucide-react";
-import { AdminKnowledgePanel } from "@/components/ai/alexia-knowledge-panel";
-import { AdminConfigPanel } from "@/components/ai/alexia-config-panel";
-import { AdminMemoryPanel } from "@/components/ai/alexia-memory-panel";
+import { AdminKnowledgePanel } from "@/components/ai/matia-knowledge-panel";
+import { AdminConfigPanel } from "@/components/ai/matia-config-panel";
+import { AdminMemoryPanel } from "@/components/ai/matia-memory-panel";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { AiResponseBadge } from "@/components/ai/ai-response-badge";
@@ -167,7 +167,7 @@ export default function AIPage() {
 
     try {
       // Conversation creation is handled server-side — no client RLS risk
-      const res = await fetch("/api/ai/alexia/chat", {
+      const res = await fetch("/api/ai/matia/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, conversation_id: conversationId }),
@@ -195,7 +195,7 @@ export default function AIPage() {
       queryClient.invalidateQueries({ queryKey: ["ai-conversations"] });
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : "Erreur de connexion avec AlexIA";
+        err instanceof Error ? err.message : "Erreur de connexion avec MatIA";
       toast.error(msg);
       setMessages((prev) => [
         ...prev,
@@ -383,7 +383,7 @@ export default function AIPage() {
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
                     <span className="bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-                      AlexIA
+                      MatIA
                     </span>
                   </h1>
                   <p className="text-sm text-muted-foreground/70 mb-8">

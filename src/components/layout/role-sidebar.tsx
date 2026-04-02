@@ -93,7 +93,7 @@ export function RoleSidebar({ variant }: RoleSidebarProps) {
     Communaute: "community",
     Pipeline: "pipeline",
     Formulaires: "forms",
-    AlexIA: "ai",
+    MatIA: "ai",
     Invitations: "invitations",
     Ressources: "resources",
     Récompenses: "rewards",

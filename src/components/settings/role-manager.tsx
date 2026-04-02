@@ -66,7 +66,7 @@ const ALL_MODULES: { slug: Module; label: string; category: string }[] = [
   { slug: "users", label: "Utilisateurs", category: "Admin" },
   { slug: "invitations", label: "Invitations", category: "Admin" },
   { slug: "audit", label: "Audit", category: "Admin" },
-  { slug: "assistant", label: "AlexIA", category: "Admin" },
+  { slug: "assistant", label: "MatIA", category: "Admin" },
   { slug: "roadmap", label: "Roadmap", category: "Admin" },
 ];
 

@@ -5,7 +5,7 @@ import {
   useCoachDocuments,
   useUploadDocument,
   useDeleteDocument,
-} from "@/hooks/use-alexia";
+} from "@/hooks/use-matia";
 import { cn } from "@/lib/utils";
 import {
   Upload,
@@ -48,7 +48,7 @@ export function AdminKnowledgePanel() {
           Base de connaissances
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Uploade tes documents (PDF, texte) pour qu&apos;AlexIA puisse repondre
+          Uploade tes documents (PDF, texte) pour qu&apos;MatIA puisse repondre
           en se basant sur ton expertise.
         </p>
       </div>

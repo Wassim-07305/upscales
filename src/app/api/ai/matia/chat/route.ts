@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       .select("*")
       .eq("coach_id", coachId)
       .maybeSingle();
-    const aiName = config?.ai_name ?? "AlexIA";
+    const aiName = config?.ai_name ?? "MatIA";
 
     // 4. Fetch REAL platform data based on role
     const platformData = await fetchPlatformData(admin, user.id, role, coachId);
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
             .reverse()
             .map(
               (m) =>
-                `${m.is_ai_generated ? "AlexIA" : (m.sender?.full_name ?? "?")} : ${m.content}`,
+                `${m.is_ai_generated ? "MatIA" : (m.sender?.full_name ?? "?")} : ${m.content}`,
             )
             .join("\n");
       }
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ response, conversation_id: activeConvId });
   } catch (error) {
-    console.error("[AlexIA Chat] Error:", error);
+    console.error("[MatIA Chat] Error:", error);
     return NextResponse.json(
       { error: "Erreur lors de la generation de la réponse" },
       { status: 500 },
@@ -436,7 +436,7 @@ ${
 }`);
     }
   } catch (err) {
-    console.warn("[AlexIA] Platform data fetch error:", err);
+    console.warn("[MatIA] Platform data fetch error:", err);
     sections.push(
       "## Donnees plateforme\nErreur lors de la recuperation des donnees.",
     );
@@ -507,7 +507,7 @@ function updateMemoryInBackground(
   userMessage: string,
   aiResponse: string,
 ) {
-  const conversation = `Client: ${userMessage}\nAlexIA: ${aiResponse}`;
+  const conversation = `Client: ${userMessage}\nMatIA: ${aiResponse}`;
   generateMemoryUpdate(existingMemory, conversation)
     .then(async (updatedMemory) => {
       await admin.from("client_ai_memory").upsert(
@@ -521,5 +521,5 @@ function updateMemoryInBackground(
         { onConflict: "client_id,coach_id" },
       );
     })
-    .catch((err) => console.error("[AlexIA Memory] Update failed:", err));
+    .catch((err) => console.error("[MatIA Memory] Update failed:", err));
 }

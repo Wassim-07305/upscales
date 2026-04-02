@@ -250,7 +250,7 @@ export default function IntegrationsPage() {
           icon={Sparkles}
           iconClassName="h-5 w-5 text-amber-500"
           name="OpenRouter (IA)"
-          description="Intelligence artificielle pour AlexIA"
+          description="Intelligence artificielle pour MatIA"
           status={
             integrationsStatus.isLoading
               ? "loading"

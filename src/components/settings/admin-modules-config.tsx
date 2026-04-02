@@ -148,7 +148,7 @@ const DEFAULT_MODULES: ModuleConfig[] = [
   },
   {
     key: "assistant",
-    label: "AlexIA",
+    label: "MatIA",
     description: "Assistant IA intelligent avec base de connaissances",
     icon: Bot,
     enabled: true,

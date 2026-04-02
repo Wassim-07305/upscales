@@ -44,7 +44,7 @@ export const WIDGET_META: Record<
   activity_feed: { label: "Activité récente", defaultSize: "1x1" },
   goals_progress: { label: "Insights IA", defaultSize: "1x1" },
   gamification: { label: "Gamification", defaultSize: "1x1" },
-  ai_insights: { label: "AlexIA", defaultSize: "1x1" },
+  ai_insights: { label: "MatIA", defaultSize: "1x1" },
 };
 
 // ─── Default layout ─────────────────────────────────────────

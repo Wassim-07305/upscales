@@ -60,7 +60,7 @@ Connexion : /login avec compte admin
  │ 2.8 │ Configurer │ /admin/commissions │ Regles par role (fixe, %, │  
  │ │ commissions │ │ paliers) │  
  ├──────┼──────────────┼──────────────────────────┼─────────────────────────────┤  
- │ 2.9 │ Configurer │ /admin/ai │ AlexIA knowledge base, │  
+ │ 2.9 │ Configurer │ /admin/ai │ MatIA knowledge base, │  
  │ │ base IA │ │ ajout documents │ ok
 ├──────┼──────────────┼──────────────────────────┼─────────────────────────────┤  
  │ 2.10 │ Creer une │ /admin/school > Builder │ Parcours > Module > Lecon │  

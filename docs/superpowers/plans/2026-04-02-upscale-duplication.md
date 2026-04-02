@@ -401,7 +401,7 @@ Dans chaque fichier API AI, remplacer "UPSCALE" par "UPSCALE" :
 - `src/app/api/ai/chat/route.ts`
 - `src/app/api/ai/insights/route.ts`
 - `src/app/api/ai/call-summary/route.ts`
-- `src/app/api/ai/alexia/chat/route.ts`
+- `src/app/api/ai/matia/chat/route.ts`
 
 Verifier avec :
 

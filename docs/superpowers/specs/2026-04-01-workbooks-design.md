@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Off-Market utilise des workbooks hébergés sur Lovable et Tally pour accompagner les formations. L'objectif est d'intégrer les workbooks directement dans la plateforme, en réutilisant le système de formulaires existant.
+UPSCALE utilise des workbooks hébergés sur Lovable et Tally pour accompagner les formations. L'objectif est d'intégrer les workbooks directement dans la plateforme, en réutilisant le système de formulaires existant.
 
 ## Approche
 
@@ -19,7 +19,7 @@ Un workbook est un formulaire enrichi avec `type: 'workbook'`. On réutilise le 
 **`step`** — séparateur d'étape numéroté (numéro auto-calculé dans le rendu selon l'ordre des steps)
 
 - `label` = titre de l'étape (ex: "Identifier une frustration majeure")
-- `description` = sous-titre (ex: "La base de ton marché Off-Market")
+- `description` = sous-titre (ex: "La base de ton marché UPSCALE")
 - `options` JSONB = `{ content: "texte explicatif long en markdown" }`
 - Non remplissable — structure pure
 
@@ -79,7 +79,7 @@ Le composant détecte `form.type` :
 **1. Couverture** (haut de page)
 
 - Badge statique "Workbook Premium"
-- Titre du workbook (gros, bold, style Off-Market rouge)
+- Titre du workbook (gros, bold, style UPSCALE rouge)
 - Description du workbook
 - Fond blanc, centré, aéré
 
@@ -103,7 +103,7 @@ Le composant détecte `form.type` :
 **4. Section finale**
 
 - Dernier `checklist` sans `step` parent → affiché comme "Tableau final" de validation
-- Bouton "Envoyer le workbook" (rouge Off-Market, pleine largeur)
+- Bouton "Envoyer le workbook" (rouge UPSCALE, pleine largeur)
 
 **Responsive** : max-width 720px centré, adapté mobile.
 

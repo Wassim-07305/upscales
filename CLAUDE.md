@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Off-Market est un CRM/plateforme de gestion pour agences de coaching et consultants (UI en français). Destinée aux freelances et coaches ciblant 10k+ EUR/mois. Plateforme multi-rôles avec gestion clients, pipeline commercial, formations (LMS), messagerie temps réel, gamification et suivi coaching.
+UPSCALE est un CRM/plateforme de gestion pour agences de coaching et consultants (UI en français). Destinée aux freelances et coaches ciblant 10k+ EUR/mois. Plateforme multi-rôles avec gestion clients, pipeline commercial, formations (LMS), messagerie temps réel, gamification et suivi coaching.
 
 ## Commands
 

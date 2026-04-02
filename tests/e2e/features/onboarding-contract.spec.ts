@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // ─── Constantes de test ──────────────────────────────────────────
-const TEST_EMAIL = "e2e-onboarding-contract@offmarket.test";
+const TEST_EMAIL = "e2e-onboarding-contract@upscale.test";
 const TEST_PASSWORD = "TestE2E123!";
 const TEST_FULL_NAME = "Jean Dupont";
 

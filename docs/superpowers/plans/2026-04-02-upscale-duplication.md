@@ -1,10 +1,10 @@
-# Duplication Off-Market → Upscale — Implementation Plan
+# Duplication UPSCALE → Upscale — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remplacer le projet Upscale par une copie d'Off-Market avec le branding Upscale (couleurs neon/turquoise, fonts Syne/Outfit, nom "UPSCALE", landing page Puck).
+**Goal:** Remplacer le projet Upscale par une copie d'UPSCALE avec le branding Upscale (couleurs neon/turquoise, fonts Syne/Outfit, nom "UPSCALE", landing page Puck).
 
-**Architecture:** Sauvegarde branding Upscale → copie code Off-Market → migration DB → rebranding (CSS, fonts, noms, logos, landing page). Off-Market est READ-ONLY.
+**Architecture:** Sauvegarde branding Upscale → copie code UPSCALE → migration DB → rebranding (CSS, fonts, noms, logos, landing page). UPSCALE est READ-ONLY.
 
 **Tech Stack:** Next.js 16, Tailwind CSS 4, Supabase, Puck CMS (landing pages Upscale)
 
@@ -98,17 +98,17 @@ Expected: `.git/`, `.env.local`, `_branding/` uniquement
 
 ---
 
-### Task 3: Copier le code Off-Market vers Upscale
+### Task 3: Copier le code UPSCALE vers Upscale
 
 **Files:**
 
-- Source (READ-ONLY): `/Users/wassim/Projets/Off-Market/`
+- Source (READ-ONLY): `/Users/wassim/Projets/UPSCALE/`
 - Destination: `/Users/wassim/Projets/upscale/`
 
-- [ ] **Step 1: Copier tous les fichiers Off-Market sauf exclusions**
+- [ ] **Step 1: Copier tous les fichiers UPSCALE sauf exclusions**
 
 ```bash
-cd /Users/wassim/Projets/Off-Market
+cd /Users/wassim/Projets/UPSCALE
 rsync -av \
   --exclude='.git' \
   --exclude='.env.local' \
@@ -124,12 +124,12 @@ rsync -av \
 
 ```bash
 # Comparer le nombre de fichiers src/ (hors node_modules/.next)
-find /Users/wassim/Projets/Off-Market/src -type f | wc -l
+find /Users/wassim/Projets/UPSCALE/src -type f | wc -l
 find /Users/wassim/Projets/upscale/src -type f | wc -l
 
 # Verifier que .env.local est toujours celui d'Upscale
 grep "SUPABASE_URL" /Users/wassim/Projets/upscale/.env.local | head -1
-# Doit contenir wcdtfkcbqsxdzjjrtwdj (Upscale), PAS srhpdgqqiuzdrlqaitdk (Off-Market)
+# Doit contenir wcdtfkcbqsxdzjjrtwdj (Upscale), PAS srhpdgqqiuzdrlqaitdk (UPSCALE)
 ```
 
 - [ ] **Step 3: Installer les dependances**
@@ -145,7 +145,7 @@ npm install
 
 **Files:**
 
-- Source migrations (read-only): `/Users/wassim/Projets/upscale/supabase/migrations/` (copiees d'Off-Market)
+- Source migrations (read-only): `/Users/wassim/Projets/upscale/supabase/migrations/` (copiees d'UPSCALE)
 - Target DB: Supabase Upscale `wcdtfkcbqsxdzjjrtwdj`
 
 - [ ] **Step 1: Verifier l'acces a la DB Upscale**
@@ -154,7 +154,7 @@ npm install
 cd /Users/wassim/Projets/upscale
 source .env.local
 echo $DATABASE_URL | grep -o "@[^/]*" | head -1
-# Doit montrer le host Upscale, PAS Off-Market
+# Doit montrer le host Upscale, PAS UPSCALE
 ```
 
 - [ ] **Step 2: Drop toutes les tables existantes du schema public**
@@ -182,7 +182,7 @@ END \$\$;
 "
 ```
 
-- [ ] **Step 3: Appliquer toutes les migrations Off-Market**
+- [ ] **Step 3: Appliquer toutes les migrations UPSCALE**
 
 ```bash
 cd /Users/wassim/Projets/upscale
@@ -203,16 +203,16 @@ source .env.local
 /opt/homebrew/Cellar/postgresql@18/18.3/bin/psql "$DATABASE_URL" -c "SELECT count(*) as table_count FROM information_schema.tables WHERE table_schema='public';"
 ```
 
-Expected: Nombre de tables similaire a Off-Market (~190)
+Expected: Nombre de tables similaire a UPSCALE (~190)
 
 - [ ] **Step 5: Commit la copie du code (avant rebranding)**
 
 ```bash
 cd /Users/wassim/Projets/upscale
 git add -A
-git commit -m "chore: replace codebase with Off-Market fork
+git commit -m "chore: replace codebase with UPSCALE fork
 
-Base code copied from Off-Market. DB schema migrated.
+Base code copied from UPSCALE. DB schema migrated.
 Branding and customization will follow in next commits."
 ```
 
@@ -226,29 +226,29 @@ Branding and customization will follow in next commits."
 
 - [ ] **Step 1: Remplacer le globals.css par celui d'Upscale**
 
-Le fichier `_branding/globals.css` contient le CSS complet d'Upscale avec les bonnes variables. Cependant, le globals.css d'Off-Market a potentiellement des composants CSS supplementaires (tiptap, animations, etc.) que le branding Upscale a aussi. La strategie est :
+Le fichier `_branding/globals.css` contient le CSS complet d'Upscale avec les bonnes variables. Cependant, le globals.css d'UPSCALE a potentiellement des composants CSS supplementaires (tiptap, animations, etc.) que le branding Upscale a aussi. La strategie est :
 
 1. Copier le globals.css d'Upscale comme base
-2. Ajouter les composants CSS specifiques a Off-Market qui manquent (si necessaire)
+2. Ajouter les composants CSS specifiques a UPSCALE qui manquent (si necessaire)
 
 ```bash
 cd /Users/wassim/Projets/upscale
-# Sauvegarder le globals.css Off-Market pour reference
-cp src/app/globals.css src/app/globals.css.offmarket
+# Sauvegarder le globals.css UPSCALE pour reference
+cp src/app/globals.css src/app/globals.css.upscale
 
 # Copier le globals.css Upscale
 cp _branding/globals.css src/app/globals.css
 ```
 
-Puis comparer les deux fichiers et ajouter les styles Off-Market manquants dans le globals.css Upscale (ex: composants specifiques a Off-Market comme les styles de `coach-students-list`, `stat-card`, etc.). Cela sera fait manuellement en lisant les deux fichiers et mergant les classes CSS specifiques qui manquent.
+Puis comparer les deux fichiers et ajouter les styles UPSCALE manquants dans le globals.css Upscale (ex: composants specifiques a UPSCALE comme les styles de `coach-students-list`, `stat-card`, etc.). Cela sera fait manuellement en lisant les deux fichiers et mergant les classes CSS specifiques qui manquent.
 
 - [ ] **Step 2: Verifier que les imports Tailwind sont compatibles**
 
-Off-Market utilise `@import "tailwindcss"` et Upscale aussi. Verifier que le format est identique. Si Off-Market utilise des plugins ou directives supplementaires dans globals.css, les ajouter.
+UPSCALE utilise `@import "tailwindcss"` et Upscale aussi. Verifier que le format est identique. Si UPSCALE utilise des plugins ou directives supplementaires dans globals.css, les ajouter.
 
 ```bash
 head -10 /Users/wassim/Projets/upscale/src/app/globals.css
-head -10 /Users/wassim/Projets/upscale/src/app/globals.css.offmarket
+head -10 /Users/wassim/Projets/upscale/src/app/globals.css.upscale
 ```
 
 - [ ] **Step 3: Commit**
@@ -272,7 +272,7 @@ git commit -m "style: apply Upscale branding colors (neon/turquoise theme)"
 Dans `src/app/layout.tsx`, remplacer :
 
 ```typescript
-// OFF-MARKET (a remplacer)
+// UPSCALE (a remplacer)
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -310,7 +310,7 @@ const geistMono = Geist_Mono({
 Dans le meme fichier, chercher la balise `<body>` ou `<html>` et remplacer les variables de fonts :
 
 ```typescript
-// OFF-MARKET
+// UPSCALE
 className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ...`}
 
 // UPSCALE
@@ -335,20 +335,20 @@ git commit -m "style: replace fonts (Inter→Outfit, Instrument→Syne, JetBrain
 
 - Modify: ~20 fichiers dans `/Users/wassim/Projets/upscale/src/`
 
-- [ ] **Step 1: Search & replace global — "Off Market" → "UPSCALE"**
+- [ ] **Step 1: Search & replace global — "UPSCALE" → "UPSCALE"**
 
 ```bash
 cd /Users/wassim/Projets/upscale
 
 # Trouver tous les fichiers avec "Off.Market" ou "off.market" (hors node_modules, .next, .git)
-grep -r --include="*.tsx" --include="*.ts" --include="*.json" --include="*.md" -l "Off.Market\|off.market\|Off Market\|off-market" src/ public/ --exclude-dir=node_modules --exclude-dir=.next | sort
+grep -r --include="*.tsx" --include="*.ts" --include="*.json" --include="*.md" -l "Off.Market\|off.market\|UPSCALE\|upscale" src/ public/ --exclude-dir=node_modules --exclude-dir=.next | sort
 
 # Remplacer dans tous les fichiers source
 find src/ -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i '' \
-  -e 's/Off-Market/UPSCALE/g' \
-  -e 's/Off Market/UPSCALE/g' \
-  -e 's/off-market/upscale/g' \
-  -e 's/off_market/upscale/g' \
+  -e 's/UPSCALE/UPSCALE/g' \
+  -e 's/UPSCALE/UPSCALE/g' \
+  -e 's/upscale/upscale/g' \
+  -e 's/upscale/upscale/g' \
   {} +
 ```
 
@@ -357,7 +357,7 @@ find src/ -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i '' \
 ```bash
 cd /Users/wassim/Projets/upscale
 # Remplacer le nom dans package.json
-sed -i '' 's/"name": "off-market"/"name": "upscale"/' package.json
+sed -i '' 's/"name": "upscale"/"name": "upscale"/' package.json
 ```
 
 - [ ] **Step 3: Mettre a jour les metadata dans layout.tsx**
@@ -388,7 +388,7 @@ cp _branding/manifest.json public/manifest.json
 
 - [ ] **Step 5: Mettre a jour la description/tagline**
 
-Chercher et remplacer la tagline Off-Market :
+Chercher et remplacer la tagline UPSCALE :
 
 - "Deviens le choix evident" → "Plateforme de Formation"
 - "coaching business pour freelances" → "formation en vente, closing et business"
@@ -396,7 +396,7 @@ Chercher et remplacer la tagline Off-Market :
 
 - [ ] **Step 6: Mettre a jour les system prompts IA**
 
-Dans chaque fichier API AI, remplacer "Off Market" par "UPSCALE" :
+Dans chaque fichier API AI, remplacer "UPSCALE" par "UPSCALE" :
 
 - `src/app/api/ai/chat/route.ts`
 - `src/app/api/ai/insights/route.ts`
@@ -416,7 +416,7 @@ Expected: Aucun resultat
 Dans `src/lib/email.ts` :
 
 ```typescript
-// "Off-Market <noreply@off-market.fr>" → adapter selon le domaine Upscale
+// "UPSCALE <noreply@upscale.fr>" → adapter selon le domaine Upscale
 DEFAULT_FROM = "UPSCALE <noreply@upscale-app.fr>";
 ```
 
@@ -430,11 +430,11 @@ BUSINESS = {
 };
 ```
 
-- [ ] **Step 8: Verification finale — plus aucune mention Off-Market**
+- [ ] **Step 8: Verification finale — plus aucune mention UPSCALE**
 
 ```bash
 cd /Users/wassim/Projets/upscale
-grep -r --include="*.tsx" --include="*.ts" --include="*.json" "Off.Market\|off.market\|Off Market\|off-market" src/ public/ | grep -v node_modules | grep -v ".next"
+grep -r --include="*.tsx" --include="*.ts" --include="*.json" "Off.Market\|off.market\|UPSCALE\|upscale" src/ public/ | grep -v node_modules | grep -v ".next"
 ```
 
 Expected: Aucun resultat (0 mentions)
@@ -444,7 +444,7 @@ Expected: Aucun resultat (0 mentions)
 ```bash
 cd /Users/wassim/Projets/upscale
 git add -A
-git commit -m "chore: rebrand Off-Market → UPSCALE (names, metadata, AI prompts, emails)"
+git commit -m "chore: rebrand UPSCALE → UPSCALE (names, metadata, AI prompts, emails)"
 ```
 
 ---
@@ -460,7 +460,7 @@ git commit -m "chore: rebrand Off-Market → UPSCALE (names, metadata, AI prompt
 Dans `/Users/wassim/Projets/upscale/next.config.ts`, remplacer le hostname Supabase des images :
 
 ```typescript
-// OFF-MARKET
+// UPSCALE
 hostname: "srhpdgqqiuzdrlqaitdk.supabase.co";
 
 // UPSCALE
@@ -476,8 +476,8 @@ sed -i '' 's/srhpdgqqiuzdrlqaitdk/wcdtfkcbqsxdzjjrtwdj/g' next.config.ts
 
 ```bash
 cd /Users/wassim/Projets/upscale
-grep -r "off-market" src/app/robots.ts 2>/dev/null && \
-  sed -i '' 's/off-market/upscale/g' src/app/robots.ts
+grep -r "upscale" src/app/robots.ts 2>/dev/null && \
+  sed -i '' 's/upscale/upscale/g' src/app/robots.ts
 ```
 
 - [ ] **Step 3: Supprimer le dossier .vercel si copie**
@@ -583,7 +583,7 @@ cp -r _branding/landing/* src/app/p/
 
 - [ ] **Step 4: Verifier les imports dans les blocs Puck**
 
-Les blocs Puck d'Upscale utilisaient des imports sans `src/` prefix (ex: `@/lib/...`). Comme Off-Market utilise `@/` = `src/`, les imports devraient fonctionner. Verifier :
+Les blocs Puck d'Upscale utilisaient des imports sans `src/` prefix (ex: `@/lib/...`). Comme UPSCALE utilise `@/` = `src/`, les imports devraient fonctionner. Verifier :
 
 ```bash
 cd /Users/wassim/Projets/upscale
@@ -610,9 +610,9 @@ cd /Users/wassim/Projets/upscale
 npm run build 2>&1 | tail -20
 ```
 
-Si erreurs de build : les corriger (probablement des imports manquants pour Puck ou des references a des composants Off-Market dans les blocs landing).
+Si erreurs de build : les corriger (probablement des imports manquants pour Puck ou des references a des composants UPSCALE dans les blocs landing).
 
-- [ ] **Step 2: Verification manuelle des mentions Off-Market**
+- [ ] **Step 2: Verification manuelle des mentions UPSCALE**
 
 ```bash
 cd /Users/wassim/Projets/upscale
@@ -627,7 +627,7 @@ Expected: 0 resultats
 ```bash
 cd /Users/wassim/Projets/upscale
 # Supprimer les fichiers temporaires
-rm -f src/app/globals.css.offmarket
+rm -f src/app/globals.css.upscale
 # Garder _branding/ pour reference (ne pas supprimer)
 ```
 
@@ -636,7 +636,7 @@ rm -f src/app/globals.css.offmarket
 ```bash
 cd /Users/wassim/Projets/upscale
 git add -A
-git commit -m "chore: final cleanup after Off-Market → UPSCALE migration"
+git commit -m "chore: final cleanup after UPSCALE → UPSCALE migration"
 git push --force origin main
 ```
 
@@ -646,10 +646,10 @@ Note: `--force` car on a completement remplace l'historique du code. A confirmer
 
 ## Recap des commits
 
-1. `chore: replace codebase with Off-Market fork` (Task 5)
+1. `chore: replace codebase with UPSCALE fork` (Task 5)
 2. `style: apply Upscale branding colors` (Task 5)
 3. `style: replace fonts` (Task 6)
-4. `chore: rebrand Off-Market → UPSCALE` (Task 7)
+4. `chore: rebrand UPSCALE → UPSCALE` (Task 7)
 5. `chore: update infra config` (Task 8)
 6. `chore: replace logos and icons` (Task 9)
 7. `feat: add Puck landing page builder` (Task 10)

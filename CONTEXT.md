@@ -1,22 +1,22 @@
-# CONTEXT.md — Off-Market
+# CONTEXT.md — UPSCALE
 
 ## Identité du projet
 
-- **Client :** Alexia Laneau (coach business, partenariat avec Nassim)
+- **Client :** Admin Upscale (coach business, partenariat avec Nassim)
 - **Deal :** Échange — app 4 000 € contre coaching 11 000 €
 - **Statut :** 60% CDC réalisé
-- **GitHub :** https://github.com/Wassim-07305/off-market
-- **Vercel (prod) :** https://off-market-ahmanewassim6-2668s-projects.vercel.app
+- **GitHub :** https://github.com/Wassim-07305/upscale
+- **Vercel (prod) :** https://upscale-ahmanewassim6-2668s-projects.vercel.app
 
 ## Description du projet (CDC)
 
-**Off-Market** est une plateforme tout-en-un de coaching et gestion business pour freelances et coachs qui veulent atteindre et dépasser 10 000€ de CA mensuel. **Ce n'est PAS une app immobilière.**
+**UPSCALE** est une plateforme tout-en-un de coaching et gestion business pour freelances et coachs qui veulent atteindre et dépasser 10 000€ de CA mensuel. **Ce n'est PAS une app immobilière.**
 
-Multi-portails : Admin (Alexia), Coach, Élève.
+Multi-portails : Admin (Admin), Coach, Élève.
 
 **Modules :** CRM Élèves, Formation LMS, Messagerie, Appels vidéo, Gamification, Journal/Check-ins, Form Builder, Contrats, Communauté, Onboarding personnalisé, IA (réponses automatiques, analyse client), Notifications.
 
-Alexia utilise l'app pour gérer ses coachés, suivre leur progression, envoyer des modules de formation et automatiser ses relances.
+Admin utilise l'app pour gérer ses coachés, suivre leur progression, envoyer des modules de formation et automatiser ses relances.
 
 ## Stack technique
 
@@ -39,7 +39,7 @@ Alexia utilise l'app pour gérer ses coachés, suivre leur progression, envoyer 
 
 | Rôle | Email              | Mot de passe |
 | ---- | ------------------ | ------------ |
-| Test | test@off-market.fr | Test1234x    |
+| Test | test@upscale.fr | Test1234x    |
 
 ## Commandes utiles
 

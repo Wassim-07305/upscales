@@ -1,4 +1,4 @@
-# Bugs identifiés par analyse statique — Off-Market
+# Bugs identifiés par analyse statique — UPSCALE
 
 Date : 2026-03-22 | Statut : Tous corrigés ou documentés
 

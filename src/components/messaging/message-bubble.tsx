@@ -17,7 +17,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { AiResponseBadge } from "@/components/ai/ai-response-badge";
-import { isAlexiaBotId } from "@/components/messaging/alexia-mention";
+import { isAdminBotId } from "@/components/messaging/alexia-mention";
 import type { EnrichedMessage } from "@/types/messaging";
 
 interface MessageBubbleProps {
@@ -135,7 +135,7 @@ export function MessageBubble({
             <div
               className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shadow-sm",
-                sender && isAlexiaBotId(sender.id)
+                sender && isAdminBotId(sender.id)
                   ? "bg-gradient-to-br from-violet-500/15 to-purple-500/15"
                   : isOwn
                     ? "bg-gradient-to-br from-[#c6ff00]/15 to-[#c6ff00]/15"
@@ -150,7 +150,7 @@ export function MessageBubble({
                   height={36}
                   className="w-9 h-9 rounded-full object-cover"
                 />
-              ) : sender && isAlexiaBotId(sender.id) ? (
+              ) : sender && isAdminBotId(sender.id) ? (
                 <span className="text-sm">🤖</span>
               ) : (
                 <span

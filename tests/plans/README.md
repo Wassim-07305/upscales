@@ -1,4 +1,4 @@
-# Plans de Test — Off-Market
+# Plans de Test — UPSCALE
 
 Plans de test QA generés par analyse statique du code source (2026-03-22).
 

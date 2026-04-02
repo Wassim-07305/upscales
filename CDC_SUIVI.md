@@ -1,7 +1,7 @@
-# Suivi d'avancement - Cahier des Charges Off-Market
+# Suivi d'avancement - Cahier des Charges UPSCALE
 
 > Derniere mise a jour : 2026-03-15
-> Avancement global : **~98%** (CDC technique) / **~95%** (besoins Alexia Call1+Call2)
+> Avancement global : **~98%** (CDC technique) / **~95%** (besoins Admin Call1+Call2)
 
 ---
 
@@ -420,9 +420,9 @@
 
 ---
 
-## Checklist Alexia (Call1 + Call2) — Couverture
+## Checklist Admin (Call1 + Call2) — Couverture
 
-> Features demandees par Alexia lors des appels decouverte. Comparaison avec l'etat actuel du code.
+> Features demandees par Admin lors des appels decouverte. Comparaison avec l'etat actuel du code.
 
 ### Features Principales
 
@@ -439,7 +439,7 @@
 | Mute des abuseurs                                | Done    | notifications_muted en DB + UI mute dans channel-sidebar.tsx                                                        |
 | Onboarding client guide                          | Done    | Walkthrough interactif, checklist, XP rewards (Sprint 30)                                                           |
 | Video accueil / onboarding                       | Done    | csm-video-step.tsx : video HTML5/iframe avec auto-detection 80% + fallback bio (Sprint 37)                          |
-| Formulaire step-by-step onboarding               | Partiel | Onboarding basique. Manque : "pourquoi Alexia", revenus actuels, infos business                                     |
+| Formulaire step-by-step onboarding               | Partiel | Onboarding basique. Manque : "pourquoi Admin", revenus actuels, infos business                                     |
 | Tutorial guide interactif (style SaaS)           | Done    | walkthrough-provider.tsx avec tooltips et highlights                                                                |
 | Test obligatoire (message test)                  | Done    | message-test-step.tsx dans onboarding                                                                               |
 | Video personnalisee CSM                          | Done    | csm-video-step.tsx + intro_video_url sur profiles (Sprint 37)                                                       |
@@ -483,7 +483,7 @@
 | Vue liste ET mosaique clients   | Done    | Grid + list dans CRM                                   |
 | Tri par activite recente        | Partiel | Tri par date. Manque tri par "dernier message non lu"  |
 | Filtrage/tri avance             | Done    | Tags, recherche, filtres dans CRM                      |
-| Branding Off-Market             | Done    | Logo, couleurs, polices personnalisables (Sprint 33)   |
+| Branding UPSCALE             | Done    | Logo, couleurs, polices personnalisables (Sprint 33)   |
 | Tutorial guide interactif       | Done    | Walkthrough provider (Sprint 30)                       |
 | Notifications differenciees son | Manque  | Pas de sons differents urgent vs normal                |
 | Badge rouge messages non lus    | Done    | Unread counter dans sidebar                            |
@@ -492,7 +492,7 @@
 
 ---
 
-## Resume des Gaps Prioritaires (Alexia)
+## Resume des Gaps Prioritaires (Admin)
 
 ### ✅ Priorite Haute — TOUT FAIT
 

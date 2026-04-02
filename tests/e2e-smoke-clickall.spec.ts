@@ -1,7 +1,7 @@
 import { test, chromium, Page, Browser } from "@playwright/test";
 
 // ─── Config ───────────────────────────────────────────────────────────
-const BASE_URL = "https://off-market-amber.vercel.app";
+const BASE_URL = "https://upscale-amber.vercel.app";
 const CDP_ENDPOINT = "http://localhost:9222";
 const EMAIL = "test@test.com";
 const PASSWORD = "test123";

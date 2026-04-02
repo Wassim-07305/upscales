@@ -1,4 +1,4 @@
-# EXPLORATION.md — Off-Market Testing Exploration
+# EXPLORATION.md — UPSCALE Testing Exploration
 
 ## Date: 2026-03-17
 
@@ -16,7 +16,7 @@
 
 - **Elements**: Formulaire email + mot de passe, bouton "Se connecter", lien "Oublie ?" (forgot-password), lien "S'inscrire" (/signup)
 - **2FA**: Si l'utilisateur a le 2FA active, ecran secondaire avec 6 inputs numeriques (TOTP)
-- **Branding**: Logo "Off Market", couleur primaire rouge (#DC2626), layout split desktop (branding gauche, form droite)
+- **Branding**: Logo "UPSCALE", couleur primaire rouge (#DC2626), layout split desktop (branding gauche, form droite)
 - **Comportement**: Apres login, redirect vers `/{role}/dashboard` via middleware
 - **Erreur**: Toast "Email ou mot de passe incorrect"
 - **Bug note**: Premiere compilation Turbopack tres lente (~110s pour le dashboard)
@@ -81,11 +81,11 @@
 - Bouton recherche "Rechercher... Cmd+K"
 - Bouton "Ne pas deranger"
 - Bouton Notifications
-- Avatar utilisateur (Alexia Laneau, Admin)
+- Avatar utilisateur (Admin Upscale, Admin)
 
 ### Contenu principal
 
-- **Greeting**: "Bonjour, Alexia" + "Vue d'ensemble de la plateforme"
+- **Greeting**: "Bonjour, Admin" + "Vue d'ensemble de la plateforme"
 - **Alertes systeme**: "15 alertes systeme — 14 eleves inactifs - 1 a risque" + bouton "Voir les alertes"
 - **KPI row 1**: CA du mois (0EUR), Eleves actifs (9), Nouveaux ce mois (9), LTV moyen (0EUR)
 - **KPI row 2**: Retention (100%), Churn (0%), Taux closing (0%), Completion formations (2%)
@@ -150,15 +150,15 @@ Seules quelques pages sont uniques par role (admin/dashboard, admin/csm, admin/u
 | Nom              | Email                          | Role   |
 | ---------------- | ------------------------------ | ------ |
 | Gilles           | gilles.hayibor@gmail.com       | admin  |
-| Alexia Laneau    | admin@offmarket.fr             | admin  |
-| Sophie Martin    | coach@offmarket.fr             | coach  |
-| Thomas Dupont    | prospect@offmarket.fr          | client |
+| Admin Upscale    | admin@upscale.app             | admin  |
+| Sophie Martin    | coach@upscale.app             | coach  |
+| Thomas Dupont    | prospect@upscale.app          | client |
 | alex laneau      | alexlaneau46@gmail.com         | client |
-| Test User 1      | test-user-1@offmarket.test     | coach  |
-| Test User 2      | test-user-2@offmarket.test     | coach  |
-| Test User 3-5    | test-user-{3-5}@offmarket.test | client |
-| QA Test Admin    | qa-admin@offmarket.test        | client |
-| Participant Test | test-participant@off-market.fr | client |
+| Test User 1      | test-user-1@upscale.test     | coach  |
+| Test User 2      | test-user-2@upscale.test     | coach  |
+| Test User 3-5    | test-user-{3-5}@upscale.test | client |
+| QA Test Admin    | qa-admin@upscale.test        | client |
+| Participant Test | test-participant@upscale.fr | client |
 | 123              | 123@gmail.com                  | client |
 | 222              | 222@mail.com                   | client |
 

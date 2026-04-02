@@ -13,7 +13,7 @@ const VAPID_PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY ?? "").replace(
   /=+$/,
   "",
 );
-const VAPID_EMAIL = process.env.VAPID_EMAIL ?? "mailto:contact@offmarket.app";
+const VAPID_EMAIL = process.env.VAPID_EMAIL ?? "mailto:contact@upscale.app";
 
 export async function POST(request: Request) {
   try {

@@ -173,7 +173,7 @@ export function AboutYouStep({
       <div>
         <label className="flex items-center gap-2 text-sm font-medium text-white/70 mb-3">
           <UserSearch className="w-4 h-4 text-primary" />
-          Comment as-tu decouvert Alexia ?
+          Comment as-tu decouvert Admin ?
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {SOURCES.map((source) => (

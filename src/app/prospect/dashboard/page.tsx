@@ -226,7 +226,7 @@ export default function ProspectDashboardPage() {
               accompagnement.
             </p>
             <a
-              href="mailto:contact@offmarket.fr"
+              href="mailto:contact@upscale.fr"
               className="mt-4 inline-flex items-center gap-2 rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
               Contactez-nous pour debloquer votre acces

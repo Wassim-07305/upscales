@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils";
 
-interface OffMarketLogoProps {
+interface UpscaleLogoProps {
   size?: number;
   showText?: boolean;
   className?: string;
   textClassName?: string;
 }
 
-export function OffMarketLogo({
+export function UpscaleLogo({
   size = 36,
   showText = false,
   className,
   textClassName,
-}: OffMarketLogoProps) {
+}: UpscaleLogoProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <svg

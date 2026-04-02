@@ -247,7 +247,7 @@ test.describe("6. Fonctionnel — Login erreurs", () => {
   test("email inexistant affiche un toast d'erreur", async ({ page }) => {
     await page.goto("/login");
 
-    await page.getByLabel("Email").fill("nexistepas@offmarket.test");
+    await page.getByLabel("Email").fill("nexistepas@upscale.test");
     await page.getByLabel("Mot de passe").fill("N1mporteQuoi!");
     await page.getByRole("button", { name: "Se connecter" }).click();
 
@@ -348,7 +348,7 @@ test.describe("8. Fonctionnel — Signup", () => {
     await page.goto("/signup");
 
     await page.getByLabel("Nom complet").fill("Test User");
-    await page.getByLabel("Email").fill("test-short-pw@offmarket.test");
+    await page.getByLabel("Email").fill("test-short-pw@upscale.test");
     await page.getByLabel("Mot de passe").fill("abc");
     await page.getByRole("button", { name: "Creer mon compte" }).click();
 
@@ -384,7 +384,7 @@ test.describe("9. Fonctionnel — Forgot Password", () => {
   }) => {
     await page.goto("/forgot-password");
 
-    await page.getByLabel("Email").fill("test@offmarket.test");
+    await page.getByLabel("Email").fill("test@upscale.test");
     await page.getByRole("button", { name: "Envoyer le lien" }).click();
 
     // Doit afficher l'ecran de confirmation "Email envoye"
@@ -885,7 +885,7 @@ test.describe("18. Edge cases — Refresh pendant action", () => {
   test("refresh pendant le login ne casse pas la page", async ({ page }) => {
     await page.goto("/login");
 
-    await page.getByLabel("Email").fill("test@offmarket.test");
+    await page.getByLabel("Email").fill("test@upscale.test");
     await page.getByLabel("Mot de passe").fill("TestPassword!");
 
     // Refresh immediatement

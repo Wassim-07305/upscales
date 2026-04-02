@@ -1,4 +1,4 @@
-# TEST-REPORT.md — Off-Market E2E Testing Report
+# TEST-REPORT.md — UPSCALE E2E Testing Report
 
 **Date:** 2026-03-17
 **Environment:** localhost:3000 (Next.js 16.1.6 + Turbopack dev mode)

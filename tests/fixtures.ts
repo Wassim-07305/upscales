@@ -32,7 +32,7 @@ function generateUsers(
   startIndex: number,
 ): TestUser[] {
   const firstNames: Record<TestRole, string[]> = {
-    admin: ["Alexia", "Julien", "Clara", "Victor"],
+    admin: ["Admin", "Julien", "Clara", "Victor"],
     coach: ["Sophie", "Nathan", "Camille", "Lucas"],
     client: [
       "Thomas",
@@ -66,7 +66,7 @@ function generateUsers(
   };
 
   return Array.from({ length: count }, (_, i) => ({
-    email: `e2e-${role}-${startIndex + i}@offmarket.test`,
+    email: `e2e-${role}-${startIndex + i}@upscale.test`,
     password: "TestE2E123!",
     role,
     fullName: `${firstNames[role][i]} ${lastNames[role][i]}`,

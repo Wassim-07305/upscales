@@ -153,7 +153,7 @@ export function useClientMemories() {
 
 // ─── AlexIA Chat (RAG-powered) ───────────────────────────────────────────────
 
-export function useSendAlexiaMessage() {
+export function useSendAdminMessage() {
   return useMutation({
     mutationFn: async ({
       message,

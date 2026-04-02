@@ -19,9 +19,9 @@ import {
   PanelLeftOpen,
   Settings,
 } from "lucide-react";
-import { AlexiaKnowledgePanel } from "@/components/ai/alexia-knowledge-panel";
-import { AlexiaConfigPanel } from "@/components/ai/alexia-config-panel";
-import { AlexiaMemoryPanel } from "@/components/ai/alexia-memory-panel";
+import { AdminKnowledgePanel } from "@/components/ai/alexia-knowledge-panel";
+import { AdminConfigPanel } from "@/components/ai/alexia-config-panel";
+import { AdminMemoryPanel } from "@/components/ai/alexia-memory-panel";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { AiResponseBadge } from "@/components/ai/ai-response-badge";
@@ -276,13 +276,13 @@ export default function AIPage() {
       {activeTab === "config" && isStaff ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-y-auto pb-8 max-h-none lg:max-h-[calc(100vh-10rem)]">
           <div className="bg-surface border border-border rounded-2xl p-5 overflow-y-auto max-h-none lg:max-h-[calc(100vh-11rem)]">
-            <AlexiaKnowledgePanel />
+            <AdminKnowledgePanel />
           </div>
           <div className="bg-surface border border-border rounded-2xl p-5 overflow-y-auto max-h-none lg:max-h-[calc(100vh-11rem)]">
-            <AlexiaConfigPanel />
+            <AdminConfigPanel />
           </div>
           <div className="bg-surface border border-border rounded-2xl p-5 overflow-y-auto max-h-none lg:max-h-[calc(100vh-11rem)]">
-            <AlexiaMemoryPanel />
+            <AdminMemoryPanel />
           </div>
         </div>
       ) : (

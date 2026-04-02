@@ -11,7 +11,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-export function AlexiaMemoryPanel() {
+export function AdminMemoryPanel() {
   const { data: memories, isLoading } = useClientMemories();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = memories?.find((m) => m.id === selectedId);

@@ -16,7 +16,7 @@ export default function MentionsLegalesPage() {
           <br />
           RCS [Ville] — SIRET [numéro]
           <br />
-          Directrice de la publication : Alexia Laneau
+          Directrice de la publication : Admin Upscale
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8 mb-4">

@@ -1,7 +1,7 @@
 # Spec : Contrat dans l'onboarding client + Onboarding prospect
 
 **Date** : 2026-03-25
-**Projet** : Off-Market
+**Projet** : UPSCALE
 **Statut** : Approuvé
 
 ---
@@ -12,7 +12,7 @@
 
 L'onboarding client actuel a 6 étapes : `welcome_video` → `about_you` → `meet_csm` → `feature_tour` → `message_test` → `completion`. Il n'y a pas d'étape de signature de contrat. Le contrat est auto-généré en fire-and-forget à la completion mais jamais présenté au client.
 
-Le contrat PDF existant (`public/contrat-off-market.pdf`) fait 9 pages, 30 articles. Les champs client à remplir sont : nom/prénom, adresse, code postal/ville, mention "lu et approuvé", signature.
+Le contrat PDF existant (`public/contrat-upscale.pdf`) fait 9 pages, 30 articles. Les champs client à remplir sont : nom/prénom, adresse, code postal/ville, mention "lu et approuvé", signature.
 
 ### Objectif
 

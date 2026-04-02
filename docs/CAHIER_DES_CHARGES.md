@@ -1,8 +1,8 @@
-# Cahier des charges - Off-Market
+# Cahier des charges - UPSCALE
 
 ## 1. Presentation generale
 
-**Off-Market** est un CRM (Customer Relationship Management) specialise pour les agences de coaching, consulting et vente en ligne. Il centralise la gestion des clients, des leads, des appels de vente, des finances, du contenu social et de l'activite d'equipe dans une seule plateforme.
+**UPSCALE** est un CRM (Customer Relationship Management) specialise pour les agences de coaching, consulting et vente en ligne. Il centralise la gestion des clients, des leads, des appels de vente, des finances, du contenu social et de l'activite d'equipe dans une seule plateforme.
 
 L'application est une **Single Page Application (SPA)** deployee en mode PWA (Progressive Web App), accessible sur desktop, tablette et mobile.
 
@@ -109,7 +109,7 @@ src/
 │   │   ├── search-input.tsx
 │   │   ├── confirm-dialog.tsx
 │   │   ├── inline-edit.tsx
-│   │   └── OffMarketLogo.tsx
+│   │   └── UpscaleLogo.tsx
 │   │
 │   ├── dashboard/              # 9 composants (stats, charts, KPIs)
 │   ├── clients/                # 14 composants (table, detail, onglets)
@@ -771,7 +771,7 @@ Page d'aide interne avec :
 - SearchInput
 - ConfirmDialog
 - InlineEdit (edition sur place)
-- OffMarketLogo
+- UpscaleLogo
 
 ### 7.3 Notifications
 

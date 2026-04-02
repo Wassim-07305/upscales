@@ -24,7 +24,7 @@ function checkNoNetworkErrorsIgnoringKnown(
   }
 }
 
-const ADMIN_EMAIL = "e2e-admin-1@offmarket.test";
+const ADMIN_EMAIL = "e2e-admin-1@upscale.test";
 const ADMIN_PASSWORD = "TestE2E123!";
 
 async function loginAsAdmin(page: Page) {

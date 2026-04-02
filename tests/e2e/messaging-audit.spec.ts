@@ -171,7 +171,7 @@ test.describe("Messagerie — DM entre admin et client", () => {
     const adminContext = await browser.newContext();
     const adminPage = await adminContext.newPage();
     await adminPage.goto("/login");
-    await adminPage.getByLabel("Email").fill("e2e-admin-1@offmarket.test");
+    await adminPage.getByLabel("Email").fill("e2e-admin-1@upscale.test");
     await adminPage.getByLabel("Mot de passe").fill("TestE2E123!");
     await adminPage.getByRole("button", { name: "Se connecter" }).click();
     await adminPage.waitForURL(/\/(admin|coach|client|sales)\//, {

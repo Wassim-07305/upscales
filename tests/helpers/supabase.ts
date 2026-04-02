@@ -81,7 +81,7 @@ export async function cleanupTestData() {
   if (users?.users) {
     const testUsers = (
       users.users as Array<{ id: string; email?: string }>
-    ).filter((u) => u.email?.endsWith("@offmarket.test"));
+    ).filter((u) => u.email?.endsWith("@upscale.test"));
 
     for (const user of testUsers) {
       await client.auth.admin.deleteUser(user.id);

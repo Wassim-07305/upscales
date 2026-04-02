@@ -70,7 +70,7 @@ test.describe("Login — erreurs", () => {
   test("mauvais email affiche un toast d'erreur", async ({ page }) => {
     await page.goto("/login");
 
-    await page.getByLabel("Email").fill("nexistepas@offmarket.test");
+    await page.getByLabel("Email").fill("nexistepas@upscale.test");
     await page.getByLabel("Mot de passe").fill("N1mporteQuoi!");
     await page.getByRole("button", { name: "Se connecter" }).click();
 

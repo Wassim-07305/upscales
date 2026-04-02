@@ -1,19 +1,19 @@
-# Off-Market — Plan de Tests E2E
+# UPSCALE — Plan de Tests E2E
 
-> Genere apres exploration manuelle de l'application deployee sur https://off-market-amber.vercel.app
+> Genere apres exploration manuelle de l'application deployee sur https://upscale-amber.vercel.app
 > Date : 2026-03-17
 
 ## Comptes de test
 
 | Role   | Email                 | Mot de passe      | Nom reel      | Espace  |
 | ------ | --------------------- | ----------------- | ------------- | ------- |
-| Admin  | admin@offmarket.fr    | TestAdmin2026!    | Alexia Laneau | /admin  |
-| Coach  | coach@offmarket.fr    | TestCoach2026!    | Sophie Martin | /coach  |
-| Client | prospect@offmarket.fr | TestProspect2026! | Thomas Dupont | /client |
+| Admin  | admin@upscale.app    | TestAdmin2026!    | Admin Upscale | /admin  |
+| Coach  | coach@upscale.app    | TestCoach2026!    | Sophie Martin | /coach  |
+| Client | prospect@upscale.app | TestProspect2026! | Thomas Dupont | /client |
 
-> Note : admin@offmarket.fr redirige vers /admin/dashboard (Alexia Laneau, role admin).
-> coach@offmarket.fr redirige vers /coach/dashboard (Sophie Martin, role coach).
-> prospect@offmarket.fr redirige vers /client/dashboard (Thomas Dupont, role client).
+> Note : admin@upscale.app redirige vers /admin/dashboard (Admin Upscale, role admin).
+> coach@upscale.app redirige vers /coach/dashboard (Sophie Martin, role coach).
+> prospect@upscale.app redirige vers /client/dashboard (Thomas Dupont, role client).
 
 ---
 
@@ -23,27 +23,27 @@
 
 - **Precondition** : Utilisateur deconnecte
 - **Etape 1** : Naviguer vers `/login`
-- **Etape 2** : Remplir le champ "Email" (placeholder `ton@email.com`) avec `admin@offmarket.fr`
+- **Etape 2** : Remplir le champ "Email" (placeholder `ton@email.com`) avec `admin@upscale.app`
 - **Etape 3** : Remplir le champ "Mot de passe" (placeholder `••••••••`) avec `TestAdmin2026!`
 - **Etape 4** : Cliquer sur le bouton "Se connecter"
-- **Resultat attendu** : Redirection vers `/admin/dashboard`, sidebar avec "Alexia Laneau / Admin" visible
-- **DB check** : `SELECT id, full_name, role FROM profiles WHERE email = 'admin@offmarket.fr';`
+- **Resultat attendu** : Redirection vers `/admin/dashboard`, sidebar avec "Admin Upscale / Admin" visible
+- **DB check** : `SELECT id, full_name, role FROM profiles WHERE email = 'admin@upscale.app';`
 
 ### Test 1.2 : Login coach reussi
 
 - **Precondition** : Utilisateur deconnecte
 - **Etape 1** : Naviguer vers `/login`
-- **Etape 2** : Remplir "Email" avec `coach@offmarket.fr`
+- **Etape 2** : Remplir "Email" avec `coach@upscale.app`
 - **Etape 3** : Remplir "Mot de passe" avec `TestCoach2026!`
 - **Etape 4** : Cliquer sur "Se connecter"
 - **Resultat attendu** : Redirection vers `/coach/dashboard`, sidebar avec "Sophie Martin / Coach" visible
-- **DB check** : `SELECT id, full_name, role FROM profiles WHERE email = 'coach@offmarket.fr';`
+- **DB check** : `SELECT id, full_name, role FROM profiles WHERE email = 'coach@upscale.app';`
 
 ### Test 1.3 : Login client reussi
 
 - **Precondition** : Utilisateur deconnecte
 - **Etape 1** : Naviguer vers `/login`
-- **Etape 2** : Remplir "Email" avec `prospect@offmarket.fr`
+- **Etape 2** : Remplir "Email" avec `prospect@upscale.app`
 - **Etape 3** : Remplir "Mot de passe" avec `TestProspect2026!`
 - **Etape 4** : Cliquer sur "Se connecter"
 - **Resultat attendu** : Redirection vers `/client/dashboard`, sidebar avec "Thomas Dupont / Client" visible
@@ -51,7 +51,7 @@
 ### Test 1.4 : Login avec mauvais mot de passe
 
 - **Etape 1** : Naviguer vers `/login`
-- **Etape 2** : Remplir "Email" avec `admin@offmarket.fr`
+- **Etape 2** : Remplir "Email" avec `admin@upscale.app`
 - **Etape 3** : Remplir "Mot de passe" avec `mauvais_mdp`
 - **Etape 4** : Cliquer sur "Se connecter"
 - **Resultat attendu** : Rester sur `/login`, message d'erreur affiché, pas de redirection
@@ -77,7 +77,7 @@
 
 ### Test 1.8 : Acces a un espace d'un autre role redirige
 
-- **Precondition** : Connecte comme client (prospect@offmarket.fr)
+- **Precondition** : Connecte comme client (prospect@upscale.app)
 - **Etape 1** : Naviguer vers `/admin/dashboard`
 - **Resultat attendu** : Redirection vers `/client/dashboard` ou `/login` (pas acces admin)
 
@@ -106,7 +106,7 @@
 
 ### Test 2.1 : KPIs affiches sur le dashboard admin
 
-- **Precondition** : Connecte comme admin@offmarket.fr
+- **Precondition** : Connecte comme admin@upscale.app
 - **Etape 1** : Naviguer vers `/admin/dashboard`
 - **Resultat attendu** : Les 4 cartes KPI sont visibles — "CA du mois", "Eleves actifs", "Nouveaux ce mois", "LTV moyen"
 
@@ -267,11 +267,11 @@
 
 ### Test 5.1 : Page Messagerie (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/messaging`
 - **Resultat attendu** : Panneau de gauche avec "Canaux" et "Messages directs", canal "General" actif par defaut
 
-### Test 5.2 : Switcher entre onglets Off-Market / Boite unifiee
+### Test 5.2 : Switcher entre onglets UPSCALE / Boite unifiee
 
 - **Etape 1** : Cliquer sur "Boite unifiee"
 - **Resultat attendu** : Vue boite unifiee s'affiche
@@ -326,13 +326,13 @@
 
 ### Test 5.12 : Rechercher un message direct
 
-- **Etape 1** : Taper "Alexia" dans le champ "Rechercher..."
+- **Etape 1** : Taper "Admin" dans le champ "Rechercher..."
 - **Resultat attendu** : La liste est filtree
 
 ### Test 5.13 : Ouvrir une conversation directe
 
-- **Etape 1** : Cliquer sur "Alexia Laneau" dans la liste des messages directs
-- **Resultat attendu** : La conversation avec Alexia s'ouvre
+- **Etape 1** : Cliquer sur "Admin Upscale" dans la liste des messages directs
+- **Resultat attendu** : La conversation avec Admin s'ouvre
 
 ### Test 5.14 : Vue mosaique des messages directs
 
@@ -350,7 +350,7 @@
 
 ### Test 6.1 : Page Formation (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/school`
 - **Resultat attendu** : Titre "Formation", lien "Gerer les formations", liste des formations disponibles
 
@@ -376,7 +376,7 @@
 
 ### Test 6.6 : Page Formation (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/school`
 - **Resultat attendu** : Meme liste de formations, sans le lien "Gerer les formations"
 - **DB check** : `SELECT id, title, description FROM formations ORDER BY created_at DESC LIMIT 5;`
@@ -387,7 +387,7 @@
 
 ### Test 7.1 : Page Contenu (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/content`
 - **Resultat attendu** : Titre "Contenu", compteurs de statuts (Brouillons, Planifies, Publies, Archives, par reseau), board Kanban vide
 
@@ -420,7 +420,7 @@
 
 ### Test 8.1 : Page Feed (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/feed`
 - **Resultat attendu** : Zone de publication, filtres de categories, section "Tendances"
 
@@ -449,7 +449,7 @@
 
 ### Test 9.1 : Page Appels (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/calls`
 - **Resultat attendu** : Titre "Appels", vue hebdomadaire avec les 7 jours de la semaine, bouton "Nouvel appel"
 
@@ -489,7 +489,7 @@
 
 ### Test 10.1 : Page Check-ins (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/checkins`
 - **Resultat attendu** : Titre "Check-ins clients", KPIs (Total, Humeur moy., Energie moy., Moral bas), liste vide
 
@@ -509,7 +509,7 @@
 
 ### Test 11.1 : Page Communaute (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/community`
 - **Resultat attendu** : Titre "Communaute", "14 membres", liste des membres avec niveaux/XP
 
@@ -539,7 +539,7 @@
 
 ### Test 12.1 : Page Calendrier (Coach) chargee
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/calendar`
 - **Resultat attendu** : Titre "Calendrier", vue mois, bouton "Evenement"
 
@@ -573,7 +573,7 @@
 
 ### Test 13.1 : Page Check-in (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/checkin`
 - **Resultat attendu** : Titre "Check-in hebdomadaire", KPIs, historique d'humeur sur 12 semaines, tabs Bien-etre/Business/Gratitudes/Objectifs/Bilan
 
@@ -602,7 +602,7 @@
 
 ### Test 14.1 : Page Journal (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/journal`
 - **Resultat attendu** : Titre "Journal", statistiques (Entrees, Jours de suite, Humeur moy.), prompt du jour, templates
 
@@ -635,7 +635,7 @@
 
 ### Test 15.1 : Page Objectifs (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/goals`
 - **Resultat attendu** : Titre "Mes objectifs", KPIs (En cours, Termines, Progression), tabs "En cours" et "Tous"
 
@@ -650,7 +650,7 @@
 
 ### Test 16.1 : Dashboard Client complet
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/dashboard`
 - **Resultat attendu** :
   - Salutation "Bonjour Thomas !"
@@ -688,7 +688,7 @@
 
 ### Test 17.1 : Page Formulaires (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/forms`
 - **Resultat attendu** : Page chargee sans erreur, liste des formulaires assignes
 
@@ -698,7 +698,7 @@
 
 ### Test 18.1 : Page Contrats (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/contracts`
 - **Resultat attendu** : Page chargee sans erreur, liste des contrats du client
 
@@ -708,7 +708,7 @@
 
 ### Test 19.1 : Page Factures (Client) chargee
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/invoices`
 - **Resultat attendu** : Page chargee sans erreur, liste des factures du client
 
@@ -734,19 +734,19 @@
 
 ### Test 20.4 : Page Parametres (Coach)
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Cliquer sur "Paramètres" dans la sidebar
 - **Resultat attendu** : Navigation vers `/coach/settings`, page de parametres chargee
 
 ### Test 20.5 : Page Parametres (Client)
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Cliquer sur "Paramètres" dans la sidebar
 - **Resultat attendu** : Navigation vers `/client/settings`
 
 ### Test 20.6 : Disponibilites (Coach)
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Cliquer sur "Disponibilites" dans la sidebar
 - **Resultat attendu** : Navigation vers `/coach/settings/availability`
 
@@ -758,7 +758,7 @@
 
 ### Test 21.1 : Page Seances (Coach) — bug identifie
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/sessions`
 - **Resultat attendu (actuel)** : Page d'erreur "Erreur — Espace Coach" avec TypeError
 - **Resultat attendu (cible)** : Page des seances de coaching chargee sans erreur
@@ -766,7 +766,7 @@
 
 ### Test 21.2 : Page Alertes (Coach) — bug identifie
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer vers `/coach/alerts`
 - **Resultat attendu (actuel)** : Page d'erreur "Erreur — Espace Coach" avec TypeError
 - **Resultat attendu (cible)** : Page des alertes chargee avec la liste des alertes clients
@@ -778,7 +778,7 @@
 
 ### Test 22.1 : Page Facturation (Admin)
 
-- **Precondition** : Connecte comme admin@offmarket.fr
+- **Precondition** : Connecte comme admin@upscale.app
 - **Etape 1** : Naviguer vers `/admin/billing`
 - **Resultat attendu** : Page de facturation chargee sans erreur
 
@@ -843,19 +843,19 @@
 
 ### Test 23.1 : Client ne peut pas acceder aux pages admin
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer directement vers `/admin/clients`
 - **Resultat attendu** : Redirection vers `/client/dashboard` ou `/login`, pas acces aux donnees admin
 
 ### Test 23.2 : Client ne peut pas acceder aux pages coach
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer directement vers `/coach/crm`
 - **Resultat attendu** : Redirection vers `/client/dashboard` ou `/login`
 
 ### Test 23.3 : Coach ne peut pas acceder aux pages admin
 
-- **Precondition** : Connecte comme coach@offmarket.fr
+- **Precondition** : Connecte comme coach@upscale.app
 - **Etape 1** : Naviguer directement vers `/admin/billing`
 - **Resultat attendu** : Redirection vers `/coach/dashboard` ou `/login`
 
@@ -875,7 +875,7 @@
 
 ### Test 24.1 : Page Certificats
 
-- **Precondition** : Connecte comme prospect@offmarket.fr
+- **Precondition** : Connecte comme prospect@upscale.app
 - **Etape 1** : Naviguer vers `/client/certificates`
 - **Resultat attendu** : Page chargee, liste des certificats obtenus
 

@@ -1,4 +1,4 @@
-# Audit CDC vs Codebase Off-Market
+# Audit CDC vs Codebase UPSCALE
 
 > Date de l'audit : 2026-03-23
 > Source : Cahier des Charges v1.0 (Fevrier 2026) — 25 pages, 12 sections
@@ -104,7 +104,7 @@
 
 **Statut : Fait**
 
-- Reponse automatique IA (@Alexia)
+- Reponse automatique IA (@Admin)
 - Slash commands IA
 - Base de connaissances configurable (admin)
 - Stats : taux validation, questions frequentes
@@ -400,7 +400,7 @@
 - Templates (contrats, factures, emails)
 - Configuration gamification (XP, badges, niveaux)
 - Configuration commissions (paliers, bonus)
-- Base connaissances IA (Alexia)
+- Base connaissances IA (Admin)
 
 ---
 
@@ -475,4 +475,4 @@
 
 ## Conclusion
 
-Le projet Off-Market couvre **95% du cahier des charges** (38/40 features). Les 2 features restantes sont mineures : calculateur pricing cote client (~1h) et mini-challenge prospect (~2-4h). Push notifications, relances email, Stripe et integrations Slack/SMS sont operationnels.
+Le projet UPSCALE couvre **95% du cahier des charges** (38/40 features). Les 2 features restantes sont mineures : calculateur pricing cote client (~1h) et mini-challenge prospect (~2-4h). Push notifications, relances email, Stripe et integrations Slack/SMS sont operationnels.

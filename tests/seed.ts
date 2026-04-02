@@ -36,106 +36,106 @@ interface SeedUser {
 const USERS: SeedUser[] = [
   // 3 admins
   {
-    email: "e2e-admin-1@offmarket.test",
+    email: "e2e-admin-1@upscale.test",
     full_name: "Julien Moreau",
     role: "admin",
   },
   {
-    email: "e2e-admin-2@offmarket.test",
+    email: "e2e-admin-2@upscale.test",
     full_name: "Claire Dupont",
     role: "admin",
   },
   {
-    email: "e2e-admin-3@offmarket.test",
+    email: "e2e-admin-3@upscale.test",
     full_name: "Antoine Leroy",
     role: "admin",
   },
   // 4 coaches
   {
-    email: "e2e-coach-1@offmarket.test",
+    email: "e2e-coach-1@upscale.test",
     full_name: "Sophie Martin",
     role: "coach",
   },
   {
-    email: "e2e-coach-2@offmarket.test",
+    email: "e2e-coach-2@upscale.test",
     full_name: "Thomas Bernard",
     role: "coach",
   },
   {
-    email: "e2e-coach-3@offmarket.test",
+    email: "e2e-coach-3@upscale.test",
     full_name: "Camille Petit",
     role: "coach",
   },
   {
-    email: "e2e-coach-4@offmarket.test",
+    email: "e2e-coach-4@upscale.test",
     full_name: "Lucas Fontaine",
     role: "coach",
   },
   // 8 clients
   {
-    email: "e2e-client-1@offmarket.test",
+    email: "e2e-client-1@upscale.test",
     full_name: "Emma Girard",
     role: "client",
   },
   {
-    email: "e2e-client-2@offmarket.test",
+    email: "e2e-client-2@upscale.test",
     full_name: "Hugo Roux",
     role: "client",
   },
   {
-    email: "e2e-client-3@offmarket.test",
+    email: "e2e-client-3@upscale.test",
     full_name: "Lea Bonnet",
     role: "client",
   },
   {
-    email: "e2e-client-4@offmarket.test",
+    email: "e2e-client-4@upscale.test",
     full_name: "Nathan Mercier",
     role: "client",
   },
   {
-    email: "e2e-client-5@offmarket.test",
+    email: "e2e-client-5@upscale.test",
     full_name: "Manon Duval",
     role: "client",
   },
   {
-    email: "e2e-client-6@offmarket.test",
+    email: "e2e-client-6@upscale.test",
     full_name: "Maxime Garnier",
     role: "client",
   },
   {
-    email: "e2e-client-7@offmarket.test",
+    email: "e2e-client-7@upscale.test",
     full_name: "Chloe Lambert",
     role: "client",
   },
   {
-    email: "e2e-client-8@offmarket.test",
+    email: "e2e-client-8@upscale.test",
     full_name: "Raphael Faure",
     role: "client",
   },
   // 3 setters
   {
-    email: "e2e-setter-1@offmarket.test",
+    email: "e2e-setter-1@upscale.test",
     full_name: "Ines Chevalier",
     role: "setter",
   },
   {
-    email: "e2e-setter-2@offmarket.test",
+    email: "e2e-setter-2@upscale.test",
     full_name: "Theo Blanchard",
     role: "setter",
   },
   {
-    email: "e2e-setter-3@offmarket.test",
+    email: "e2e-setter-3@upscale.test",
     full_name: "Jade Rousseau",
     role: "setter",
   },
   // 2 closers
   {
-    email: "e2e-closer-1@offmarket.test",
+    email: "e2e-closer-1@upscale.test",
     full_name: "Alexandre Dubois",
     role: "closer",
   },
   {
-    email: "e2e-closer-2@offmarket.test",
+    email: "e2e-closer-2@upscale.test",
     full_name: "Marie Lefebvre",
     role: "closer",
   },

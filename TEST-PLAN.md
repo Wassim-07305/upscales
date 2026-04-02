@@ -1,4 +1,4 @@
-# Plan de test exhaustif — Off-Market
+# Plan de test exhaustif — UPSCALE
 
 > CRM/Coaching platform — Next.js 16 + Supabase
 > 5 roles : `admin`, `coach`, `client`, `setter`, `closer`

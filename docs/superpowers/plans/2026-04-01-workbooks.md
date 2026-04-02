@@ -180,7 +180,7 @@ export function StepFieldEditor({ field }: { field: BuilderField }) {
             updateField(field.id, { description: e.target.value })
           }
           className="w-full h-9 px-3 bg-muted border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-          placeholder="Ex: La base de ton marche Off-Market"
+          placeholder="Ex: La base de ton marche UPSCALE"
         />
       </div>
       <div>
@@ -1046,8 +1046,8 @@ Add this template to the `FORM_TEMPLATES` array:
 ```typescript
 {
   id: "workbook-marche",
-  name: "Workbook Marche Off-Market",
-  description: "5 etapes pour creer ton marche Off-Market",
+  name: "Workbook Marche UPSCALE",
+  description: "5 etapes pour creer ton marche UPSCALE",
   category: "onboarding",
   type: "workbook",
   icon: "BookOpen",

@@ -1,7 +1,7 @@
-# Rapport de Livraison — Off-Market
+# Rapport de Livraison — UPSCALE
 
 > Date : 2026-03-23
-> URL de production : https://off-market-amber.vercel.app
+> URL de production : https://upscale-amber.vercel.app
 > Branche : `main`
 
 ---
@@ -13,7 +13,7 @@
 | TypeScript (`tsc --noEmit`) | ⚠️ 2 erreurs | `use-lead-magnet.ts:173` (type CapturedContact) + `use-ltv.ts:48` (cast InvoiceWithClient) |
 | Build Vercel                | ✅ OK        | Dernier deploiement READY (build en cours pour le commit Google Calendar)                  |
 | Branche main                | ✅ A jour    | 13 fichiers modifies localement (non pushes)                                               |
-| URL production              | ✅ Active    | https://off-market-amber.vercel.app                                                        |
+| URL production              | ✅ Active    | https://upscale-amber.vercel.app                                                        |
 
 > **Note** : `ignoreBuildErrors: true` dans next.config — les 2 erreurs TS n'empechent pas le build mais doivent etre corrigees.
 
@@ -77,7 +77,7 @@ F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F13, F14, F15, F16, F17, F19, F21, F22
 
 | Point                 | Statut           | Detail                                           |
 | --------------------- | ---------------- | ------------------------------------------------ |
-| `<title>` global      | ✅               | "Off Market — Deviens le choix evident"          |
+| `<title>` global      | ✅               | "UPSCALE — Deviens le choix evident"          |
 | Meta OpenGraph        | ✅               | title, description, siteName, type, locale fr_FR |
 | Twitter Card          | ✅               | summary_large_image                              |
 | OG Image dynamique    | ✅               | opengraph-image.tsx (1200x630, Edge runtime)     |

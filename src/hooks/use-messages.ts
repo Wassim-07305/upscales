@@ -8,7 +8,7 @@ import type { EnrichedMessage } from "@/types/messaging";
 import { playUrgentSound } from "@/lib/sounds";
 import { toast } from "sonner";
 import {
-  containsAlexiaMention,
+  containsAdminMention,
   ALEXIA_BOT_ID,
 } from "@/components/messaging/alexia-mention";
 
@@ -262,10 +262,10 @@ export function useMessages(channelId: string | null) {
       }
 
       // Auto-reponse AlexIA : si elle est membre du canal OU si @alexia mentionnee
-      const isAlexiaMember = alexiaMemberQuery.data ?? false;
-      const hasMention = containsAlexiaMention(variables.content);
+      const isAdminMember = alexiaMemberQuery.data ?? false;
+      const hasMention = containsAdminMention(variables.content);
 
-      if (channelId && (isAlexiaMember || hasMention)) {
+      if (channelId && (isAdminMember || hasMention)) {
         try {
           const messageForAI = hasMention
             ? variables.content.replace(/@alexia\b/gi, "").trim()
@@ -282,7 +282,7 @@ export function useMessages(channelId: string | null) {
           if (res.ok) {
             const data = await res.json();
             if (data.response) {
-              if (isAlexiaMember) {
+              if (isAdminMember) {
                 // Inserer en tant qu'AlexIA via endpoint dedie
                 await fetch("/api/ai/alexia/channel-reply", {
                   method: "POST",

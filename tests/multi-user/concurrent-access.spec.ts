@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-const ADMIN_EMAIL = "e2e-admin-1@offmarket.test";
-const CLIENT_1_EMAIL = "e2e-client-1@offmarket.test";
-const CLIENT_2_EMAIL = "e2e-client-2@offmarket.test";
+const ADMIN_EMAIL = "e2e-admin-1@upscale.test";
+const CLIENT_1_EMAIL = "e2e-client-1@upscale.test";
+const CLIENT_2_EMAIL = "e2e-client-2@upscale.test";
 const PASSWORD = "TestE2E123!";
 
 async function loginUser(

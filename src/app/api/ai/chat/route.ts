@@ -103,7 +103,7 @@ async function buildContext(
       }
     }
 
-    // Fetch past admin messages from channels (Alexia's answers) to train on patterns
+    // Fetch past admin messages from channels (Admin's answers) to train on patterns
     const { data: adminProfiles } = await supabase
       .from("profiles")
       .select("id")
@@ -123,7 +123,7 @@ async function buildContext(
         .limit(50);
 
       if (adminMessages && adminMessages.length > 0) {
-        context += `\n### Réponses recentes d'Alexia (admin) dans les channels — inspire-toi de son ton et style\n`;
+        context += `\n### Réponses recentes d'Admin (admin) dans les channels — inspire-toi de son ton et style\n`;
         for (const msg of adminMessages) {
           // Sanitize: strip potential prompt injection markers from stored messages
           const rawContent = (msg.content ?? "").slice(0, 300);

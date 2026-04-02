@@ -182,7 +182,7 @@ Connexion : /login avec compte client
  │ 5.9 │ Envoyer un │ /client/messaging │ Channels groupe + DM coach, │  
  │ │ message │ │ @mentions ok │  
  ├──────┼─────────────────┼───────────────────────┼─────────────────────────────┤  
- │ 5.10 │ Poser question │ Messaging > @Alexia │ Reponse IA, boutons "Utile" │  
+ │ 5.10 │ Poser question │ Messaging > @Admin │ Reponse IA, boutons "Utile" │  
  │ │ a l'IA │ │ / "Besoin d'un coach" │  
  ├──────┼─────────────────┼───────────────────────┼─────────────────────────────┤  
  │ 5.11 │ Poster dans le │ /client/feed │ Post victoire, likes, │  

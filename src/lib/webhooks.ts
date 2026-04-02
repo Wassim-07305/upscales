@@ -69,7 +69,7 @@ export async function dispatchWebhook(
             "Content-Type": "application/json",
             "X-Webhook-Signature": `sha256=${signature}`,
             "X-Webhook-Event": event,
-            "User-Agent": "OffMarket-Webhooks/1.0",
+            "User-Agent": "Upscale-Webhooks/1.0",
           },
           body,
           signal: AbortSignal.timeout(10000), // 10s timeout

@@ -1,7 +1,7 @@
-# Checklist de Test Manuel — Off-Market
+# Checklist de Test Manuel — UPSCALE
 
 > Date : 22 mars 2026 | CDC : 71/71 features couvertes
-> URL : https://off-market-amber.vercel.app
+> URL : https://upscale-amber.vercel.app
 
 ---
 
@@ -23,7 +23,7 @@ Pour chaque item, teste manuellement et coche :
 - [ok ] 3 stats animees (35+, 10K, 97%)
 - [ok ] 6 cartes features
 - [ ok] 3 etapes "Comment ca marche"
-- [ ok] 3 cartes "Pourquoi Off-Market"
+- [ ok] 3 cartes "Pourquoi UPSCALE"
 - [ ok] 3 temoignages avec etoiles
 - [ok ] **FAQ accordeon** (6 questions, cliquer chaque question, une seule ouverte a la fois)
 - [ok ] CTA final "Postuler maintenant" → redirige vers `/signup`
@@ -410,7 +410,7 @@ n'est pas présent dans la sidebar + charge a l'infini
 
 ---
 
-## 26. Invitations (`/admin/invitations`) c'est ok mais c'est dans https://off-market-amber.vercel.app/admin/personnes
+## 26. Invitations (`/admin/invitations`) c'est ok mais c'est dans https://upscale-amber.vercel.app/admin/personnes
 
 - [ ] Liste avec filtres (all, pending, accepted, expired)
 - [ ] **Nouvelle invitation** : email + role → toast succes

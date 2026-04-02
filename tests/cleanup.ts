@@ -1,5 +1,5 @@
 /**
- * Script de cleanup — Supprime tous les utilisateurs @offmarket.test
+ * Script de cleanup — Supprime tous les utilisateurs @upscale.test
  *
  * Usage : npx tsx tests/cleanup.ts
  */
@@ -24,10 +24,10 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 });
 
 // Emails a ne jamais supprimer (comptes reels)
-const PROTECTED_EMAILS = ["admin@offmarket.fr", "coach@offmarket.fr"];
+const PROTECTED_EMAILS = ["admin@upscale.fr", "coach@upscale.fr"];
 
 async function cleanup() {
-  console.log("\n🧹 Cleanup des utilisateurs @offmarket.test...\n");
+  console.log("\n🧹 Cleanup des utilisateurs @upscale.test...\n");
 
   // Lister tous les users
   const { data: listData, error: listError } =
@@ -43,12 +43,12 @@ async function cleanup() {
 
   const testUsers = listData.users.filter(
     (u) =>
-      u.email?.endsWith("@offmarket.test") &&
+      u.email?.endsWith("@upscale.test") &&
       !PROTECTED_EMAILS.includes(u.email ?? ""),
   );
 
   if (testUsers.length === 0) {
-    console.log("  Aucun utilisateur @offmarket.test trouve.\n");
+    console.log("  Aucun utilisateur @upscale.test trouve.\n");
     return;
   }
 

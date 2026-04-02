@@ -10,7 +10,7 @@ test.describe("Dashboard Admin (/admin/dashboard)", () => {
 
     const heading = page.locator("h1").filter({ hasText: "Bonjour" });
     await expect(heading).toBeVisible({ timeout: 15_000 });
-    // Verifie que le prenom est present (ex: "Bonjour, Alexia")
+    // Verifie que le prenom est present (ex: "Bonjour, Admin")
     await expect(heading).toContainText(
       authenticatedPage.user.fullName.split(" ")[0],
     );

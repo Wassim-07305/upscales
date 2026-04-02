@@ -1,7 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { setupNetworkErrorTracking, checkNoNetworkErrors } from "./helpers";
 
-const BASE_URL = "https://off-market-amber.vercel.app";
+const BASE_URL = "https://upscale-amber.vercel.app";
 
 async function login(page: Page) {
   await page.goto(`${BASE_URL}/login`);

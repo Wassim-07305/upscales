@@ -18,7 +18,7 @@ import {
   File,
 } from "lucide-react";
 
-export function AlexiaKnowledgePanel() {
+export function AdminKnowledgePanel() {
   const { data: documents, isLoading } = useCoachDocuments();
   const upload = useUploadDocument();
   const deleteDoc = useDeleteDocument();

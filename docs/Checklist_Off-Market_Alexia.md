@@ -1,4 +1,4 @@
-# Checklist Complète — Projet Off-Market (Alexia)
+# Checklist Complète — Projet UPSCALE (Admin)
 
 > Extraction exhaustive des appels Call1 (58 min) et Call2 (34 min) — Mars 2026
 
@@ -41,9 +41,9 @@
 ### Onboarding client
 
 - [ ] Création de compte avec mot de passe
-- [ ] Page d'accueil branded Off-Market (logo, identité visuelle)
+- [ ] Page d'accueil branded UPSCALE (logo, identité visuelle)
 - [ ] Vidéo d'accueil / onboarding (vidéo générale de formation)
-- [ ] Formulaire step-by-step : pourquoi Alexia, revenus actuels, infos business
+- [ ] Formulaire step-by-step : pourquoi Admin, revenus actuels, infos business
 - [ ] Accès immédiat après onboarding : formation, messagerie, toutes les features
 - [ ] Tutorial guidé interactif (style SaaS) : guide step-by-step, highlights, explication IA de chaque feature
 - [ ] Test obligatoire : le client envoie un message test dans la messagerie pendant le tutorial
@@ -55,7 +55,7 @@
 
 - [ ] Dashboard de progression visible pour coach et client
 - [ ] Roadmap personnalisée auto-générée après l'appel de kickoff (IA analyse le transcript)
-- [ ] Jalons / milestones clairs avec critères de validation explicites (ex : "Le marché est validé quand le positionnement est off-market ET X ET Y")
+- [ ] Jalons / milestones clairs avec critères de validation explicites (ex : "Le marché est validé quand le positionnement est upscale ET X ET Y")
 - [ ] Roadmap imprimable pour le client
 - [ ] Gestion des rythmes différents : certains clients finissent en 1 mois, d'autres prennent plus longtemps
 
@@ -72,8 +72,8 @@
 - [ ] **Green** : tout va bien, pas de problème
 - [ ] **Orange** : le client commence à se plaindre ou n'avance pas (ex : non-engagement, pas de résultats malgré efforts)
 - [ ] **Red** : le client demande un remboursement, accuse d'arnaque — intervention urgente
-- [ ] Le CSM ou Alexia pose le flag manuellement
-- [ ] Notification automatique à Alexia quand un flag change de statut
+- [ ] Le CSM ou Admin pose le flag manuellement
+- [ ] Notification automatique à Admin quand un flag change de statut
 - [ ] Objectif : ne jamais rater un red flag qui pourrait nuire à la réputation
 
 ### Gestion des CSM (Customer Success Managers)
@@ -81,17 +81,17 @@
 - [ ] Attribution automatique d'un CSM au nouveau client basée sur :
   - Spécialité du client (tech, coach, etc.) extraite du formulaire d'onboarding
   - Répartition équilibrée de la charge (load balancing)
-- [ ] Override manuel : Alexia peut réassigner si l'algo se trompe
+- [ ] Override manuel : Admin peut réassigner si l'algo se trompe
 - [ ] Vidéo de bienvenue par CSM (chaque CSM enregistre sa vidéo)
-- [ ] CSM a accès complet aux données Off-Market du client
-- [ ] CSM ne voit PAS les autres business/programmes d'Alexia (ABCÉDÉ, etc.)
+- [ ] CSM a accès complet aux données UPSCALE du client
+- [ ] CSM ne voit PAS les autres business/programmes d'Admin (ABCÉDÉ, etc.)
 - [ ] Exception : CSM peut voir le nombre de clients acquis (pour vérifier ses commissions)
 - [ ] Vue groupée par CSM : qui a combien de clients (ex : Luc 8, Marie 4, Géraldine 7)
 - [ ] Corrélation performance CSM ↔ résultats clients
 
 ### FAQ / Base de connaissances IA
 
-- [ ] Tracking de toutes les questions clients et réponses d'Alexia
+- [ ] Tracking de toutes les questions clients et réponses d'Admin
 - [ ] Si une même question est reposée → l'IA répond automatiquement avec la réponse précédente
 - [ ] Compteur : +1, +2, +3... à chaque occurrence de la même question
 - [ ] Alerte quand une question est posée 5+ fois/semaine → suggestion de créer une vidéo sur le sujet
@@ -122,9 +122,9 @@
 
 ### Calcul automatique des paiements contracteurs
 
-- [ ] Déduction automatique de ce qu'Alexia doit aux setters/CSM quand une vente est faite
+- [ ] Déduction automatique de ce qu'Admin doit aux setters/CSM quand une vente est faite
 - [ ] Gestion des pourcentages différents par contracteur et par vente
-- [ ] Gestion des paiements partiels (ex : client paie via Secura → Alexia reçoit 70% → le contracteur touche 5% de ce montant → le reste est dû plus tard)
+- [ ] Gestion des paiements partiels (ex : client paie via Secura → Admin reçoit 70% → le contracteur touche 5% de ce montant → le reste est dû plus tard)
 - [ ] Éliminer les erreurs de calcul manuels (même 10€ d'écart pose problème en compta)
 
 ### Génération automatique de contrats/factures
@@ -173,7 +173,7 @@
 - [ ] **Vue liste ET mosaïque/grille** pour la liste des clients (toggle entre les deux)
 - [ ] **Tri par activité récente** : clients avec messages non lus en haut
 - [ ] **Filtrage/tri** des clients (pas juste alphabétique A-Z)
-- [ ] **Branding Off-Market** : logo et identité visuelle dès l'onboarding
+- [ ] **Branding UPSCALE** : logo et identité visuelle dès l'onboarding
 - [ ] **Tutorial guidé interactif** style SaaS pour les nouveaux clients
 - [ ] **Notifications différenciées** : son distinct pour les messages urgents vs normaux
 - [ ] **Badge rouge** avec compteur de messages non lus
@@ -206,12 +206,12 @@
 - [ ] ❌ **Outils dispersés** : actuellement School + Slack + Lovébol + Google Docs + Fathom + YouSign + WhatsApp + Excel → tout doit être centralisé
 - [ ] ❌ **Perte de temps manuelle** : 15 min/client pour les contrats, heures/semaine pour fusion de documents, calcul de paiements contracteurs à la main
 - [ ] ❌ **Pas de visibilité sur la progression** : impossible de savoir où en est chaque client sans demander
-- [ ] ❌ **Notifications non fiables** (Slack) : parfois reçues, parfois non → Alexia vérifie manuellement les 35 clients chaque soir
+- [ ] ❌ **Notifications non fiables** (Slack) : parfois reçues, parfois non → Admin vérifie manuellement les 35 clients chaque soir
 - [ ] ❌ **Pas de distinction urgent/normal** : impossible de savoir quand un client a un vrai problème urgent
 - [ ] ❌ **Clients qui mentent** sur leurs métriques dans les challenges
 - [ ] ❌ **Erreurs de calcul** des paiements contracteurs (même 10€ d'écart = problème)
 - [ ] ❌ **Red flags ratés** : pas de système pour détecter tôt les clients insatisfaits
-- [ ] ❌ **Questions répétitives** : Alexia et les CSM répondent aux mêmes questions encore et encore
+- [ ] ❌ **Questions répétitives** : Admin et les CSM répondent aux mêmes questions encore et encore
 - [ ] ❌ **Onboarding impersonnel** : les clients ne comprennent pas la valeur immédiatement → risque de remboursement
 - [ ] ❌ **Complexité de Slack** : trop de boutons et d'options que les clients n'utilisent jamais
 - [ ] ❌ **Tri alphabétique inutile** avec 35+ clients
@@ -227,7 +227,7 @@
 | ------------------------------------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | "Secura" — paiement partiel          | Call1 ~30:26      | Probablement **Alma** ou un autre processeur de paiement en plusieurs fois (Secura n'est pas un outil connu)                            |
 | "Lovébol" — outil workbooks          | Call1 ~8:06       | Probablement **Involve.me** (outil de formulaires/workbooks interactifs)                                                                |
-| "ABCÉDÉ" — autre programme d'Alexia  | Call1 ~17:00      | Nom d'un autre programme/business d'Alexia que le CSM ne doit pas voir — nom possiblement déformé par la transcription                  |
+| "ABCÉDÉ" — autre programme d'Admin  | Call1 ~17:00      | Nom d'un autre programme/business d'Admin que le CSM ne doit pas voir — nom possiblement déformé par la transcription                  |
 | Mélange français/anglais fréquent    | Tout au long      | La transcription Fathom bascule entre FR et EN, parfois au milieu d'une phrase — le sens général reste clair                            |
 | "SIRET, SI, LA" — infos pour contrat | Call1 ~24:38      | SIRET = numéro d'entreprise FR / "SI" et "LA" probablement des champs administratifs spécifiques ou une déformation de la transcription |
 | "School" — plateforme de formation   | Call1 & Call2     | Probablement **Skool** (skool.com), plateforme communautaire de formation en ligne                                                      |

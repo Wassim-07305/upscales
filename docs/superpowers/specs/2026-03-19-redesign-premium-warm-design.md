@@ -1,4 +1,4 @@
-# Off-Market — Redesign "Premium Warm"
+# UPSCALE — Redesign "Premium Warm"
 
 Full redesign de l'interface interne pour supprimer le look "AI-generated" et amener le niveau de polish de l'onboarding a l'interieur de l'app.
 
@@ -107,7 +107,7 @@ Le bloc `@theme inline` dans `globals.css` (Tailwind 4) doit etre mis a jour pou
 ### Structure
 
 ```
-[Logo 26px + "Off Market" 12px semibold]
+[Logo 26px + "UPSCALE" 12px semibold]
 [Recherche ⌘K — champ inline, fond #111113, border #1A1A1E]
 [Section "Principal"]
   Dashboard | Clients | Messagerie | Formations
@@ -164,7 +164,7 @@ Plus de barre de recherche (elle est dans la sidebar).
 
 ```
 [Breadcrumb: "Dashboard" en 11px muted]        [Theme toggle] [Notif bell]
-[Titre: "Bonjour Alexia" en display font 20px]
+[Titre: "Bonjour Admin" en display font 20px]
 ```
 
 - Pas de sticky (le contenu scrolle naturellement).
@@ -180,7 +180,7 @@ Plus de barre de recherche (elle est dans la sidebar).
 ### Admin dashboard
 
 ```
-[Header: breadcrumb + "Bonjour Alexia" + actions]
+[Header: breadcrumb + "Bonjour Admin" + actions]
 
 [Hero Metric — Revenus du mois]
   Background: linear-gradient(135deg, var(--primary-glow), var(--primary-glow-subtle))
@@ -227,7 +227,7 @@ Meme structure mais :
 
 ### Prospect dashboard (`src/app/prospect/dashboard/page.tsx`)
 
-- Hero = "Decouvre Off Market" — diagnostic simplifie + CTA vers l'onboarding/quiz.
+- Hero = "Decouvre UPSCALE" — diagnostic simplifie + CTA vers l'onboarding/quiz.
 - Cards = Features verrouillees avec apercu (inchange structurellement, alignement tokens uniquement).
 - Feed = activite communaute.
 

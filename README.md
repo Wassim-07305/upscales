@@ -1,4 +1,4 @@
-# Off-Market
+# UPSCALE
 
 Plateforme de coaching et de gestion business pour freelancers et coachs. Interface en francais.
 

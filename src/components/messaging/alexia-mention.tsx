@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Bot, Sparkles } from "lucide-react";
 
-interface AlexiaMentionProps {
+interface AdminMentionProps {
   className?: string;
 }
 
@@ -11,7 +11,7 @@ interface AlexiaMentionProps {
  * Badge visuel affiche quand un message contient @AlexIA.
  * Pour l'instant, c'est uniquement du UI, pas de backend RAG.
  */
-export function AlexiaMentionBadge({ className }: AlexiaMentionProps) {
+export function AdminMentionBadge({ className }: AdminMentionProps) {
   return (
     <span
       className={cn(
@@ -32,7 +32,7 @@ export function AlexiaMentionBadge({ className }: AlexiaMentionProps) {
 /**
  * Detecte si un texte contient une mention @AlexIA.
  */
-export function containsAlexiaMention(text: string): boolean {
+export function containsAdminMention(text: string): boolean {
   return /@alexia\b/i.test(text);
 }
 
@@ -40,7 +40,7 @@ export function containsAlexiaMention(text: string): boolean {
  * Remplace @AlexIA dans le texte par un placeholder pour le rendu.
  * Retourne les segments avec les mentions marquees.
  */
-export function parseAlexiaMentions(
+export function parseAdminMentions(
   text: string,
 ): Array<{ type: "text" | "alexia"; content: string }> {
   const parts: Array<{ type: "text" | "alexia"; content: string }> = [];
@@ -67,7 +67,7 @@ export function parseAlexiaMentions(
 export const ALEXIA_BOT_ID = "00000000-0000-0000-0000-a1e01a000001";
 
 /** Verifie si un ID correspond au bot AlexIA */
-export function isAlexiaBotId(id: string): boolean {
+export function isAdminBotId(id: string): boolean {
   return id === ALEXIA_BOT_ID;
 }
 

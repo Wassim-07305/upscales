@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useCoachAIConfig, useUpdateAIConfig } from "@/hooks/use-alexia";
 import { Loader2, Save } from "lucide-react";
 
-export function AlexiaConfigPanel() {
+export function AdminConfigPanel() {
   const { data: config, isLoading } = useCoachAIConfig();
   const update = useUpdateAIConfig();
 

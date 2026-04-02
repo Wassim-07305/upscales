@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Supprimer le look "AI-generated" de l'app Off-Market en appliquant le design "Premium Warm" — hierarchie forte, typographie a caractere, gradients rouges subtils, animations fluides.
+**Goal:** Supprimer le look "AI-generated" de l'app UPSCALE en appliquant le design "Premium Warm" — hierarchie forte, typographie a caractere, gradients rouges subtils, animations fluides.
 
 **Architecture:** Next.js 16 App Router, 5 roles (admin/coach/sales/client/prospect) avec dossiers dedies dans `src/app/`. UI components dans `src/components/ui/`, dashboard widgets dans `src/components/dashboard/`. Tailwind CSS 4 avec `@theme inline` dans `globals.css`.
 

@@ -1,12 +1,12 @@
-# Duplication Off-Market → Upscale — Design Spec
+# Duplication UPSCALE → Upscale — Design Spec
 
 ## Goal
 
-Remplacer le code et le schema DB d'Upscale par une copie d'Off-Market, puis appliquer le branding Upscale (couleurs, fonts, logos, nom, landing page) pour obtenir une plateforme identique a Off-Market mais avec l'identite visuelle Upscale.
+Remplacer le code et le schema DB d'Upscale par une copie d'UPSCALE, puis appliquer le branding Upscale (couleurs, fonts, logos, nom, landing page) pour obtenir une plateforme identique a UPSCALE mais avec l'identite visuelle Upscale.
 
 ## Constraints
 
-- **Off-Market est READ-ONLY** — aucune modification de fichier ni de DB
+- **UPSCALE est READ-ONLY** — aucune modification de fichier ni de DB
 - **Upscale garde sa propre DB Supabase** (`wcdtfkcbqsxdzjjrtwdj`)
 - **Upscale garde son `.git/`** (remote `Wassim-07305/upscales`)
 - **Upscale garde son `.env.local`** (credentials Supabase, API keys)
@@ -50,13 +50,13 @@ Copier :
 - Theme color : `#0D0D0D`
 - PWA : `manifest.json` complet
 
-## Phase 2 — Duplication code Off-Market → Upscale
+## Phase 2 — Duplication code UPSCALE → Upscale
 
 ### Etapes
 
 1. Sauvegarder `.env.local` et `.git/` d'Upscale dans un dossier temporaire
 2. Supprimer tout le contenu d'Upscale sauf `.git/` et `.env.local`
-3. Copier tout Off-Market vers Upscale (sauf `.git/`, `.env.local`, `.env.example`, `node_modules/`, `.next/`, `_branding/`)
+3. Copier tout UPSCALE vers Upscale (sauf `.git/`, `.env.local`, `.env.example`, `node_modules/`, `.next/`, `_branding/`)
 4. Restaurer `.env.local` d'Upscale
 5. `npm install` dans Upscale
 
@@ -64,7 +64,7 @@ Copier :
 
 1. Connecter a la DB Upscale via `DATABASE_URL` depuis `.env.local`
 2. Drop toutes les tables schema public + extensions si necessaire
-3. Appliquer les 140+ migrations d'Off-Market sequentiellement via `supabase db push` ou psql
+3. Appliquer les 140+ migrations d'UPSCALE sequentiellement via `supabase db push` ou psql
 4. Verifier le schema (count tables)
 
 ## Phase 4 — Rebranding
@@ -73,7 +73,7 @@ Copier :
 
 **Fichier : `src/app/globals.css`**
 
-- Remplacer toutes les variables CSS Off-Market par celles d'Upscale
+- Remplacer toutes les variables CSS UPSCALE par celles d'Upscale
 - Ajouter les variables custom (neon, turquoise, surface)
 - Ajouter effets (glow-neon, mesh-gradient, dot-grid)
 
@@ -95,10 +95,10 @@ Copier :
 
 Remplacer dans ~20 fichiers :
 
-- "Off Market" → "UPSCALE"
-- "Off-Market" → "UPSCALE"
-- "off-market" → "upscale"
-- "off_market" → "upscale"
+- "UPSCALE" → "UPSCALE"
+- "UPSCALE" → "UPSCALE"
+- "upscale" → "upscale"
+- "upscale" → "upscale"
 
 Fichiers concernes :
 
@@ -135,7 +135,7 @@ Fichiers concernes :
 - Copier le systeme Puck (landing page builder) depuis `_branding/` :
   - `lib/puck/` → `src/lib/puck/`
   - `app/p/` → `src/app/p/`
-- Adapter les imports si necessaire (Off-Market utilise `src/app/` prefix, Upscale utilisait `app/` directement)
+- Adapter les imports si necessaire (UPSCALE utilise `src/app/` prefix, Upscale utilisait `app/` directement)
 
 ## Phase 5 — Verification
 
@@ -146,6 +146,6 @@ Fichiers concernes :
 
 ## Risques
 
-- **Differences de structure** : Off-Market utilise `src/app/` (App Router avec src/), Upscale utilisait `app/` sans src/. La copie doit respecter la structure Off-Market (`src/`).
-- **Puck CMS** : le systeme de landing pages d'Upscale utilise Puck (drag-and-drop) qui n'existe pas dans Off-Market. Il faudra installer la dependance `@measured/puck` dans le nouveau Upscale.
-- **Env vars** : certaines env vars d'Off-Market peuvent manquer dans Upscale (OPENROUTER, RESEND, STRIPE, etc.). Le build peut echouer sur des features qui dependent de ces cles.
+- **Differences de structure** : UPSCALE utilise `src/app/` (App Router avec src/), Upscale utilisait `app/` sans src/. La copie doit respecter la structure UPSCALE (`src/`).
+- **Puck CMS** : le systeme de landing pages d'Upscale utilise Puck (drag-and-drop) qui n'existe pas dans UPSCALE. Il faudra installer la dependance `@measured/puck` dans le nouveau Upscale.
+- **Env vars** : certaines env vars d'UPSCALE peuvent manquer dans Upscale (OPENROUTER, RESEND, STRIPE, etc.). Le build peut echouer sur des features qui dependent de ces cles.

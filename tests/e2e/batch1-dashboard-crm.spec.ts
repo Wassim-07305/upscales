@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const BASE_URL = "https://off-market-amber.vercel.app";
+const BASE_URL = "https://upscale-amber.vercel.app";
 const EMAIL = "test@test.com";
 const PASSWORD = "test123";
 

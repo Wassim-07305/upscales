@@ -45,7 +45,7 @@ ls supabase/migrations/ | tail -3
 
 Créer `supabase/migrations/NNN_contract_template_onboarding.sql` avec :
 
-- `INSERT INTO contract_templates` contenant le titre "Contrat d'Accompagnement — Système Off-Market"
+- `INSERT INTO contract_templates` contenant le titre "Contrat d'Accompagnement — Système UPSCALE"
 - Le champ `content` = le contrat complet en HTML (copié depuis le PDF, tous les 30 articles)
 - Les variables : `client_name` (text), `client_address` (text), `client_city` (text), `date` (date)
 - `is_active = true`

@@ -5,7 +5,7 @@ Tu es un QA engineer senior. Tu dois analyser les features de l'app, determiner 
 ## Input
 
 - Fichier de features/checklist : $ARGUMENTS (si vide, cherche CHECKLIST-MANUELLE.md ou un fichier similaire dans le repo)
-- URL de l'app : utilise NEXT_PUBLIC_APP_URL de .env.local ou https://off-market-amber.vercel.app par defaut
+- URL de l'app : utilise NEXT_PUBLIC_APP_URL de .env.local ou https://upscale-amber.vercel.app par defaut
 
 ## Workflow
 

@@ -130,7 +130,7 @@ export function MessageTestStep({ onNext }: MessageTestStepProps) {
                   <span className="text-xs font-bold text-white">A</span>
                 </div>
                 <div>
-                  <p className="text-[11px] text-white/40 mb-0.5">Alexia</p>
+                  <p className="text-[11px] text-white/40 mb-0.5">Admin</p>
                   <div className="rounded-xl bg-white/10 px-3 py-2 text-sm text-white/70">
                     Bienvenue dans la communaute ! N&apos;hesite pas a te
                     presenter

@@ -1,4 +1,4 @@
-# Cahier des charges Off-Market — V3 (Mars 2026)
+# Cahier des charges UPSCALE — V3 (Mars 2026)
 
 ---
 
@@ -6,34 +6,34 @@
 
 ### 1.1 Création du compte client
 
-- Alexia crée un profil client dans le back-office (nom, email, CSM assigné)
+- Admin crée un profil client dans le back-office (nom, email, CSM assigné)
 - Génération automatique d'un lien d'invitation unique
 - Le client clique sur le lien → crée son mot de passe → accède à l'app
 
 ### 1.2 Page d'accueil brandée
 
-- Logo Off-Market + couleurs d'Alexia
-- Vidéo de bienvenue d'Alexia qui explique le déroulé
+- Logo UPSCALE + couleurs d'Admin
+- Vidéo de bienvenue d'Admin qui explique le déroulé
 - Guided tour step-by-step de l'app (style SaaS : zones floutées, tutoriel progressif)
 
 ### 1.3 Formulaire d'onboarding
 
-- Questions : pourquoi il a choisi Alexia, son activité, son CA actuel, sa spécialité (tech/IA, coaching, autre…)
+- Questions : pourquoi il a choisi Admin, son activité, son CA actuel, sa spécialité (tech/IA, coaching, autre…)
 - La réponse spécialité détermine automatiquement le CSM assigné
 - Progression step-by-step avec validation de chaque étape
 - Page de confirmation "Merci, tu es bien onboardé"
 
 ### 1.4 Actions automatiques post-onboarding
 
-- Création automatique du canal de messagerie (client + CSM + Alexia)
+- Création automatique du canal de messagerie (client + CSM + Admin)
 - Affichage de la vidéo de présentation du CSM assigné
 - Accès immédiat à la formation + à la messagerie
-- Notification à Alexia que le client est onboardé
+- Notification à Admin que le client est onboardé
 
 ### 1.5 Attribution CSM
 
 - Automatique selon la spécialité renseignée dans l'onboarding
-- Override manuel possible par Alexia en back-office
+- Override manuel possible par Admin en back-office
 - Le CSM est dans le canal dès le jour 1
 
 ---
@@ -42,7 +42,7 @@
 
 ### 2.1 Canaux
 
-- Un canal individuel par client (client + CSM + Alexia)
+- Un canal individuel par client (client + CSM + Admin)
 - Canaux collectifs fixes : Général, Lives, Challenge, Wins/Succès
 
 ### 2.2 Vue clients
@@ -70,8 +70,8 @@
 
 ### 3.2 Notifications & suivi
 
-- Notification à Alexia dès qu'un workbook est complété
-- Statut de progression visible par Alexia et le CSM
+- Notification à Admin dès qu'un workbook est complété
+- Statut de progression visible par Admin et le CSM
 
 ### 3.3 Fusion transcript + workbook
 
@@ -91,7 +91,7 @@
 
 - 2 questions : problématique/objectif + solution déjà essayée
 - Si trivial → réponse possible par vidéo loom sans call
-- Formulaire visible par Alexia/CSM avant l'appel
+- Formulaire visible par Admin/CSM avant l'appel
 
 ---
 
@@ -103,9 +103,9 @@
 - Contenu : prochaines étapes, jalons, actions, critères de validation
 - Format : document propre, exportable / imprimable
 
-### 5.2 Assistant IA (« Jarvis Off-Market »)
+### 5.2 Assistant IA (« Jarvis UPSCALE »)
 
-- Nourri avec toutes les réponses d'Alexia aux questions clients passées
+- Nourri avec toutes les réponses d'Admin aux questions clients passées
 - Répond automatiquement aux questions fréquentes
 
 ### 5.3 Analyse client IA
@@ -196,8 +196,8 @@
 
 ### 10.2 Pose du flag
 
-- CSM et Alexia peuvent poser/modifier
-- Notification automatique à Alexia sur orange ou rouge
+- CSM et Admin peuvent poser/modifier
+- Notification automatique à Admin sur orange ou rouge
 
 ---
 
@@ -227,15 +227,15 @@
 
 - Vue d'ensemble : quel CSM a quels clients
 - Performances croisées : résultats des clients par CSM
-- Accès CSM limité au CA Off-Market uniquement
+- Accès CSM limité au CA UPSCALE uniquement
 
 ---
 
 ## MODULE 14 — LEAD MAGNET / QUALIFICATION ENTRANTE
 
 - Page publique ou lien LinkedIn → analyse auto du profil prospect
-- Score ou évaluation du positionnement Off-Market
-- Alexia valide ou non l'entrée sans appel de qualification complet
+- Score ou évaluation du positionnement UPSCALE
+- Admin valide ou non l'entrée sans appel de qualification complet
 
 ---
 

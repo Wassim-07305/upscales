@@ -238,7 +238,7 @@ async function uploadToYouTube(
     requestBody: {
       snippet: {
         title,
-        description: `Migré depuis Supabase Storage — Off-Market`,
+        description: `Migré depuis Supabase Storage — UPSCALE`,
         categoryId: "27", // Education
       },
       status: {

@@ -1,0 +1,178 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSupabase } from "./use-supabase";
+import { useAuth } from "./use-auth";
+import { useEffect, useRef } from "react";
+import type { Notification, NotificationCategory } from "@/types/database";
+import { useNotificationSound } from "./use-notification-sound";
+import { toast } from "sonner";
+import { getSoundTypeForNotification } from "@/lib/notification-sounds";
+
+interface UseNotificationsOptions {
+  category?: NotificationCategory;
+}
+
+export function useNotifications(options?: UseNotificationsOptions) {
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const category = options?.category;
+  const { playSoundForNotification } = useNotificationSound();
+  const playSoundRef = useRef(playSoundForNotification);
+  playSoundRef.current = playSoundForNotification;
+
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications", { category }],
+    staleTime: 0, // Temps reel — les subscriptions Supabase gerent les updates
+    queryFn: async () => {
+      let query = supabase
+        .from("notifications")
+        .select("*")
+        .eq("recipient_id", user?.id ?? "")
+        .eq("is_archived", false)
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Notification[];
+    },
+    enabled: !!user,
+  });
+
+  // Realtime
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
+          // Jouer un son differencie selon le type de notification
+          if (payload.eventType === "INSERT") {
+            const newNotif = payload.new as Notification;
+            playSoundRef.current(newNotif.type, newNotif.category);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, user, queryClient]);
+
+  const markAsRead = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await (supabase as any)
+        .from("notifications")
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq("id", notificationId);
+      if (error) throw error;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: () => toast.error("Impossible de marquer comme lu"),
+  });
+
+  const markAllAsRead = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      let query = (supabase as any)
+        .from("notifications")
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq("recipient_id", user.id)
+        .eq("is_read", false);
+
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      const { error } = await query;
+      if (error) throw error;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: () => toast.error("Erreur lors du marquage"),
+  });
+
+  const archiveNotification = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await (supabase as any)
+        .from("notifications")
+        .update({ is_archived: true })
+        .eq("id", notificationId);
+      if (error) throw error;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: () => toast.error("Erreur lors de l'archivage"),
+  });
+
+  const archiveAllRead = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const { error } = await (supabase as any)
+        .from("notifications")
+        .update({ is_archived: true })
+        .eq("recipient_id", user.id)
+        .eq("is_read", true)
+        .eq("is_archived", false);
+      if (error) throw error;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: () => toast.error("Erreur lors de l'archivage"),
+  });
+
+  const deleteNotification = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+      if (error) throw error;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onError: () => toast.error("Erreur lors de la suppression"),
+  });
+
+  const notifications = notificationsQuery.data ?? [];
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const countByCategory = notifications.reduce<Record<string, number>>(
+    (acc, n) => {
+      if (!n.is_read) {
+        acc[n.category] = (acc[n.category] ?? 0) + 1;
+      }
+      return acc;
+    },
+    {},
+  );
+
+  return {
+    notifications,
+    isLoading: notificationsQuery.isLoading,
+    unreadCount,
+    countByCategory,
+    markAsRead,
+    markAllAsRead,
+    archiveNotification,
+    archiveAllRead,
+    deleteNotification,
+  };
+}

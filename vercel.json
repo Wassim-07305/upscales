@@ -1,12 +1,48 @@
 {
   "crons": [
     {
-      "path": "/api/cron/cleanup",
-      "schedule": "0 3 * * 0"
+      "path": "/api/relance/process",
+      "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/presence-cleanup",
-      "schedule": "*/2 * * * *"
+      "path": "/api/cron/send-sms",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/contracts/renew",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/ai-reports",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/notifications/batch",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/competitions/update-scores",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/coaching/check-alerts",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/scheduled-messages",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/generate-invoices",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/payment-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/email-reminders",
+      "schedule": "0 8 * * *"
     }
   ]
 }

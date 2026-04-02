@@ -1,106 +1,95 @@
-const CACHE_NAME = "upscale-v1";
+// Off-Market Push Notification Service Worker
 
-const PRECACHE_URLS = [
-  "/dashboard",
-  "/formations",
-  "/community",
-  "/chat",
-  "/calendar",
-  "/notifications",
-  "/icons/icon-192x192.png",
-  "/icons/icon-512x512.png",
-];
-
-// Install: precache shell
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-  );
+// Forcer l'activation immediate des nouvelles versions du SW
+self.addEventListener("install", function () {
+  self.skipWaiting();
 });
 
-// Activate: cleanup old caches
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    ).then(() => self.clients.claim())
-  );
-});
-
-// Fetch: network-first for pages, cache-first for static assets
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests and chrome-extension
-  if (request.method !== "GET") return;
-  if (url.protocol === "chrome-extension:") return;
-  if (url.pathname.startsWith("/api/")) return;
-
-  // Static assets: cache-first
-  if (
-    url.pathname.match(/\.(png|jpg|jpeg|svg|gif|webp|ico|woff2?|css|js)$/) ||
-    url.pathname.startsWith("/_next/static/")
-  ) {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // Pages: network-first with cache fallback
-  if (request.headers.get("accept")?.includes("text/html")) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match("/dashboard")))
-    );
-    return;
-  }
-});
-
-// Push notifications support
-self.addEventListener("push", (event) => {
+self.addEventListener("push", function (event) {
   if (!event.data) return;
 
-  const data = event.data.json();
-  const options = {
-    body: data.body || data.message || "",
-    icon: data.icon || "/icons/icon-192x192.png",
-    badge: data.badge || "/icons/icon-48x48.png",
-    vibrate: [100, 50, 100],
-    data: { url: data.data?.url || data.link || "/notifications" },
-    tag: data.tag || undefined,
-    actions: [{ action: "open", title: "Ouvrir" }],
-  };
+  try {
+    var payload = event.data.json();
 
-  event.waitUntil(self.registration.showNotification(data.title || "UPSCALE", options));
+    var options = {
+      body: payload.body || "",
+      icon: "/logo.png",
+      badge: "/logo.png",
+      tag: payload.tag || "off-market",
+      data: {
+        url: payload.url || "/",
+      },
+      actions: payload.actions || [],
+      vibrate: [200, 100, 200],
+      requireInteraction: payload.requireInteraction || false,
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(
+        payload.title || "Off Market",
+        options,
+      ),
+    );
+  } catch (e) {
+    var text = event.data.text();
+    event.waitUntil(
+      self.registration.showNotification("Off Market", {
+        body: text,
+        icon: "/logo.png",
+      }),
+    );
+  }
 });
 
-self.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", function (event) {
   event.notification.close();
-  const url = event.notification.data?.url || "/dashboard";
-  event.waitUntil(clients.openWindow(url));
+
+  var url =
+    event.notification.data && event.notification.data.url
+      ? event.notification.data.url
+      : "/";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(function (clientList) {
+        for (var i = 0; i < clientList.length; i++) {
+          var client = clientList[i];
+          if (
+            client.url.indexOf(self.location.origin) !== -1 &&
+            "focus" in client
+          ) {
+            client.navigate(url);
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(url);
+      }),
+  );
+});
+
+self.addEventListener("activate", function (event) {
+  event.waitUntil(self.clients.claim());
+});
+
+// Re-enregistrer l'abonnement push quand le navigateur le renouvelle
+self.addEventListener("pushsubscriptionchange", function (event) {
+  event.waitUntil(
+    self.registration.pushManager
+      .subscribe(
+        event.oldSubscription
+          ? event.oldSubscription.options
+          : { userVisibleOnly: true },
+      )
+      .then(function (subscription) {
+        return fetch("/api/notifications/push-resubscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(subscription.toJSON()),
+        });
+      })
+      .catch(function () {
+        // Echec silencieux - le prochain login re-souscrira
+      }),
+  );
 });

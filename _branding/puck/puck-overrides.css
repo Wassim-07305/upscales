@@ -1,0 +1,392 @@
+/* Puck dark theme overrides — match Upscale neon theme */
+/* Class format: _ComponentName_hash_number (e.g. _PuckHeader_15xnq_1) */
+
+:root {
+  --puck-color-azure-01: #0d0d0d;
+  --puck-color-azure-02: #111111;
+  --puck-color-azure-03: #161616;
+  --puck-color-azure-04: #1c1c1c;
+  --puck-color-azure-05: #252525;
+  --puck-color-azure-06: #333333;
+  --puck-color-azure-07: #666666;
+  --puck-color-azure-08: #999999;
+  --puck-color-azure-09: #c6ff00;
+  --puck-color-azure-10: #a8d900;
+  --puck-color-azure-11: #c6ff00;
+  --puck-color-azure-12: #ffffff;
+
+  --puck-color-grey-01: #0d0d0d;
+  --puck-color-grey-02: #111111;
+  --puck-color-grey-03: #1a1a1a;
+  --puck-color-grey-04: #222222;
+  --puck-color-grey-05: #2a2a2a;
+  --puck-color-grey-06: #3a3a3a;
+  --puck-color-grey-07: #555555;
+  --puck-color-grey-08: #888888;
+  --puck-color-grey-09: #aaaaaa;
+  --puck-color-grey-10: #cccccc;
+  --puck-color-grey-11: #dddddd;
+  --puck-color-grey-12: #f0f0f0;
+
+  --puck-color-white: #0d0d0d;
+  --puck-color-black: #ffffff;
+
+  --puck-font-family: "Outfit", system-ui, sans-serif;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+
+[class*="PuckHeader"] {
+  background-color: #111111 !important;
+  border-color: #2a2a2a !important;
+  border-bottom: 1px solid #2a2a2a !important;
+}
+
+/* Header title & text */
+[class*="PuckHeader-title"],
+[class*="PuckHeader"] span,
+[class*="PuckHeader"] p {
+  color: #ffffff !important;
+}
+
+/* Header path link (back button) */
+[class*="PuckHeader-path"],
+[class*="PuckHeader-path"] a,
+[class*="PuckHeader"] a {
+  color: #c6ff00 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+/* Add ← arrow before the path text */
+[class*="PuckHeader-path"] a::before {
+  content: "←" !important;
+  font-size: 16px !important;
+}
+
+[class*="PuckHeader-path"]:hover,
+[class*="PuckHeader-path"] a:hover,
+[class*="PuckHeader"] a:hover {
+  color: #d4ff33 !important;
+  background-color: rgba(198, 255, 0, 0.08) !important;
+}
+
+/* All header icons — bright */
+[class*="PuckHeader"] svg {
+  color: #cccccc !important;
+}
+
+[class*="PuckHeader"] button:hover svg {
+  color: #ffffff !important;
+}
+
+/* Header toggle buttons (sidebar, responsive) */
+[class*="PuckHeader-toggle"],
+[class*="PuckHeader-leftSideBarToggle"],
+[class*="PuckHeader-rightSideBarToggle"],
+[class*="PuckHeader-menuButton"] {
+  color: #cccccc !important;
+}
+
+[class*="PuckHeader-toggle"]:hover,
+[class*="PuckHeader-menuButton"]:hover {
+  color: #ffffff !important;
+  background-color: #1c1c1c !important;
+}
+
+/* Header tools area (zoom, responsive toggles) */
+[class*="PuckHeader-tools"] button,
+[class*="PuckHeader-tools"] > * {
+  color: #cccccc !important;
+}
+
+[class*="PuckHeader-tools"] button:hover {
+  color: #ffffff !important;
+  background-color: #1c1c1c !important;
+}
+
+/* ─── Publish / action buttons ───────────────────────── */
+
+/* Primary button (Publish) — clean white style */
+[class*="Button--primary"] {
+  background-color: #ffffff !important;
+  color: #0d0d0d !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border-color: #ffffff !important;
+  padding: 8px 20px !important;
+  font-size: 13px !important;
+  transition: all 0.2s ease !important;
+}
+
+[class*="Button--primary"]:hover {
+  background-color: #e0e0e0 !important;
+}
+
+[class*="Button--primary"] svg {
+  color: #0d0d0d !important;
+}
+
+/* Secondary button */
+[class*="Button--secondary"] {
+  background-color: #1c1c1c !important;
+  color: #cccccc !important;
+  border-color: #333333 !important;
+}
+
+[class*="Button--secondary"]:hover {
+  background-color: #252525 !important;
+  color: #ffffff !important;
+}
+
+/* ─── Viewport controls (responsive icons + zoom) ────── */
+
+[class*="ViewportControls"] {
+  background-color: #1c1c1c !important;
+  border-color: #333333 !important;
+  border-radius: 8px !important;
+}
+
+[class*="ViewportControls-divider"] {
+  background-color: #333333 !important;
+}
+
+/* Viewport buttons (mobile, tablet, desktop icons) */
+[class*="ViewportButton"] {
+  color: #cccccc !important;
+}
+
+[class*="ViewportButton"]:hover {
+  color: #ffffff !important;
+  background-color: #252525 !important;
+}
+
+[class*="ViewportButton"] svg {
+  color: #cccccc !important;
+}
+
+[class*="ViewportButton"]:hover svg {
+  color: #ffffff !important;
+}
+
+/* Zoom dropdown select */
+[class*="ViewportControls-zoomSelect"],
+[class*="ViewportControls"] select {
+  background-color: #1c1c1c !important;
+  color: #cccccc !important;
+  border-color: #333333 !important;
+  border-radius: 6px !important;
+  -webkit-appearance: none !important;
+}
+
+/* IconButton (generic icon buttons in header) */
+[class*="IconButton"] {
+  color: #cccccc !important;
+}
+
+[class*="IconButton"]:hover {
+  color: #ffffff !important;
+  background-color: #1c1c1c !important;
+}
+
+[class*="IconButton"] svg {
+  color: inherit !important;
+}
+
+/* PuckCanvas controls fallback */
+[class*="PuckCanvas-controls"] {
+  background-color: #1c1c1c !important;
+  border-color: #333333 !important;
+  border-radius: 8px !important;
+}
+
+/* ─── Preview area ───────────────────────────────────── */
+
+[class*="PuckCanvas"],
+[class*="PuckPreview"],
+[class*="Puck-portal"] {
+  background-color: #0d0d0d !important;
+}
+
+[class*="PuckPreview-frame"] iframe,
+[class*="PuckCanvas-root"] {
+  background-color: #0d0d0d !important;
+}
+
+/* ─── Sidebars ───────────────────────────────────────── */
+
+[class*="PuckLayout-inner"] {
+  background-color: #0d0d0d !important;
+}
+
+[class*="SidebarSection"] {
+  background-color: #111111 !important;
+  border-color: #2a2a2a !important;
+}
+
+/* Sidebar section titles — force visibility on ALL children */
+[class*="SidebarSection-title"],
+[class*="SidebarSection-title"] span,
+[class*="SidebarSection-title"] div,
+[class*="SidebarSection-title"] p,
+[class*="SidebarSection-title"] h1,
+[class*="SidebarSection-title"] h2,
+[class*="SidebarSection-title"] h3,
+[class*="SidebarSection-title"] h4,
+[class*="SidebarSection-title"] h5,
+[class*="SidebarSection-title"] [class*="Heading"] {
+  color: #aaaaaa !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* Sidebar section title buttons (collapse chevron) */
+[class*="SidebarSection-title"] button,
+[class*="SidebarSection-title"] svg {
+  color: #888888 !important;
+}
+
+[class*="SidebarSection-title"] button:hover,
+[class*="SidebarSection-title"] button:hover svg {
+  color: #ffffff !important;
+}
+
+/* Right sidebar — PAGE title and labels */
+[class*="Puck"] [class*="Heading"] {
+  color: #ffffff !important;
+}
+
+/* ─── Component list ─────────────────────────────────── */
+
+[class*="ComponentList"] {
+  background-color: #111111 !important;
+}
+
+[class*="ComponentList-content"] {
+  gap: 4px !important;
+}
+
+[class*="ComponentList"] [class*="Button"] {
+  background-color: #161616 !important;
+  border-color: #2a2a2a !important;
+  color: #cccccc !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+[class*="ComponentList"] [class*="Button"]:hover {
+  border-color: #c6ff00 !important;
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[class*="ComponentList"] [class*="Button"] svg {
+  color: #888888 !important;
+}
+
+[class*="ComponentList"] [class*="Button"]:hover svg {
+  color: #c6ff00 !important;
+}
+
+/* ─── Form fields (props panel) ──────────────────────── */
+
+/* Field labels — must be clearly readable */
+[class*="Input-label"],
+[class*="Input-label"] span,
+[class*="Input-label"] [class*="Heading"],
+[class*="PuckFields"] label,
+[class*="PuckFields"] label span,
+[class*="Puck"] label {
+  color: #cccccc !important;
+  font-weight: 500 !important;
+}
+
+[class*="PuckFields"] input,
+[class*="PuckFields"] textarea,
+[class*="PuckFields"] select,
+[class*="Puck"] input,
+[class*="Puck"] textarea,
+[class*="Puck"] select {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+[class*="Puck"] input:focus,
+[class*="Puck"] textarea:focus,
+[class*="Puck"] select:focus {
+  border-color: #c6ff00 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(198, 255, 0, 0.25) !important;
+}
+
+[class*="Puck"] input::placeholder,
+[class*="Puck"] textarea::placeholder {
+  color: #555555 !important;
+}
+
+/* ─── ActionBar (component hover actions) ────────────── */
+
+[class*="ActionBar"] {
+  background-color: #1c1c1c !important;
+  border-color: #333333 !important;
+  border-radius: 6px !important;
+}
+
+[class*="ActionBar-action"] {
+  color: #cccccc !important;
+}
+
+[class*="ActionBar-action"]:hover {
+  color: #ffffff !important;
+  background-color: #252525 !important;
+}
+
+[class*="ActionBar-label"] {
+  color: #aaaaaa !important;
+  font-size: 11px !important;
+}
+
+/* ─── Dropzone ───────────────────────────────────────── */
+
+[class*="DropZone"] {
+  background-color: transparent !important;
+}
+
+[class*="DraggableComponent"]:hover {
+  outline-color: #c6ff00 !important;
+}
+
+[class*="DraggableComponent--isSelected"] {
+  outline-color: #c6ff00 !important;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+
+[class*="Puck"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[class*="Puck"] ::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+[class*="Puck"] ::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
+}
+
+[class*="Puck"] ::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}

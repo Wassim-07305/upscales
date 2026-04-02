@@ -1,138 +1,123 @@
-# Upscale LMS
+# Off-Market
 
-Plateforme de formation en ligne (Learning Management System) complète avec portail apprenant et panneau d'administration.
+Plateforme de coaching et de gestion business pour freelancers et coachs. Interface en francais.
 
 ## Stack technique
 
-- **Frontend** : Next.js 16 (App Router) + React 19 + TypeScript 5
-- **Styling** : Tailwind CSS 4 + shadcn/ui
+- **Frontend** : React 19, TypeScript 5, Next.js 16 (App Router), Tailwind CSS 4
 - **Backend** : Supabase (PostgreSQL, Auth, RLS, Storage, Realtime)
-- **State** : Zustand
-- **Formulaires** : React Hook Form + Zod
-- **Editeur rich text** : Tiptap
-- **PDF** : @react-pdf/renderer
-- **Charts** : Recharts
-- **Page builder** : Puck
-- **IA** : OpenAI embeddings + pgvector + Claude Haiku (RAG)
+- **State** : Zustand (3 stores) + TanStack React Query (server state)
+- **UI** : Radix UI, Lucide Icons, Framer Motion, Recharts
+- **IA** : Anthropic Claude SDK
+- **Deploiement** : Vercel
 
 ## Fonctionnalites
 
-### Portail Apprenant
-- Catalogue de formations (video, texte, quiz)
-- Lecteur video avec sauvegarde de progression
-- Quiz avec score et retry
-- Sidebar de navigation des modules avec barre de progression
-- Certificats PDF generes automatiquement
-- Confetti de celebration a la fin d'une formation
-- Communaute (posts, likes, commentaires, reponses)
-- Chat en temps reel (channels publics, prives, DM)
-- Calendrier de sessions avec inscription
-- Notifications en temps reel
-- Assistant IA (RAG sur le contenu des formations)
-- Profil utilisateur avec onboarding
+### Portails multi-roles
 
-### Panneau Admin
-- Dashboard avec KPIs et graphiques
-- Editeur de formations (modules, quiz, drag & drop)
-- CRM etudiants (fiches, tags, notes)
-- Gestion des channels de discussion
-- Gestion des sessions/evenements
-- Systeme de booking (pages de reservation, creneaux, qualifications)
-- Page builder (landing pages avec Puck)
-- Gestion de la base de connaissances IA
-- Parametres de la plateforme
+- **Admin** : gestion complete de la plateforme, analytics, facturation, moderation
+- **Coach** : suivi des eleves, dashboard avec alertes, check-ins, appels
+- **Client** : progression, gamification, check-ins, journal, cours, communaute
+- **Sales** : pipeline CRM, contacts, prospection
+- **Setter / Closer** : gestion des appels commerciaux
 
-## Installation
+### Modules principaux
 
-### Pre-requis
+- **CRM** : pipeline Kanban 5 colonnes, scoring des leads, historique d'interactions
+- **Messaging** : temps reel, threads, reactions, mentions, messages vocaux, pieces jointes, messages programmes
+- **LMS (School)** : cours, modules, lecons, quiz, certificats
+- **Formulaires** : constructeur drag-and-drop avec logique conditionnelle
+- **Gamification** : XP, badges, leaderboard, challenges, streaks
+- **Facturation** : contrats avec signature electronique, factures, templates, integration Stripe
+- **Check-ins** : suivi hebdomadaire avec humeur, energie, gratitudes, objectifs, heatmap calendrier, streaks
+- **Journal** : entrees avec templates (gratitude, reflexion, objectifs, victoires), tags, mood tracking
+- **Appels** : calendrier, visio, notes d'appel, enregistrement
+- **Notifications** : categories, filtres, actions groupees, archivage
+- **Communaute** : feed social, likes, commentaires, moderation
+- **IA Coach** : analyse des eleves, detection des risques, generation de contenu
+
+## Demarrage
+
+### Prerequis
+
 - Node.js 18+
-- Un projet Supabase
+- Compte Supabase
 
-### Configuration
+### Installation
 
-1. Cloner le repo :
-```bash
-git clone https://github.com/Wassim-07305/upscales.git
-cd upscales
-git checkout dev
-```
-
-2. Installer les dependances :
 ```bash
 npm install
 ```
 
-3. Configurer les variables d'environnement :
-```bash
-cp .env.example .env.local
+### Configuration
+
+Creer un fichier `.env.local` :
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+DATABASE_URL=your_database_url
 ```
 
-Remplir `.env.local` :
-```
-NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-anon-key
-SUPABASE_SERVICE_ROLE_KEY=votre-service-role-key
-```
-
-4. Appliquer les migrations Supabase (dans le SQL Editor du dashboard) :
-   - `supabase/migrations/001_initial_schema.sql`
-   - `supabase/migrations/002_booking_system.sql`
-   - `supabase/migrations/003_fix_booking_day_of_week.sql`
-   - `supabase/migrations/004_landing_pages.sql`
-   - `supabase/migrations/005_ai_knowledge_base.sql`
-   - `supabase/migrations/006_fix_comment_likes_trigger.sql`
-
-5. Creer un bucket `media` dans Supabase Storage (public).
-
-### Lancement
+### Lancer le serveur de dev
 
 ```bash
-NODE_OPTIONS='--max-http-header-size=32768' npm run dev -- -p 3005
+npm run dev
 ```
 
-L'option `--max-http-header-size` est necessaire pour les JWT Supabase ES256.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-Ouvrir [http://localhost:3005](http://localhost:3005).
+### Commandes
 
-## Scripts
-
-| Commande | Description |
-|----------|-------------|
-| `npm run dev` | Serveur de developpement |
-| `npm run build` | Build de production |
-| `npm run start` | Serveur de production |
-| `npm run lint` | Linting ESLint |
+| Commande        | Description              |
+| --------------- | ------------------------ |
+| `npm run dev`   | Serveur de developpement |
+| `npm run build` | Build de production      |
+| `npm run lint`  | Linting ESLint           |
 
 ## Structure du projet
 
 ```
-app/
-  (auth)/              # Routes publiques (login, register, forgot-password)
-  (dashboard)/         # Routes protegees (dashboard, formations, chat, etc.)
-    admin/             # Routes admin (CRM, formations editor, settings)
-  (onboarding)/        # Onboarding nouvel utilisateur
-  api/                 # API routes (upload, certificates, auth, booking, AI)
-  book/[slug]/         # Pages de reservation publiques
-  p/[slug]/            # Landing pages publiques
-components/
-  ui/                  # 26 composants shadcn/ui
-  formations/          # VideoPlayer, QuizComponent, ModuleList
-  community/           # PostCard, CommentSection, CreatePost
-  booking/             # Composants admin et public du booking
-  layout/              # Sidebar, Header, GlobalSearch, Notifications
-  notifications/       # NotificationBell, NotificationItem
-lib/
-  supabase/            # Clients Supabase (browser, server, admin, middleware)
-  stores/              # Zustand stores (chat, notifications, UI)
-  hooks/               # Custom hooks (useChat, useNotifications, useCRM, etc.)
-  puck/                # Blocs Puck pour le page builder
-  ai/                  # RAG pipeline (embeddings, chunker, system prompt)
-  types/               # TypeScript interfaces
-  utils/               # Helpers (dates, formatters, roles)
+src/
+  app/
+    (auth)/              # Routes d'authentification (login, signup, forgot-password)
+    admin/               # Portail admin (~20 routes)
+    coach/               # Portail coach (~12 routes)
+    client/              # Portail client (~15 routes)
+    sales/               # Portail sales (~6 routes)
+    _shared-pages/       # Pages partagees entre roles
+    api/                 # Routes API (IA, admin, facturation, Stripe)
+  components/            # Composants React organises par module
+  hooks/                 # 29+ hooks TanStack Query
+  stores/                # 3 stores Zustand (UI, form-builder, messaging)
+  lib/                   # Utilitaires, clients Supabase, animations, navigation
+  types/                 # Types TypeScript
 supabase/
-  migrations/          # 6 fichiers de migration SQL
+  migrations/            # 32 fichiers de migration SQL
 ```
+
+## Base de donnees
+
+Les migrations Supabase se trouvent dans `supabase/migrations/`. Elles couvrent :
+
+- Schema initial (profiles, channels, messages, courses, etc.)
+- Systeme de roles (admin, coach, client, setter, closer, sales)
+- Facturation et contrats
+- Feed communautaire
+- Coaching (check-ins, goals, sessions, alertes)
+- Gamification (XP, badges, challenges, streaks)
+- Calendrier d'appels et visio
+- Messaging avance (threads, reactions, pieces jointes)
+- Notifications avec categories
+- Pipeline CRM avec interactions
 
 ## Deploiement
 
-Deployer sur [Vercel](https://vercel.com) avec les variables d'environnement configurees.
+Deployer sur [Vercel](https://vercel.com) :
+
+```bash
+npx vercel
+```
+
+Configurer les variables d'environnement dans le dashboard Vercel.

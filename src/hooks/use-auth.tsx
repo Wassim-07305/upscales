@@ -1,0 +1,319 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { useSupabase } from "./use-supabase";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUIStore } from "@/stores/ui-store";
+import type { Profile } from "@/types/database";
+import type { User, AuthError } from "@supabase/supabase-js";
+
+/**
+ * Clear all auth-related cookies from the browser.
+ * Used before redirects to prevent middleware from seeing stale sessions.
+ */
+function clearAuthCookies() {
+  // Clear profile cache
+  document.cookie = "om_profile_cache=; path=/; max-age=0; SameSite=Lax";
+  // Clear all Supabase session cookies
+  document.cookie.split(";").forEach((c) => {
+    const name = c.trim().split("=")[0];
+    if (name && name.startsWith("sb-")) {
+      document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+    }
+  });
+}
+
+interface AuthContextValue {
+  user: User | null;
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signInWithMagicLink: (email: string) => Promise<{ error: AuthError | null }>;
+
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  refreshProfile: () => Promise<void>;
+  isAdmin: boolean;
+  isCoach: boolean;
+  isStaff: boolean;
+  isSetter: boolean;
+  isCloser: boolean;
+  isSales: boolean;
+  isClient: boolean;
+  // Impersonation
+  isImpersonating: boolean;
+  realUser: User | null;
+  realProfile: Profile | null;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+interface AuthProviderProps {
+  children: ReactNode;
+  /** When provided (from server layout), auth bootstraps instantly with no loading flash */
+  initialUser?: User | null;
+  initialProfile?: Profile | null;
+}
+
+export function AuthProvider({
+  children,
+  initialUser,
+  initialProfile,
+}: AuthProviderProps) {
+  const hasServerData = initialUser !== undefined;
+  const [user, setUser] = useState<User | null>(initialUser ?? null);
+  const [profile, setProfile] = useState<Profile | null>(
+    initialProfile ?? null,
+  );
+  const [loading, setLoading] = useState(!hasServerData);
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchProfile = async (userId: string) => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (!cancelled) setProfile(data);
+    };
+
+    // Safety timeout — only needed when no server bootstrap data
+    const timeout = hasServerData
+      ? null
+      : setTimeout(() => {
+          if (!cancelled) setLoading(false);
+        }, 3000);
+
+    // Use getSession() for auth from cookies (faster than getUser which makes a network call)
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (cancelled) return;
+        if (timeout) clearTimeout(timeout);
+        if (session?.user) {
+          setUser(session.user);
+          if (!hasServerData) setLoading(false);
+          fetchProfile(session.user.id); // async, fills in after render
+        } else {
+          if (!hasServerData) setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          if (timeout) clearTimeout(timeout);
+          if (!hasServerData) setLoading(false);
+        }
+      });
+
+    // Step 2: Listen for auth state changes (token refresh, sign in/out)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (cancelled) return;
+      if (event === "INITIAL_SESSION") return; // already handled by getSession above
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      if (timeout) clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
+
+  // Realtime: listen to changes on the user's own profile row (role, name, etc.)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`profile-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newProfile = payload.new as Profile;
+          const oldRole = profile?.role;
+          setProfile(newProfile);
+
+          // If role changed, redirect to the correct dashboard
+          if (oldRole && newProfile.role !== oldRole) {
+            const ROLE_DASHBOARDS: Record<string, string> = {
+              admin: "/admin/dashboard",
+              coach: "/coach/dashboard",
+              setter: "/sales/dashboard",
+              closer: "/sales/dashboard",
+              client: "/client/dashboard",
+              prospect: "/client/dashboard",
+            };
+            const target =
+              ROLE_DASHBOARDS[newProfile.role] ?? "/client/dashboard";
+            clearAuthCookies();
+            window.location.replace(target);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, user, profile?.role]);
+
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      clearAuthCookies();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (!error) {
+        // Invalidate all queries so they refetch with the new user's data
+        queryClient.invalidateQueries();
+      }
+      return { error };
+    },
+    [supabase, queryClient],
+  );
+
+  const signUp = useCallback(
+    async (email: string, password: string, fullName: string) => {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+        },
+      });
+      return { error };
+    },
+    [supabase],
+  );
+
+  const signInWithMagicLink = useCallback(
+    async (email: string) => {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      return { error };
+    },
+    [supabase],
+  );
+
+  const signOut = useCallback(async () => {
+    // Clear impersonation state
+    useUIStore.getState().clearImpersonation();
+    // Clear all React Query caches
+    queryClient.clear();
+    // Clear all auth cookies to prevent middleware from redirecting back
+    clearAuthCookies();
+    // Clear auth state
+    setUser(null);
+    setProfile(null);
+    // Sign out without awaiting (can hang with SSR client)
+    supabase.auth.signOut().catch(() => {});
+    // Redirect immediately — cookies are already cleared so middleware won't bounce back
+    window.location.replace("/login");
+  }, [supabase, queryClient]);
+
+  const resetPassword = useCallback(
+    async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      });
+      return { error };
+    },
+    [supabase],
+  );
+
+  const refreshProfile = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    if (data) setProfile(data);
+  }, [supabase, user]);
+
+  // Impersonation: si un profil impersone est set, on l'utilise a la place
+  const impersonatedProfile = useUIStore((state) => state.impersonatedProfile);
+  const isImpersonating = !!impersonatedProfile && profile?.role === "admin";
+
+  const effectiveProfile = isImpersonating ? impersonatedProfile : profile;
+  const role = effectiveProfile?.role;
+  // Computed before the object literal to avoid TypeScript control-flow narrowing
+  // exhausting all other role values before it reaches the isClient line
+  const isClientRole = role === "client" || role === "prospect";
+
+  const value: AuthContextValue = {
+    user: isImpersonating
+      ? ({ ...user, id: impersonatedProfile.id } as User)
+      : user,
+    profile: effectiveProfile,
+    loading,
+    signIn,
+    signUp,
+    signInWithMagicLink,
+    signOut,
+    resetPassword,
+    refreshProfile,
+    isAdmin: role === "admin",
+    isCoach: role === "coach",
+    isStaff:
+      role === "admin" ||
+      role === "coach" ||
+      role === "setter" ||
+      role === "closer",
+    isSetter: role === "setter",
+    isCloser: role === "closer",
+    isSales: role === "setter" || role === "closer",
+    isClient: isClientRole,
+    // Impersonation
+    isImpersonating,
+    realUser: user,
+    realProfile: profile,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return ctx;
+}

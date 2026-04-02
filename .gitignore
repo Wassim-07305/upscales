@@ -39,4 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Test simulation files (contain local credentials)
+tests/simulation/*.mjs
+tests/screenshots/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+tests/.auth/
+.playwright-mcp/
+tests/debug-*
 .env*.local
+.superpowers/
+qa-reports/

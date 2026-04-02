@@ -1,0 +1,185 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { useCallStore } from "@/stores/call-store";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Monitor,
+  MonitorOff,
+  ScrollText,
+  StickyNote,
+  PhoneOff,
+  ClipboardList,
+  MessageSquare,
+} from "lucide-react";
+
+interface CallControlsProps {
+  onToggleMic: () => void;
+  onToggleCamera: () => void;
+  onToggleScreenShare: () => void;
+  onToggleTranscript: () => void;
+  onToggleNotes?: () => void;
+  onToggleChat?: () => void;
+  onTogglePreCallResponses?: () => void;
+  onHangUp: () => void;
+  showTranscript: boolean;
+  showNotes?: boolean;
+  showChat?: boolean;
+  showPreCallResponses?: boolean;
+  isTranscriptionSupported: boolean;
+  recordingSlot?: React.ReactNode;
+}
+
+export function CallControls({
+  onToggleMic,
+  onToggleCamera,
+  onToggleScreenShare,
+  onToggleTranscript,
+  onToggleNotes,
+  onToggleChat,
+  onTogglePreCallResponses,
+  onHangUp,
+  showTranscript,
+  showNotes,
+  showChat,
+  showPreCallResponses,
+  isTranscriptionSupported,
+  recordingSlot,
+}: CallControlsProps) {
+  const { isMicOn, isCameraOn, isScreenSharing, isTranscribing } =
+    useCallStore();
+
+  return (
+    <div className="flex items-center justify-center gap-2 py-4 px-4 bg-zinc-950/50 backdrop-blur-md">
+      {/* Recording */}
+      {recordingSlot}
+
+      {/* Mic */}
+      <ControlButton
+        onClick={onToggleMic}
+        active={isMicOn}
+        activeIcon={Mic}
+        inactiveIcon={MicOff}
+        label={isMicOn ? "Couper le micro" : "Activer le micro"}
+        dangerWhenInactive
+      />
+
+      {/* Camera */}
+      <ControlButton
+        onClick={onToggleCamera}
+        active={isCameraOn}
+        activeIcon={Video}
+        inactiveIcon={VideoOff}
+        label={isCameraOn ? "Couper la camera" : "Activer la camera"}
+        dangerWhenInactive
+      />
+
+      {/* Screen share */}
+      <ControlButton
+        onClick={onToggleScreenShare}
+        active={isScreenSharing}
+        activeIcon={MonitorOff}
+        inactiveIcon={Monitor}
+        label={isScreenSharing ? "Arreter le partage" : "Partager l'ecran"}
+        highlightWhenActive
+      />
+
+      {/* Transcription */}
+      {isTranscriptionSupported && (
+        <ControlButton
+          onClick={onToggleTranscript}
+          active={isTranscribing || showTranscript}
+          activeIcon={ScrollText}
+          inactiveIcon={ScrollText}
+          label="Transcription"
+          highlightWhenActive
+        />
+      )}
+
+      {/* Notes */}
+      {onToggleNotes && (
+        <ControlButton
+          onClick={onToggleNotes}
+          active={!!showNotes}
+          activeIcon={StickyNote}
+          inactiveIcon={StickyNote}
+          label="Notes de seance"
+          highlightWhenActive
+        />
+      )}
+
+      {/* Chat */}
+      {onToggleChat && (
+        <ControlButton
+          onClick={onToggleChat}
+          active={!!showChat}
+          activeIcon={MessageSquare}
+          inactiveIcon={MessageSquare}
+          label="Chat"
+          highlightWhenActive
+        />
+      )}
+
+      {/* Pre-call responses (staff only) */}
+      {onTogglePreCallResponses && (
+        <ControlButton
+          onClick={onTogglePreCallResponses}
+          active={!!showPreCallResponses}
+          activeIcon={ClipboardList}
+          inactiveIcon={ClipboardList}
+          label="Réponses pre-appel"
+          highlightWhenActive
+        />
+      )}
+
+      {/* Hang up */}
+      <button
+        onClick={onHangUp}
+        className="w-12 h-12 rounded-full bg-lime-400 hover:bg-lime-700 flex items-center justify-center text-white transition-all active:scale-90 ml-4"
+        title="Raccrocher"
+      >
+        <PhoneOff className="w-5 h-5" />
+      </button>
+    </div>
+  );
+}
+
+function ControlButton({
+  onClick,
+  active,
+  activeIcon: ActiveIcon,
+  inactiveIcon: InactiveIcon,
+  label,
+  dangerWhenInactive,
+  highlightWhenActive,
+}: {
+  onClick: () => void;
+  active: boolean;
+  activeIcon: React.ComponentType<{ className?: string }>;
+  inactiveIcon: React.ComponentType<{ className?: string }>;
+  label: string;
+  dangerWhenInactive?: boolean;
+  highlightWhenActive?: boolean;
+}) {
+  const Icon = active ? ActiveIcon : InactiveIcon;
+
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      className={cn(
+        "w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90",
+        !active && dangerWhenInactive
+          ? "bg-lime-400/20 text-lime-300 hover:bg-lime-400/30"
+          : active && highlightWhenActive
+            ? "bg-primary/20 text-primary hover:bg-primary/30"
+            : "bg-foreground/10 text-foreground hover:bg-foreground/20",
+      )}
+    >
+      <Icon className="w-5 h-5" />
+    </button>
+  );
+}

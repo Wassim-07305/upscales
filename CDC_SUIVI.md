@@ -1,469 +1,529 @@
-# Suivi du Cahier des Charges - Upscale LMS
+# Suivi d'avancement - Cahier des Charges Off-Market
 
-> Derniere mise a jour : 2026-03-12
-> Version CDC : 1.0 | Mars 2026
+> Derniere mise a jour : 2026-03-15
+> Avancement global : **~98%** (CDC technique) / **~95%** (besoins Alexia Call1+Call2)
 
 ---
 
 ## Legende
 
-| Icone | Statut |
-|-------|--------|
-| ✅ | Complet |
-| 🟡 | Partiel |
-| ❌ | Non implemente |
+| Symbole | Signification              |
+| ------- | -------------------------- |
+| Done    | Fonctionnalite implementee |
+| Partiel | Partiellement implementee  |
+| Manque  | Non implementee            |
 
 ---
 
-## Vue d'ensemble
+## 3. Tableau de Bord
 
-| # | Section | Completion | Statut |
-|---|---------|------------|--------|
-| 1 | Introduction & Vision | - | Architecture OK |
-| 2 | Architecture & Technologie | 95% | Stack conforme |
-| 3 | Roles & Securite | 90% | 4 roles, RLS, audit trail |
-| 4 | Authentification & Profils | 100% | OAuth 4 providers, visibilite profil, rate limiting login+reset |
-| 5 | Formations & Catalogue | 100% | Filtres, infinite scroll, vue liste, tri |
-| 6 | Modules & Contenu | 98% | Video + Tiptap + PiP + resume + breadcrumb OK |
-| 7 | Quiz & Evaluations | 90% | 3 types, historique, shuffle, multimedia, Zod, timer |
-| 8 | Certificats | 95% | PDF + QR + partage LinkedIn/Twitter |
-| 9 | Calendrier & Sessions | 90% | Vues mois/semaine/jour + filtres + drag-and-drop |
-| 10 | Chat & Canaux | 98% | Realtime + edit/delete + reactions + pin + block + archive |
-| 11 | Communaute | 98% | Feed + infinite scroll + edition + share + suppression + signalement |
-| 12 | Notifications | 98% | Triggers + suppression + nettoyage + tout lu + infinite scroll + liens directs |
-| 13 | CRM Administrateur | 95% | Fiches + tags + notes CRM + export CSV + tri colonnes |
-| 14 | Booking & Reservations | 90% | Systeme fonctionnel + exceptions jours fermes |
-| 15 | Landing Pages | 95% | Puck + 11 blocs + SEO meta/og + preview admin |
-| 16 | Intelligence Artificielle | 85% | RAG + Claude + streaming + UI admin OK |
-| 17 | Design System | 98% | Dark mode complet + reduced-motion |
+| Ref  | Fonctionnalite           | Statut | Notes                                                                                           |
+| ---- | ------------------------ | ------ | ----------------------------------------------------------------------------------------------- |
+| F1   | Dashboard Admin          | Done   | KPIs, utilisateurs, alertes                                                                     |
+| F2   | Dashboard Coach          | Done   | Eleves, alertes, progression, activite                                                          |
+| F3   | Dashboard Client         | Done   | Progression, XP, badges, appels                                                                 |
+| F4   | Dashboard Sales          | Done   | KPIs financiers, MRR, forecast, top clients (Sprint 22)                                         |
+| F4.1 | Widgets KPI              | Done   | MRR/ARR, retention, NPS basique                                                                 |
+| F4.2 | Graphiques & Historiques | Done   | Courbes revenus + export + heatmaps activite + comparaisons periodes + closing rate (Sprint 38) |
 
-**Moyenne globale : ~97%**
+### Manques Dashboard
+
+- [x] Export PDF/Excel des rapports (Sprint 25)
+- [x] Heatmaps d'activite par jour/heure (activity-heatmap.tsx Sprint 38)
+- [x] Comparaisons periode a periode (period-comparison.tsx Sprint 38)
+- [ ] Widgets configurables (drag-drop dashboard)
 
 ---
 
-## Detail par fonctionnalite
+## 4. CRM & Suivi des Eleves
 
-### 3. ROLES & SECURITE
+| Ref  | Fonctionnalite             | Statut  | Notes                                                                      |
+| ---- | -------------------------- | ------- | -------------------------------------------------------------------------- |
+| F5   | Fiches Eleves              | Done    | Profil, historique, notes, contrats, statut                                |
+| F6   | Tags d'Engagement          | Done    | VIP, Standard, New, At-Risk, Churned + couleurs                            |
+| F7   | Pipeline Etudiant          | Done    | Kanban drag-drop + vue liste + filtres                                     |
+| F8   | Alertes Automatiques Coach | Done    | Inactivite, at-risk, objectifs, check-in                                   |
+| F8.1 | Visualisations Pipeline    | Done    | Kanban + Liste + Timeline + Bulk actions (Sprint 26)                       |
+| F8.2 | Segmentation et Filtrage   | Partiel | Filtres par tag, recherche. Manque segments sauvegardes, export CSV avance |
 
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F3.1 | Role Administrateur | ✅ | Acces complet admin panel |
-| F3.2 | Role Moderateur | 🟡 | Role existe, permissions pas granulaires |
-| F3.3 | Role Membre | ✅ | Dashboard etudiant complet |
-| F3.4 | Role Prospect | ✅ | Acces limite, booking only |
-| F3.5 | RLS policies | ✅ | Migrations 009 + 20260310 |
-| F3.6 | Audit trail admin | ✅ | Table audit_logs + page /admin/audit + helper logAuditAction |
+### Manques CRM
 
-### 4. AUTHENTIFICATION & PROFILS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F5 | Connexion OAuth2 | ✅ | Google, GitHub, Facebook, Discord |
-| F5.1 | Supabase Auth | ✅ | Middleware + cookies httpOnly |
-| F5.2 | Session refresh auto | ✅ | Middleware middleware.ts |
-| F5.3 | Rate limiting login | ✅ | 5 tentatives max, verrouillage 60s avec countdown |
-| F6 | Inscription + onboarding | ✅ | 5 etapes avec Framer Motion |
-| F6.1 | Creation profil auto | ✅ | Trigger PostgreSQL |
-| F6.2 | Role par defaut prospect | ✅ | Defini dans le trigger |
-| F6.3 | Captcha | ❌ | Non implemente |
-| F7 | Recuperation mot de passe | ✅ | Page forgot-password fonctionnelle |
-| F7.1 | Token 24h expiration | ✅ | Gere par Supabase Auth |
-| F7.2 | Rate limiting reset | ✅ | 3 tentatives max, verrouillage 120s avec countdown |
-| F8 | Profil personnalisable | ✅ | Photo, bio, telephone, preferences |
-| F8.1 | Upload photo profil | ✅ | Compression + Supabase Storage |
-| F8.2 | Visibilite profil | ✅ | Toggle public/prive avec Switch dans ProfileForm |
-| F8.3 | Historique modifications | ❌ | Non implemente |
-| F9 | Flow onboarding | ✅ | 5 etapes animees, confettis, progress bar |
-| F9.1 | Sauvegarde progressive | ✅ | Apres chaque etape |
-| F9.2 | Reprise si interruption | ✅ | Detecte etape en cours |
-
-### 5. FORMATIONS & CATALOGUE
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F10 | Catalogue avec recherche | ✅ | Recherche titre/description, filtres avances |
-| F10.1 | Grille responsive | ✅ | Cards avec stats |
-| F10.2 | Filtres avances | ✅ | Difficulte, duree, categorie, statut |
-| F10.3 | Badges visuels | ✅ | Gratuit/Payant/Premium |
-| F10.4 | Infinite scroll catalogue | ✅ | FormationGrid + IntersectionObserver |
-| F10.5 | Vue liste alternative | ✅ | Toggle grille/liste avec FormationListItem |
-| F10.6 | Tri par colonne | ✅ | Titre, duree, note, popularite, recent |
-| F11 | Detail formation | ✅ | Description, modules, inscrits, duree |
-| F11.1 | Image couverture | ✅ | Thumbnail optimise |
-| F11.2 | Liste modules + duree | ✅ | Avec progression si inscrit |
-| F11.3 | Section avis | ✅ | Systeme de notation |
-| F12 | Inscription formations | ✅ | Bouton + verification role |
-| F12.1 | Unicite inscription | ✅ | Contrainte DB |
-| F12.2 | Notification inscription | ✅ | Trigger DB notification |
-| F12.3 | Acces module 1 auto | ✅ | Redirection apres inscription |
-| F13 | Barre progression | ✅ | Pourcentage + X/Y modules |
-| F13.1 | Couleur degradee neon | ✅ | #C6FF00 vers #7FFFD4 |
-| F13.2 | Animation remplissage | ✅ | Transition fluide |
-| F13.3 | Synchro temps reel | ✅ | Mise a jour apres chaque module |
-
-### 6. MODULES & CONTENU
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F14 | Video avec lecteur | ✅ | Play/pause, volume, fullscreen, vitesse |
-| F14.1 | Upload Supabase Storage | ✅ | Via /api/upload |
-| F14.2 | URLs embed externes | ✅ | YouTube, Vimeo |
-| F14.3 | Picture-in-picture | ✅ | Bouton PiP dans VideoPlayer |
-| F14.4 | Sauvegarde position | ✅ | module_progress.last_position_seconds toutes les 10s |
-| F14.5 | Auto-completion 90% | ✅ | Marque complete a 90% visionne |
-| F15 | Editeur Tiptap | ✅ | WYSIWYG complet |
-| F15.1 | Barre d'outils | ✅ | Gras, italique, listes, liens |
-| F15.2 | Images dans contenu | ✅ | Insertion + optimisation |
-| F15.3 | Niveaux titres | ✅ | h1 a h6 |
-| F15.4 | Stockage JSON | ✅ | Format JSON Tiptap en DB |
-| F16 | Quiz integres | ✅ | Dans les modules |
-| F16.1 | 3 types questions | ✅ | QCM, vrai/faux, reponse libre |
-| F16.2 | Explications par question | ✅ | Affichees apres soumission |
-| F16.3 | Historique tentatives | ✅ | 10 dernieres tentatives |
-| F17 | Progression auto | ✅ | Marquage + transition suivant |
-| F17.1 | Bouton suivant conditionnel | ✅ | Active si conditions remplies |
-| F17.2 | Table module_progress | ✅ | completed_at enregistre |
-| F17.3 | Prerequis modules | ✅ | Verrouillage si prerequis non complete |
-| F18 | Navigation modules | ✅ | Sidebar + precedent/suivant |
-| F18.1 | Badges statut | ✅ | Complete, en cours, verrouille |
-| F18.2 | Breadcrumb | ✅ | Formations > Formation > Module (desktop + mobile) |
-
-### 7. QUIZ & EVALUATIONS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F19 | Types questions | ✅ | multiple_choice, true_false, free_response |
-| F19.1 | Options aleatoires | ✅ | Fisher-Yates shuffle questions + options, re-shuffle au retry |
-| F19.2 | Support multimedia options | ✅ | image_url sur quiz_options + affichage dans QuizComponent |
-| F19.3 | Validation Zod reponses | ✅ | Schema Zod valide answers avant insert DB |
-| F20 | Notation automatique | ✅ | Score % + pass/fail |
-| F20.1 | Score de passage 70% | ✅ | Configurable par quiz |
-| F20.2 | Notation manuelle libre | 🟡 | Reponses libres = toujours correct |
-| F20.3 | Table quiz_attempts | ✅ | Score, passed, created_at |
-| F20.4 | Stats par question | ❌ | Non implemente |
-| F20.5 | Timer quiz | ✅ | time_limit_minutes optionnel, countdown, auto-submit |
-| F21 | Feedback immediat | ✅ | Score + bonnes reponses |
-| F21.1 | Explications textuelles | ✅ | Par question avec icone |
-| F21.2 | Option refaire quiz | ✅ | Bouton retry si echoue |
-| F21.3 | Suggestion modules | ❌ | Pas de recommandations |
-
-### 8. CERTIFICATS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F22 | Generation PDF auto | ✅ | @react-pdf/renderer |
-| F22.1 | Design Upscale | ✅ | Neon border, dark bg, landscape A4 |
-| F22.2 | Infos : nom, formation, date | ✅ | + numero certificat |
-| F22.3 | Stockage Supabase | ✅ | Table certificates |
-| F22.4 | Declenchement auto | ✅ | A la completion formation |
-| F23 | Numero unique UUID | ✅ | Format UPS-YYYYMM-XXXXXX |
-| F23.1 | Verification externe | ✅ | Page /verify/[number] |
-| F23.2 | QR code sur certificat | ✅ | Lien verification |
-| F24 | Galerie certificats | ✅ | Page /certificates |
-| F24.1 | Telechargement PDF | ✅ | Bouton par certificat |
-| F24.2 | Partage LinkedIn/Twitter | ✅ | Dropdown LinkedIn, X/Twitter, copier lien |
-| F24.3 | Apercu vignette | ❌ | Pas de preview visuel |
-| F24.4 | Export liste complete | ❌ | Non implemente |
-
-### 9. CALENDRIER & SESSIONS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F25 | Calendrier interactif | ✅ | 3 vues avec toggle |
-| F25.1 | Vue mois | ✅ | Grille avec sessions, clic pour drill down |
-| F25.2 | Vue semaine | ✅ | Grille horaire 7h-22h, 7 colonnes |
-| F25.3 | Vue jour | ✅ | Grille horaire detaillee |
-| F25.4 | Multi-couleur sessions | ✅ | Couleur par session |
-| F25.5 | Places restantes | ✅ | Affiche dans les cards |
-| F25.6 | Navigation mois | ✅ | Prev/next + bouton Aujourd'hui |
-| F25.7 | Drag-and-drop admin | ✅ | @dnd-kit sortable avec echange creneaux |
-| F26 | Sessions live | ✅ | Creation, inscription, details |
-| F26.1 | Lieu physique/visio | ✅ | Support Zoom/Meet |
-| F26.2 | Limitation participants | ✅ | max_participants |
-| F26.3 | Statut scheduled/completed | ✅ | Gestion statut |
-| F26.4 | Notification modif session | ✅ | Trigger DB |
-| F26.5 | Desistement | 🟡 | Possible mais pas de delai N heures |
-| F27 | Filtres sessions | ✅ | Panel filtres avec badge compteur |
-| F27.1 | Filtre statut | ✅ | A venir, passees, annulees |
-| F27.2 | Filtre type | ✅ | En ligne, physique, hybride |
-| F27.3 | Filtre lieu | ✅ | Via filtre type online/physical |
-| F27.4 | Badge filtres actifs | ✅ | Compteur sur bouton Filtres |
-
-### 10. CHAT & CANAUX
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F28 | Chat temps reel | ✅ | Supabase Realtime |
-| F28.1 | Canaux publics/prives/DM | ✅ | 3 types supportes |
-| F28.2 | Avatar + nom auteur | ✅ | Affiche sur chaque message |
-| F28.3 | Horodatage FR | ✅ | date-fns locale FR |
-| F28.4 | Reactions emoji | ✅ | 6 emojis rapides, toggle, compteur |
-| F28.5 | Edition/suppression | ✅ | Par l'auteur, label (modifie) |
-| F28.6 | Typing indicator | ✅ | Broadcast Supabase |
-| F28.7 | Notification nouveaux msg | 🟡 | Realtime mais pas de badge |
-| F29 | Canaux thematiques | ✅ | Creation + gestion admin |
-| F29.1 | Canaux prives invitation | ✅ | Systeme membre canal |
-| F29.2 | Description canal | ✅ | Affichee en haut |
-| F29.3 | Liste membres en ligne | 🟡 | Membres listes, statut basique |
-| F29.4 | Pin messages | ✅ | Pin/unpin + barre epinglee en haut du chat |
-| F30 | DM securises | ✅ | One-to-one fonctionnel |
-| F30.1 | Creation auto DM | ✅ | Au premier message |
-| F30.2 | Liste conversations | ✅ | Avec tri recent |
-| F30.3 | Statut en ligne | 🟡 | Basique |
-| F30.4 | Bloquer utilisateur | ✅ | Blocage/deblocage DM + blocage envoi messages |
-| F30.5 | Archivage conversations | ✅ | Archive/desarchive DM + section archivee pliable |
-
-### 11. COMMUNAUTE
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F31 | Feed chronologique | ✅ | Plus recents en premier |
-| F31.1 | Auteur, avatar, contenu | ✅ | PostCard complet |
-| F31.2 | Compteur likes/comments | ✅ | Temps reel |
-| F31.3 | Horodatage FR | ✅ | date-fns locale FR |
-| F31.4 | Infinite scroll | ✅ | PostFeed + IntersectionObserver |
-| F31.5 | Filtre auteur/hashtag | 🟡 | Filtre type (recent, popular, annonces, mes posts) |
-| F31.6 | Pin posts moderateurs | ✅ | Posts annonces |
-| F31.7 | Texte riche Tiptap | ✅ | Dans CreatePost |
-| F32 | Posts, commentaires, likes | ✅ | Systeme complet |
-| F32.1 | Upload image/video | ✅ | CreatePost avec media |
-| F32.2 | Commentaires imbriques | ✅ | CommentSection |
-| F32.3 | Like/unlike posts+comments | ✅ | Avec compteur optimiste |
-| F32.4 | Suppression par auteur/modo | ✅ | Auteur + moderateur peuvent supprimer via PostCard menu |
-| F32.5 | Edition post par auteur | ✅ | Mode edition dans PostCard |
-| F33 | Detail post | ✅ | Page /community/[postId] |
-| F33.1 | Commentaires + reponses | ✅ | Thread complet |
-| F33.2 | Share buttons | ✅ | LinkedIn, X/Twitter, copier lien dans PostCard |
-| F33.3 | Signalement commentaires | ✅ | Bouton Flag, table comment_reports, RLS |
-
-### 12. NOTIFICATIONS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F34 | Centre notifications | ✅ | Page /notifications |
-| F34.1 | Tri anti-chronologique | ✅ | Plus recentes en haut |
-| F34.2 | Filtrage par type | ✅ | Preferences par type |
-| F34.3 | Marquage lu/non-lu | ✅ | Toggle par notification |
-| F34.4 | Suppression individuelle | ✅ | Bouton X au hover |
-| F34.5 | Nettoyage en masse | ✅ | Bouton Nettoyer (supprime les lues) |
-| F34.6 | Pagination/scroll infini | ✅ | IntersectionObserver + chargement par 30 |
-| F35 | Types multiples | ✅ | enrollment, completion, message, community, system |
-| F35.1 | Icone par type | ✅ | 6 icones distinctes + couleurs par type dans NotificationItem |
-| F35.2 | Lien navigation direct | ✅ | Link vers ressource via notification.link |
-| F36 | Marquage lu | ✅ | Toggle lu/non-lu |
-| F36.1 | Marquer tout comme lu | ✅ | Bouton "Tout lu" dans panel + page notifications |
-| F36.2 | Badge header non-lues | ✅ | Badge compteur temps reel dans header (99+ max) |
-| F36.3 | Surlignage non-lues | 🟡 | Style different mais subtil |
-
-### 13. CRM ADMINISTRATEUR
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F37 | Liste etudiants | ✅ | Table avec colonnes completes |
-| F37.1 | Recherche nom/email | ✅ | Temps reel |
-| F37.2 | Filtres role/tags/statut | ✅ | Multi-filtres |
-| F37.3 | Tri par colonne | ✅ | Nom, role, formations, activite, inscription — asc/desc |
-| F37.4 | Export CSV | ✅ | UTF-8 BOM + colonnes FR dans CRMClient |
-| F37.5 | Actions rapides | 🟡 | Voir detail OK, modifier role manquant en liste |
-| F38 | Fiches etudiants | ✅ | Page /admin/crm/[userId] |
-| F38.1 | Profil complet | ✅ | Email, tel, bio, dates |
-| F38.2 | Formations en cours | ✅ | Avec progression visuelle |
-| F38.3 | Certificats obtenus | ✅ | Avec dates |
-| F38.4 | Sessions | 🟡 | Pas distingue prochaines/passees |
-| F38.5 | Notes CRM | ✅ | Section Notes CRM dans StudentDetail |
-| F38.6 | Tags colores | ✅ | Assignation + badges |
-| F39 | Suivi progression | ✅ | Par formation, modules, quiz |
-| F39.1 | Barre progression % | ✅ | Par formation |
-| F39.2 | Resultats quiz | ✅ | Scores visibles |
-| F39.3 | Temps restant estime | ❌ | Non implemente |
-| F39.4 | Alertes blocage | ❌ | Non implemente |
-| F40 | Actions admin | 🟡 | Partiellement implemente |
-| F40.1 | Modifier role | ✅ | admin, moderator, member, prospect |
-| F40.2 | Reset mot de passe | ❌ | Non implemente |
-| F40.3 | Tags personnalises | ✅ | CRUD complet |
-| F40.4 | Notes CRM privees | ✅ | crm_notes table + UI StudentDetail |
-| F40.5 | Suspendre compte | ✅ | Page /suspended |
-| F40.6 | Exporter donnees user | ❌ | Non implemente |
-
-### 14. BOOKING & RESERVATIONS
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F41 | Pages publiques | ✅ | /book/[slug] |
-| F41.1 | Selection date/heure | ✅ | Calendrier + creneaux |
-| F41.2 | Formulaire qualification | ✅ | Champs custom |
-| F41.3 | Confirmation | ✅ | Resume reservation |
-| F41.4 | Email confirmation | ❌ | Non implemente |
-| F41.5 | Notification admin | ❌ | Pas de notif a chaque booking |
-| F41.6 | Support timezone | ❌ | Non implemente |
-| F42 | Gestion creneaux admin | ✅ | /admin/booking |
-| F42.1 | Config par jour semaine | ✅ | Heures debut/fin |
-| F42.2 | Duree creneaux | ✅ | 15/30/45/60 min |
-| F42.3 | Buffer entre reservations | 🟡 | Basique |
-| F42.4 | Exceptions jours fermes | ✅ | ExceptionEditor avec dates bloquees et raisons |
-| F43 | Calendrier booking admin | 🟡 | Liste, pas de vue calendrier |
-| F43.1 | Sync Google Calendar | ❌ | Non implemente |
-
-### 15. LANDING PAGES
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F44 | Pages personnalisees | ✅ | Page builder Puck |
-| F44.1 | URL publique slug | ✅ | /p/[slug] |
-| F44.2 | Editeur drag-and-drop | ✅ | Puck integre |
-| F44.3 | Blocs disponibles | ✅ | Hero, Features, CTA, Pricing, FAQ, Testimonials, TextImage, Video, RichText, Email, Spacer |
-| F44.4 | SEO meta/og:image | ✅ | generateMetadata() dans /p/[slug] avec title, description, OpenGraph |
-| F44.5 | Preview avant publication | ✅ | ?preview=true pour admin, bandeau jaune mode preview |
-| F44.6 | Historique versions | ❌ | Non implemente |
-| F45 | URLs et gestion pages | ✅ | Slug unique |
-| F45.1 | Activation/desactivation | ✅ | Toggle publier/depublier avec handleToggleActive |
-| F45.2 | Tracking visits | ❌ | Non implemente |
-| F45.3 | Analytics par page | ❌ | Non implemente |
-
-### 16. INTELLIGENCE ARTIFICIELLE
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F46 | Chatbot IA RAG | ✅ | /dashboard/ai avec Claude |
-| F46.1 | Interface conversationnelle | ✅ | Chat UI |
-| F46.2 | Historique conversations | ✅ | Persistant en DB |
-| F46.3 | Reponses contextuelles RAG | ✅ | pgvector + embeddings |
-| F46.4 | Sources affichees | ✅ | Documents references |
-| F46.5 | Streaming | ✅ | streamText() + toUIMessageStreamResponse() |
-| F46.6 | Acces member+ seulement | ✅ | Restriction role |
-| F47 | Knowledge base admin | ✅ | UI complete /admin/ai avec AIAdminClient |
-| F47.1 | Upload PDF/TXT | ✅ | Upload + traitement auto en arriere-plan |
-| F47.2 | Import formations | ✅ | API import-formation |
-| F47.3 | Vectorisation auto | ✅ | Pipeline pgvector |
-| F47.4 | Indicateur statut | ✅ | Badges processing/ready/error avec icones |
-| F47.5 | Suppression + cleanup | ✅ | API DELETE |
-| F48 | Reponses contextuelles | ✅ | Cosine similarity search |
-| F48.1 | Top 5 chunks | ✅ | Algorithme en place |
-| F48.2 | Prompt systeme custom | ✅ | buildSystemPrompt() |
-| F48.3 | Rate limiting | ✅ | In-memory rate limiter sur upload, AI chat, booking |
-
-### 17. DESIGN SYSTEM
-
-| ID | Fonctionnalite | Statut | Notes |
-|----|---------------|--------|-------|
-| F49 | Dark mode exclusif | ✅ | Fond #0D0D0D, pas de light mode |
-| F49.1 | Palette couleurs | ✅ | Neon #C6FF00, Turquoise #7FFFD4 |
-| F49.2 | shadcn/ui custom | ✅ | 26 composants |
-| F49.3 | Animations Framer | ✅ | Transitions, fade-up, float |
-| F49.4 | Glass effects | ✅ | Backdrop blur, gradients |
-| F49.5 | Responsive mobile | ✅ | Mobile-first, hamburger menu |
-| F49.6 | Respect reduce-motion | ✅ | @media prefers-reduced-motion dans globals.css |
-| F49.7 | Typographie | ✅ | Outfit, Syne, Geist Mono |
+- [x] Vue Timeline (progression temporelle) (Sprint 26)
+- [x] Bulk actions (modifier plusieurs eleves) (Sprint 26)
+- [ ] Segments sauvegardes et partageables
+- [x] Historique des mouvements pipeline avec timestamps (Sprint 26)
 
 ---
 
-## Fonctionnalites bonus (hors CDC)
+## 5. Formation (LMS)
 
-| Fonctionnalite | Statut | Notes |
-|---------------|--------|-------|
-| Gamification XP/Niveaux | ✅ | Systeme complet avec badges |
-| Leaderboard | ✅ | Top 20 par XP |
-| Systeme parrainage | ✅ | Code referral + rewards XP |
-| Dashboard progression | ✅ | Stats detaillees etudiant |
-| Notes de module | ✅ | Prises de notes par module |
-| Discussions Q&A modules | ✅ | Threads avec resolution |
-| Broadcast admin | ✅ | Annonces a tous les users |
-| Moderation admin | ✅ | Posts + suspensions |
-| Analytics admin | ✅ | Statistiques plateforme |
-| Stripe paiement | ✅ | Checkout + webhooks |
+| Ref   | Fonctionnalite             | Statut  | Notes                                                                          |
+| ----- | -------------------------- | ------- | ------------------------------------------------------------------------------ |
+| F9    | Cours et Modules           | Done    | Hierarchie cours > modules > lecons                                            |
+| F10   | School Builder             | Done    | Drag-drop, types de contenu, editeur                                           |
+| F11   | Quiz et Exercices          | Done    | Quiz player + timer, soumission exercices, correction coach, stats (Sprint 24) |
+| F12   | Progression et Tracking    | Done    | Pourcentage completion, lecons completees                                      |
+| F12.1 | Parcours d'Apprentissage   | Done    | Prerequis entre cours, verrouillage, gate page, gestion admin (Sprint 28)      |
+| F12.2 | Contenus Multimedias       | Partiel | Video (YouTube/Vimeo) OK. Manque audio, embeds Figma/Miro                      |
+| F12.3 | Gamification Apprentissage | Done    | XP par lecon, badges completion, streaks                                       |
 
----
+### Manques LMS
 
-## Prochaines priorites
-
-### Sprint 4 (complete)
-- [x] F25 : Vues calendrier mois/semaine/jour + filtres
-- [x] F37.4 : Export CSV CRM (deja implemente)
-- [x] F10.4 : Infinite scroll catalogue formations
-- [x] F32.5 : Edition de posts par l'auteur (deja implemente)
-- [x] F36.2 : Badge notifications temps reel (deja implemente)
-
-### Sprint 5 (complete)
-- [x] F5 : OAuth Facebook + Discord
-- [x] F28.4 : Reactions emoji chat (6 emojis rapides)
-- [x] F24.2 : Partage certificats LinkedIn/Twitter
-- [x] F34.4 : Suppression individuelle + nettoyage en masse notifications
-
-### Sprint 6 (complete)
-- [x] F19.1 : Shuffle questions + options quiz (Fisher-Yates)
-- [x] F10.5 : Vue liste formations (toggle grille/liste)
-- [x] F47 : UI knowledge base admin (deja implemente)
-- [x] F38.5 : Notes CRM privees (deja implemente)
-- [x] F46.5 : Streaming reponses IA (deja implemente)
-
-### Sprint 7 (complete)
-- [x] F10.6 : Tri par colonne formations (titre, duree, note, popularite, recent)
-- [x] F14.3 : Picture-in-picture video
-- [x] F44.3 : Blocs landing pages (deja implemente - 11 blocs)
-- [x] F36.1 : Marquer tout comme lu (deja implemente)
-- [x] F32.5 : Edition post par auteur (deja implemente)
-
-### Sprint 8 (complete)
-- [x] F29.4 : Pin messages chat (pin/unpin + barre epinglee)
-- [x] F33.2 : Share buttons posts (LinkedIn, X/Twitter, copier lien)
-- [x] F8.2 : Visibilite profil (toggle public/prive)
-- [x] F3.6 : Audit trail admin (table + page + helper)
-- [x] F14.4 : Sauvegarde position video (deja implemente)
-
-### Sprint 9 (complete)
-- [x] F30.4 : Bloquer utilisateur (DM) — blocage/deblocage + blocage envoi
-- [x] F30.5 : Archivage conversations — archive/desarchive + section pliable
-- [x] F37.4 : Export CSV CRM (deja implemente)
-- [x] F44.4 : SEO meta/og:image landing pages (deja implemente)
-- [x] F49.6 : Respect prefers-reduced-motion — @media query dans globals.css
-
-### Sprint 10 (complete)
-- [x] F5.3 : Rate limiting login — 5 tentatives max, verrouillage 60s
-- [x] F25.7 : Drag-and-drop calendrier admin — @dnd-kit echange creneaux
-- [x] F34.6 : Infinite scroll notifications — IntersectionObserver + pages de 30
-- [x] F44.5 : Preview landing pages — mode preview admin avec bandeau jaune
-- [x] F36.2 : Badge notifications header (deja implemente)
-
-### Sprint 11 (complete)
-- [x] F19.2 : Support multimedia options quiz — image_url + affichage dans QuizComponent
-- [x] F18.2 : Breadcrumb complet modules — Formations > Formation > Module (desktop)
-- [x] F42.4 : Exceptions jours fermes booking (deja implemente)
-- [x] F45.1 : Toggle actif/inactif landing pages (deja implemente)
-- [x] F35.1 : Icones par type notification (deja implemente)
-
-### Sprint 12 (complete)
-- [x] F7.2 : Rate limiting reset password — 3 tentatives max, verrouillage 120s
-- [x] F19.3 : Validation Zod reponses quiz — schema valide answers avant insert
-- [x] F32.4 : Suppression post cote user — onDelete handler dans PostFeed
-- [x] F35.2 : Lien navigation direct notifications (deja implemente)
-- [x] F37.3 : Tri par colonne CRM — nom, role, formations, activite, inscription asc/desc
-
-### Sprint 13 (complete)
-- [x] F48.3 : Rate limiting API — in-memory limiter sur upload, AI chat, booking
-- [x] F20.5 : Timer quiz — countdown optionnel, auto-submit a expiration
-- [x] F33.3 : Signalement commentaires — bouton Flag, table comment_reports, RLS
-- [x] F3.5 : Audit logs admin (deja implemente)
-- [x] F38.5 : Notes internes CRM (deja implemente)
-
-### Sprint 14 (a planifier)
-- [ ] A definir
+- [x] Interface quiz avec scoring automatique (Sprint 24)
+- [x] Correction manuelle exercices par coach (Sprint 24)
+- [x] Stats quiz/exercices pour coach (Sprint 24)
+- [x] Timer quiz avec auto-submit (Sprint 24)
+- [x] Certificats de completion (certificate-card.tsx + use-certificates.ts)
+- [x] Parcours d'apprentissage avec prerequis (Sprint 28)
+- [ ] Support audio/podcast
+- [ ] Embeds externes (Figma, Miro, Google Docs)
 
 ---
 
-## Historique des sprints
+## 6. Messagerie
 
-| Sprint | Date | Contenu | Branche |
-|--------|------|---------|---------|
-| Sprint 1 | 2026-03-10 | Recherche globale, triggers notifications, OAuth Google/GitHub | dev → main |
-| Sprint 2 | 2026-03-10 | Quiz multi-types, historique tentatives, certificats PDF | dev → main |
-| Sprint 3 | 2026-03-11 | Upload images posts, chat edit/delete/typing, infinite scroll communaute | dev → main |
-| Sprint 4 | 2026-03-11 | Vues calendrier mois/semaine/jour, filtres sessions, infinite scroll formations | main |
-| Sprint 5 | 2026-03-11 | OAuth FB/Discord, reactions emoji chat, partage certificats, suppression notifs | main |
-| Sprint 6 | 2026-03-11 | Shuffle quiz, vue liste formations, validation UI IA/CRM/streaming | main |
-| Sprint 7 | 2026-03-11 | Tri formations, PiP video, validation blocs landing/notifs/posts | main |
-| Sprint 8 | 2026-03-11 | Pin messages, share posts, visibilite profil, audit trail admin | main |
-| Sprint 9 | 2026-03-11 | Block user DM, archive conversations, reduced-motion, validation CSV/SEO | main |
-| Sprint 10 | 2026-03-12 | Rate limiting login, drag-drop calendar, infinite scroll notifs, preview landing pages | main |
-| Sprint 11 | 2026-03-12 | Multimedia quiz options, breadcrumb modules, validation booking/pages/notifs | main |
-| Sprint 12 | 2026-03-12 | Rate limiting reset, validation Zod quiz, suppression posts, tri CRM colonnes | main |
-| Sprint 13 | 2026-03-12 | Rate limiting API, timer quiz, signalement commentaires | main |
+| Ref   | Fonctionnalite             | Statut  | Notes                                                                        |
+| ----- | -------------------------- | ------- | ---------------------------------------------------------------------------- |
+| F13   | Chat Temps Reel            | Done    | Messages, typing, fichiers, reactions, edit/delete                           |
+| F14   | Canaux et Fils             | Done    | Canaux publics/prives, threads, mentions                                     |
+| F15   | Assistant IA Chat          | Done    | Slash commands /resume /translate /suggest integres dans chat (Sprint 38)    |
+| F16   | Recherche et Notifications | Partiel | Recherche messages OK. Notifications in-app OK                               |
+| F16.1 | Canaux Personnalises       | Done    | Publics, prives, par equipe, permissions                                     |
+| F16.2 | Gestion Conversations      | Done    | Favoris (bookmarks), mute, epinglage, templates reponses rapides (Sprint 37) |
+
+### Manques Messagerie
+
+- [x] Epinglage de messages (is_pinned dans schema messages)
+- [x] Templates / reponses rapides (template-picker.tsx + template-manager-modal.tsx Sprint 37)
+- [x] Archive de conversations (Sprint 38)
+- [x] IA integree dans le chat — /resume, /translate, /suggest (Sprint 38)
+- [x] Mode "Do Not Disturb" — hook + header toggle + durees (Sprint 38)
+
+---
+
+## 7. Appels & Calendrier
+
+| Ref   | Fonctionnalite            | Statut | Notes                                                                |
+| ----- | ------------------------- | ------ | -------------------------------------------------------------------- |
+| F17   | Planification d'Appels    | Done   | Slots, reservation, calendrier semaine/liste                         |
+| F18   | Calendrier Integre        | Done   | Vue semaine, sync Google Calendar                                    |
+| F19   | Appels Video WebRTC       | Done   | Video room, controles, screen sharing                                |
+| F20   | Transcription Automatique | Done   | Transcription + enregistrement video + player + download (Sprint 38) |
+| F20.1 | Rescheduling et Absence   | Done   | Report avec raison, date originale tracee (Sprint 23)                |
+| F20.2 | Notes et Follow-up        | Done   | Notes post-appel, templates, action items (Sprint 23)                |
+| F20.3 | Metriques et Reporting    | Done   | KPIs, taux completion, satisfaction, par type/jour (Sprint 23)       |
+
+### Manques Appels
+
+- [x] Enregistrement des appels video (Sprint 38)
+- [x] UI de lecture des transcriptions — recording-player.tsx (Sprint 38)
+- [ ] Export transcriptions en PDF/texte
+- [ ] Rappels email/SMS avant appel
+- [ ] Support multi-participants (appels groupe)
+
+---
+
+## 8. Gamification
+
+| Ref   | Fonctionnalite            | Statut | Notes                                                                                                             |
+| ----- | ------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| F21   | Systeme XP et Progression | Done   | Points, niveaux, leaderboard                                                                                      |
+| F22   | Badges et Achievements    | Done   | Badges visuels, conditions, notifications                                                                         |
+| F23   | Leaderboard               | Done   | Global, podium top 3, position personnelle                                                                        |
+| F24   | Challenges Hebdomadaires  | Done   | Types varies, progression, participants                                                                           |
+| F25   | Check-Ins Quotidiens      | Done   | Check-in matinal + soir, mood, energie (Sprint 21)                                                                |
+| F25.1 | Streaks et Habits         | Done   | Streak tracking, compteur                                                                                         |
+| F25.2 | Social Proof              | Done   | Leaderboard avec filtres semaine/mois/tout + rank changes (Sprint 38)                                             |
+| F25.3 | Rewards et Privileges     | Done   | Catalogue rewards, redemption XP, admin gestion, stock (use-rewards.ts + admin-rewards.tsx + rewards-catalog.tsx) |
+
+### Manques Gamification
+
+- [x] Systeme de rewards/redemption (convertir XP en avantages) (Sprint 36)
+- [x] Filtres leaderboard (semaine/mois/tout) (Sprint 38)
+- [ ] Anonymat optionnel leaderboard
+- [ ] Team competitions / defis d'equipe
+- [ ] Badges rares et exclusifs configurables par admin
+
+---
+
+## 9. Journal & Check-Ins
+
+| Ref | Fonctionnalite           | Statut  | Notes                                                   |
+| --- | ------------------------ | ------- | ------------------------------------------------------- |
+| F26 | Journal de Coaching      | Done    | Edition libre, calendrier, historique                   |
+| F27 | Check-Ins Structures     | Done    | Mood, energie, gratitudes, objectifs, notes (Sprint 21) |
+| F28 | Suivi Objectifs Coaching | Partiel | Hook useCoachingGoals existe. UI limitee                |
+
+### Manques Journal
+
+- [ ] Prompts guides pour le journal
+- [ ] Medias (images, attachements) dans journal
+- [ ] Journal prive vs partage avec coach
+- [ ] Export journal en PDF
+- [ ] Rapports automatises sur tendances check-in
+- [ ] Objectifs SMART avec sous-objectifs et jalons
+
+---
+
+## 10. Formulaires (Form Builder)
+
+| Ref   | Fonctionnalite               | Statut  | Notes                                                                                               |
+| ----- | ---------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| F29   | Editeur Drag-and-Drop        | Done    | @dnd-kit, library de champs, preview                                                                |
+| F30   | Types de Champs              | Done    | Text, email, phone, select, rating, NPS, date, file, etc.                                           |
+| F31   | Logique Conditionnelle       | Done    | Show/hide, conditions, operateurs                                                                   |
+| F32   | Collecte et Gestion Reponses | Partiel | Stockage + export CSV/PDF OK (Sprint 25). Manque rapports agreges, webhooks                         |
+| F32.1 | Evaluations et Sondages      | Partiel | NPS/rating OK. Manque CSAT, pre/post tests                                                          |
+| F32.2 | Intake et Onboarding Forms   | Partiel | Formulaire onboarding basique                                                                       |
+| F32.3 | Lead Magnet Forms            | Done    | Formulaires publics capture leads + scoring + stats admin (use-lead-magnet.ts + /api/leads/capture) |
+
+### Manques Formulaires
+
+- [x] Export reponses CSV/Excel (Sprint 25)
+- [x] Lead magnet forms publics (Sprint 36)
+- [ ] Rapports agreges avec statistiques
+- [ ] Templates de formulaires pre-construits
+- [ ] Webhooks sur soumission
+- [ ] Alertes si reponse critique (NPS < 5)
+
+---
+
+## 11. Contrats & Facturation
+
+| Ref   | Fonctionnalite             | Statut | Notes                                                                                       |
+| ----- | -------------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| F33   | Gestion des Contrats       | Done   | Templates, creation, envoi, statuts                                                         |
+| F34   | Facturation Automatique    | Done   | Generation factures, PDF, numerotation                                                      |
+| F35   | Gestion des Paiements      | Done   | Stripe complet + Wise API + refunds (Sprint 35)                                             |
+| F36   | Relances Automatiques      | Done   | 5 relances auto + cron dispatch email (Sprint 35)                                           |
+| F37   | Rapports Financiers        | Done   | MRR/ARR, graphiques, forecast (Sprint 22)                                                   |
+| F37.1 | Signatures Electroniques   | Done   | E-signature integree : signature-pad.tsx + /api/contracts/[id]/sign + metadata IP/timestamp |
+| F37.2 | Gestion Renouvellements    | Done   | Facturation recurrente via echeanciers (Sprint 35)                                          |
+| F37.3 | Gestion Refunds et Credits | Done   | Remboursement total/partiel via Stripe (Sprint 35)                                          |
+
+### Manques Facturation
+
+- [x] E-signature integree (Sprint 36)
+- [ ] Renouvellement automatique contrats
+- [x] Gestion remboursements partiels/totaux (Sprint 35)
+- [x] Integration Wise (virements internationaux) (Sprint 35)
+- [x] Facturation recurrente automatique (Sprint 35)
+- [ ] Multi-devises
+
+---
+
+## 12. Communaute (Feed)
+
+| Ref   | Fonctionnalite              | Statut  | Notes                                                                                                          |
+| ----- | --------------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| F38   | Feed Social                 | Done    | Posts, likes, commentaires, types, moderation                                                                  |
+| F39   | Partage Wins & Achievements | Partiel | Posts type "victory" OK. Manque templates wins                                                                 |
+| F40   | Profils Publics             | Done    | Page profil complete: avatar, role, bio, follow/unfollow, stats XP/badges/followers, posts recents (Sprint 27) |
+| F40.1 | Regles Communautaires       | Partiel | Moderation OK. Manque code of conduct affiche                                                                  |
+| F40.2 | Moderation et Reporting     | Done    | Report, admin review, pin, delete                                                                              |
+| F40.3 | Communautes Specialisees    | Done    | Sous-communautes thematiques avec cards, CRUD, feed filtre (Sprint 38)                                         |
+
+### Manques Communaute
+
+- [x] Profils publics complets (badges, wins, stats, follow) (Sprint 27)
+- [x] Systeme follow/unfollow (Sprint 27)
+- [ ] Sous-communautes par niche/interet
+- [ ] Commentaires imbriques (nested replies)
+- [ ] Trending posts / most liked
+
+---
+
+## 13. Onboarding
+
+| Ref   | Fonctionnalite         | Statut | Notes                                                                                 |
+| ----- | ---------------------- | ------ | ------------------------------------------------------------------------------------- |
+| F41   | Flow Onboarding Client | Done   | Walkthrough interactif avec tooltips, visite guidee plateforme (Sprint 30)            |
+| F42   | Checklist Onboarding   | Done   | Checklist 6 etapes + XP rewards + banniere rappel + integration dashboard (Sprint 30) |
+| F42.1 | Engagement Progressif  | Manque | Pas de pacing jour 1/2-3/4-5/semaine 2                                                |
+| F42.2 | Support et Assistance  | Manque | Pas de chatbot onboarding, FAQ                                                        |
+| F42.3 | Personnalisation       | Manque | Pas de chemins differencies selon profil                                              |
+
+### Manques Onboarding
+
+- [x] Walkthrough interactif avec tooltips (Sprint 30)
+- [x] Videos guides integrees (csm-video-step.tsx Sprint 37)
+- [x] Recompenses XP a chaque etape completee (Sprint 30)
+- [ ] Personnalisation selon type d'offre/formation
+- [ ] Chatbot d'assistance onboarding
+
+---
+
+## 14. Intelligence Artificielle
+
+| Ref   | Fonctionnalite             | Statut  | Notes                                                                           |
+| ----- | -------------------------- | ------- | ------------------------------------------------------------------------------- |
+| F43   | Assistant IA Coaching      | Done    | Chat Claude, prompts coaching, historique conversations                         |
+| F44   | Analyse de Risque Eleve    | Done    | Analyse auto multi-facteurs, health_score, alertes, recommandations (Sprint 29) |
+| F45   | Generation de Contenu      | Partiel | IA genere sur demande. Pas de workflow automatise                               |
+| F46   | Insights Coaching          | Partiel | Reponses IA OK. Manque rapports periodiques auto                                |
+| F46.1 | Transparence IA            | Manque  | Pas de labels "reponse IA", confidence scores                                   |
+| F46.2 | Confidentialite Donnees IA | Partiel | Donnees non partagees. Manque consentement explicite                            |
+| F46.3 | Bias et Fairness           | Manque  | Pas d'audit de biais                                                            |
+
+### Manques IA
+
+- [x] Analyse de risque automatique (scoring at-risk) (Sprint 29)
+- [ ] Rapports IA periodiques generes automatiquement
+- [ ] Labels "Reponse IA" vs humain
+- [ ] Integration IA dans messagerie (slash commands)
+- [ ] Consentement explicite pour usage IA
+
+---
+
+## 15. Notifications
+
+| Ref   | Fonctionnalite            | Statut  | Notes                                                                                                                            |
+| ----- | ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| F47   | Notifications In-App      | Done    | Cloche, liste, filtres, marquage lu                                                                                              |
+| F48   | Notifications Email       | Done    | 11 templates: facture, paiement, invitation, welcome, rappel, contrat, session, checkin, badge, alerte coach, digest (Sprint 31) |
+| F49   | Notifications Push        | Done    | Web Push API + service worker + VAPID + toggle settings + push send API (Sprint 31)                                              |
+| F50   | Parametres Notification   | Done    | Toggles par type, digest email                                                                                                   |
+| F50.1 | Notification Intelligente | Manque  | Pas de batching, timing optimal, priority scoring                                                                                |
+| F50.2 | Notifications Critiques   | Partiel | Alertes systeme basiques                                                                                                         |
+| F50.3 | Analytics Notification    | Manque  | Pas de tracking delivery/open/click rates                                                                                        |
+
+### Manques Notifications
+
+- [x] Notifications push navigateur (Web Push API) (Sprint 31)
+- [x] Templates email varies (session, checkin, badge, coach alert, digest) (Sprint 31)
+- [ ] SMS via Twilio
+- [ ] Notification intelligente (batching, timing optimal)
+- [ ] Analytics notifications (taux ouverture, clics)
+
+---
+
+## 16. Invitations & Gestion Utilisateurs
+
+| Ref   | Fonctionnalite               | Statut  | Notes                                                             |
+| ----- | ---------------------------- | ------- | ----------------------------------------------------------------- |
+| F51   | Systeme d'Invitation         | Done    | Invitations email, statut, expiration                             |
+| F52   | Auto-Provisioning            | Partiel | Invitation-only. Manque auto-creation premier acces               |
+| F53   | Gestion Roles et Permissions | Partiel | Roles predefinis OK. Manque roles custom, permissions granulaires |
+| F54   | Authentification et Securite | Done    | Email/password + OAuth Google + 2FA TOTP (Sprint 32)              |
+| F54.1 | Onboarding Coach             | Manque  | Pas de flow specifique coach                                      |
+| F54.2 | Onboarding Staff             | Manque  | Pas de flow specifique staff                                      |
+| F54.3 | Offboarding Utilisateur      | Manque  | Pas de transfert de donnees, desactivation                        |
+
+### Manques Utilisateurs
+
+- [x] 2FA (TOTP authenticator) (Sprint 32)
+- [ ] SSO Google/Microsoft optionnel
+- [ ] Invitation en masse (CSV import)
+- [ ] Roles personnalises creables par admin
+- [ ] Offboarding avec transfert responsabilites
+- [ ] Audit des connexions et acces
+
+---
+
+## 17. Parametres
+
+| Ref   | Fonctionnalite          | Statut  | Notes                                                                  |
+| ----- | ----------------------- | ------- | ---------------------------------------------------------------------- |
+| F55   | Configuration Admin     | Done    | Organisation, integrations, templates                                  |
+| F56   | Branding et Theme       | Done    | Light/dark + logo custom, couleurs, polices, border-radius (Sprint 33) |
+| F57   | Integrations Tierces    | Partiel | Google Calendar OK, Stripe partiel                                     |
+| F58   | Sauvegardes et RGPD     | Done    | Suppression compte + export JSON + consentements RGPD (Sprint 32)      |
+| F58.1 | Branding Avance         | Done    | Logo, palette, favicon, polices, border-radius (Sprint 33)             |
+| F58.2 | Pages Publiques Branded | Manque  | Login/landing pas personnalisables                                     |
+| F58.3 | Domaine Personnalise    | Manque  | Pas de custom domain                                                   |
+
+### Manques Parametres
+
+- [x] Branding complet (logo, couleurs, polices) (Sprint 33)
+- [ ] Pages login/landing branded
+- [ ] Domaine personnalise
+- [x] Export donnees personnelles JSON (RGPD) (Sprint 32)
+- [x] Consentement RGPD au premier acces (Sprint 32)
+
+---
+
+## X. Securite et Conformite
+
+| Ref | Fonctionnalite                   | Statut  | Notes                                                                |
+| --- | -------------------------------- | ------- | -------------------------------------------------------------------- |
+| F61 | Chiffrement des Donnees          | Partiel | TLS via Vercel/Supabase. Manque E2E custom                           |
+| F62 | Conformite RGPD                  | Done    | Suppression compte + export JSON + banniere consentement (Sprint 32) |
+| F63 | Authentification et Autorisation | Done    | OAuth + RLS + 2FA TOTP (Sprint 32). Manque IP whitelist              |
+| F64 | Audit et Monitoring              | Manque  | Pas d'audit logs, SIEM                                               |
+| F65 | Haute Disponibilite              | Partiel | Vercel + Supabase managed. Pas de multi-region custom                |
+
+---
+
+## 18. Integrations
+
+| Ref | Fonctionnalite             | Statut | Notes                                                             |
+| --- | -------------------------- | ------ | ----------------------------------------------------------------- |
+| F66 | Integrations Paiement      | Done   | Stripe complet (checkout, webhook, refund) + Wise API (Sprint 35) |
+| F67 | Integrations Calendrier    | Done   | Google Calendar bidirectionnel                                    |
+| F68 | Integrations Communication | Manque | Pas de Slack, Teams, SMS, WhatsApp                                |
+| F69 | Integrations Analytics     | Manque | Pas de Google Analytics, Mixpanel, Segment                        |
+| F70 | API REST                   | Done   | API v1 (clients, leads, calls) + API keys + webhooks (Sprint 34)  |
+
+### Manques Integrations
+
+- [x] Wise pour virements internationaux (Sprint 35)
+- [ ] Slack notifications evenements cles
+- [ ] SMS via Twilio
+- [ ] Google Analytics / Mixpanel
+- [x] API REST publique /api/v1/ (clients, leads, calls) (Sprint 34)
+- [x] Webhooks custom configurables avec HMAC + logs (Sprint 34)
+- [ ] Zapier connector
+
+---
+
+## Historique des Sprints
+
+| Sprint | Contenu                                                                                                                                                                                               | Date          |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1-20   | Fondations plateforme (auth, dashboards, CRM, LMS, messagerie, appels, gamification, journal, forms, billing, feed, onboarding, IA, notifications)                                                    | < 2026-03-11  |
+| 21     | Systeme de checkin ameliore (mood, energie, gratitudes, objectifs, heatmap)                                                                                                                           | 2026-03-11    |
+| 22     | Rapports financiers & Sales Dashboard (payment reminders, KPIs, forecast, top clients)                                                                                                                | 2026-03-11    |
+| 23     | Gestion appels avancee (reschedule, satisfaction, note templates, call metrics)                                                                                                                       | 2026-03-11    |
+| 24-31  | Quiz, exports, timeline CRM, profils publics, parcours LMS, analyse risque IA, onboarding, notifications push/email                                                                                   | 2026-03-11~12 |
+| 32     | RGPD complet (export JSON, consentements, banniere) + 2FA TOTP (enrollment, login flow)                                                                                                               | 2026-03-14    |
+| 33     | Branding & white-label (logo custom, couleurs, polices, favicon, border-radius, preview live)                                                                                                         | 2026-03-14    |
+| 34     | API REST publique v1 (clients, leads, calls) + API keys + webhooks HMAC + admin UI                                                                                                                    | 2026-03-14    |
+| 35     | Stripe complet (refunds, cron overdue/reminders/recurring) + Wise API (quotes, transfers, balance)                                                                                                    | 2026-03-14    |
+| 36     | CDC gap fill — gamification (challenges, badges), coaching (sessions, alertes), formations (comments, prereqs), contenu (kanban, calendrier), objectifs, CSM auto-assign, roadmap IA, rituels/streaks | 2026-03-15    |
+| 37     | Enrichissement Apify 5 plateformes, lead scoring auto, templates messages, sequences relance, import CSV CRM, video onboarding CSM, dashboard client premium                                          | 2026-03-15    |
+| 38     | IA slash commands chat, archive conversations, DND, enregistrement video, notif flag, leaderboard filtres, sous-communautes, roadmap PDF, heatmap, comparaison periodes, closing rate                 | 2026-03-15    |
+
+---
+
+## Prochains Sprints Recommandes
+
+### Vague 1 - Gaps critiques
+
+- [x] **Sprint 24** : Quiz & Exercices UI — timer, soumission, correction, stats (F11)
+- [x] **Sprint 25** : Export PDF/Excel — dashboards sales/billing + reponses formulaires CSV/PDF (F4.2, F32)
+- [x] **Sprint 26** : Vue Timeline CRM + bulk actions — 3 vues, multi-select, tag batch (F8.1)
+
+### Vague 2 - Differenciation
+
+- [x] **Sprint 27** : Profils publics + follow system (F40)
+- [x] **Sprint 28** : Parcours d'apprentissage avec prerequis (F12.1)
+- [x] **Sprint 29** : Analyse de risque IA automatique (F44)
+- [x] **Sprint 30** : Onboarding interactif walkthrough (F41-F42)
+
+### Vague 3 - Polish & Conformite
+
+- [x] **Sprint 31** : Notifications push + email templates (F48-F49)
+- [x] **Sprint 32** : RGPD complet + 2FA (F54, F62)
+- [x] **Sprint 33** : Branding & white-label (F56, F58.1)
+- [x] **Sprint 34** : API REST publique + webhooks (F70)
+- [x] **Sprint 35** : Integrations Stripe complet + Wise (F66)
+
+---
+
+## Checklist Alexia (Call1 + Call2) — Couverture
+
+> Features demandees par Alexia lors des appels decouverte. Comparaison avec l'etat actuel du code.
+
+### Features Principales
+
+| Feature                                          | Statut  | Notes                                                                                                               |
+| ------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| Workbooks / Questionnaires dynamiques            | Done    | Workbook editor + player + soumission + review coach (use-workbooks.ts + workbook-editor.tsx + workbook-player.tsx) |
+| Appels video natifs + transcription              | Done    | WebRTC + transcription temps reel (Web Speech API) + use-webrtc.ts + use-transcription.ts                           |
+| Generation docs post-appel (transcript+workbook) | Done    | Fusion IA transcript + workbook → document (/api/ai/workbook-fusion + /api/ai/transcript-fusion)                    |
+| Messagerie simplifiee (remplace Slack)           | Done    | Channels publics/prives, DMs, threads, reactions, typing, fichiers + templates reponses rapides                     |
+| Canal individuel par client                      | Done    | DM channels fonctionnels                                                                                            |
+| Canaux de groupe (General, Lives, Challenge)     | Done    | Channels publics/prives creables                                                                                    |
+| Badge messages non lus (compteur rouge)          | Done    | Unread count tracking dans use-channels.ts                                                                          |
+| Systeme #urgent / @urgent                        | Done    | Flag urgent dans messaging + son different + notification prioritaire                                               |
+| Mute des abuseurs                                | Done    | notifications_muted en DB + UI mute dans channel-sidebar.tsx                                                        |
+| Onboarding client guide                          | Done    | Walkthrough interactif, checklist, XP rewards (Sprint 30)                                                           |
+| Video accueil / onboarding                       | Done    | csm-video-step.tsx : video HTML5/iframe avec auto-detection 80% + fallback bio (Sprint 37)                          |
+| Formulaire step-by-step onboarding               | Partiel | Onboarding basique. Manque : "pourquoi Alexia", revenus actuels, infos business                                     |
+| Tutorial guide interactif (style SaaS)           | Done    | walkthrough-provider.tsx avec tooltips et highlights                                                                |
+| Test obligatoire (message test)                  | Done    | message-test-step.tsx dans onboarding                                                                               |
+| Video personnalisee CSM                          | Done    | csm-video-step.tsx + intro_video_url sur profiles (Sprint 37)                                                       |
+| Dashboard progression client                     | Done    | Dashboard client premium : streak, XP, objectifs, cours, badges, upsell (Sprint 37)                                 |
+| Roadmap personnalisee auto-generee par IA        | Done    | auto-roadmap-trigger.ts + /api/ai/generate-roadmap (Sprint 36)                                                      |
+| Jalons/milestones avec criteres validation       | Partiel | Pipeline stages existent. Manque criteres explicites de validation                                                  |
+| Questions pre-appel standardisees                | Done    | use-pre-call-questions.ts avec questions configurables                                                              |
+| Reponse video au lieu d'appel                    | Manque  | Pas de systeme de reponse video asynchrone                                                                          |
+| Systeme de flags (Green/Orange/Red)              | Done    | student_details.flag + flag history + UI dans side panel                                                            |
+| Notification auto quand flag change              | Done    | Auto-notification admin + coach sur changement flag (Sprint 38)                                                     |
+| Attribution auto CSM                             | Done    | csm-auto-assign.ts avec algo specialite + charge (Sprint 36)                                                        |
+| Override manuel CSM                              | Done    | csm-dashboard.tsx avec UI attribution + batch assign                                                                |
+| Vue groupee par CSM                              | Done    | csm-dashboard.tsx avec metriques par coach + clients groupes (Sprint 36)                                            |
+| Correlation performance CSM <-> resultats        | Done    | csm-dashboard.tsx avec health scores + revenue par coach                                                            |
+| FAQ / Base de connaissances IA                   | Done    | use-faq.ts + faq-dashboard.tsx + /api/ai/faq-match (auto-reponse IA, tracking, alertes)                             |
+| IA scoring urgence client                        | Done    | Analyse risque IA avec health_score (Sprint 29)                                                                     |
+
+### Features Secondaires (Nice to Have)
+
+| Feature                              | Statut  | Notes                                                                           |
+| ------------------------------------ | ------- | ------------------------------------------------------------------------------- |
+| Dashboard financier complet          | Done    | MRR, ventes, KPIs, forecast, cash collecte vs facture (financial-dashboard.tsx) |
+| Cash collecte vs cash facture        | Done    | Vue comparee dans financial-dashboard.tsx (Sprint 22)                           |
+| LTV par client                       | Done    | use-ltv.ts + ltv-ranking.tsx (calcul auto, classement top N)                    |
+| Ventes par canal                     | Done    | Revenue by channel dans financial-dashboard.tsx (pie chart)                     |
+| Taux de closing + commentaires       | Done    | Closing rate par source + lost_reason + temps moyen (Sprint 38)                 |
+| Calcul auto paiements contracteurs   | Done    | Auto-commission a la conversion client (use-pipeline.ts moveContact)            |
+| Generation auto contrats/factures    | Done    | Templates + PDF + envoi email                                                   |
+| Signature electronique               | Done    | E-signature integree : signature-pad.tsx + API sign + metadata IP               |
+| CRM mobile setter                    | Partiel | PWA responsive. Manque optimisation mobile specifique setter                    |
+| Challenges / Leaderboard anti-triche | Partiel | Gamification complete. Manque integration LinkedIn API verif                    |
+| Lead Magnet forms publics            | Done    | /api/leads/capture + /f/[formId] + use-lead-magnet.ts + stats admin             |
+| Calendrier lives partage             | Partiel | Calendrier appels existe. Manque calendrier lives groupe                        |
+| Upsell automatise par palier revenu  | Done    | use-upsell.ts avec rules + triggers auto + dashboard admin                      |
+
+### Preferences UI / Design
+
+| Feature                         | Statut  | Notes                                                  |
+| ------------------------------- | ------- | ------------------------------------------------------ |
+| Simplicite (anti-Slack)         | Done    | UI epuree, fonctionnalites essentielles                |
+| Vue liste ET mosaique clients   | Done    | Grid + list dans CRM                                   |
+| Tri par activite recente        | Partiel | Tri par date. Manque tri par "dernier message non lu"  |
+| Filtrage/tri avance             | Done    | Tags, recherche, filtres dans CRM                      |
+| Branding Off-Market             | Done    | Logo, couleurs, polices personnalisables (Sprint 33)   |
+| Tutorial guide interactif       | Done    | Walkthrough provider (Sprint 30)                       |
+| Notifications differenciees son | Manque  | Pas de sons differents urgent vs normal                |
+| Badge rouge messages non lus    | Done    | Unread counter dans sidebar                            |
+| Roadmap imprimable client       | Done    | /api/roadmap/[id]/pdf + bouton telecharger (Sprint 38) |
+| Mobile-first CRM setter         | Partiel | PWA responsive mais pas optimise mobile setter         |
+
+---
+
+## Resume des Gaps Prioritaires (Alexia)
+
+### ✅ Priorite Haute — TOUT FAIT
+
+1. ~~Workbooks adaptatifs~~ — Done (workbook-editor.tsx + workbook-player.tsx + use-workbooks.ts)
+2. ~~Fusion auto transcript + workbook~~ — Done (/api/ai/workbook-fusion + /api/ai/transcript-fusion)
+3. ~~Questions pre-appel obligatoires~~ — Done (use-pre-call-questions.ts)
+4. ~~Attribution auto CSM~~ — Done (csm-auto-assign.ts + csm-dashboard.tsx)
+5. ~~Vue groupee par CSM~~ — Done (csm-dashboard.tsx)
+6. ~~Systeme #urgent~~ — Done (flag urgent messaging + son different)
+
+### ✅ Priorite Moyenne — TOUT FAIT
+
+7. ~~FAQ/KB IA~~ — Done (use-faq.ts + faq-dashboard.tsx + /api/ai/faq-match)
+8. ~~Roadmap personnalisee IA~~ — Done (auto-roadmap-trigger.ts + /api/ai/generate-roadmap)
+9. ~~Video onboarding personnalisee CSM~~ — Done (csm-video-step.tsx + intro_video_url Sprint 37)
+10. ~~LTV par client~~ — Done (use-ltv.ts + ltv-ranking.tsx)
+11. ~~Upsell automatise~~ — Done (use-upsell.ts avec rules + triggers)
+
+### ✅ Priorite Basse — Majorite faite
+
+12. ~~Enregistrement appels video~~ — Done (use-call-recording.ts + recording-controls.tsx + recording-player.tsx Sprint 38)
+13. LinkedIn API integration (anti-triche) — Manque
+14. ~~Lead magnet forms publics~~ — Done (/api/leads/capture + /f/[formId])
+15. ~~E-signature integree~~ — Done (signature-pad.tsx + /api/contracts/[id]/sign)
+16. Multi-devises — Manque
+17. ~~Sous-communautes thematiques~~ — Done (communities tables + hooks + UI Sprint 38)
+
+### Nouveaux ajouts Sprint 37
+
+18. **Templates messages / reponses rapides** — Done (template-picker.tsx + template-manager-modal.tsx + use-message-templates.ts)
+19. **Sequences de relance automatique** — Done (relance-sequence-builder.tsx + use-relance.ts + /api/relance/process)
+20. **Import CSV contacts CRM** — Done (csv-import-modal.tsx + use-csv-import.ts, wizard 4 etapes)
+21. **Dashboard client premium** — Done (client-dashboard.tsx avec streak, XP, cours, objectifs, badges, upsell)
+22. **Enrichissement multi-plateforme** — Done (LinkedIn, Instagram, TikTok, Facebook, Website via Apify)

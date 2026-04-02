@@ -1,0 +1,791 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
+import { useSupabase } from "@/hooks/use-supabase";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "next-themes";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { fadeInUp, defaultTransition } from "@/lib/animations";
+import { getInitials } from "@/lib/utils";
+import {
+  User,
+  Palette,
+  Shield,
+  Save,
+  Sun,
+  Moon,
+  Monitor,
+  Camera,
+  Loader2,
+  Download,
+  Trash2,
+  AlertTriangle,
+  Calendar,
+  Unlink,
+  ExternalLink,
+  Lock,
+  Eye,
+  EyeOff,
+  Trophy,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  useGoogleCalendarStatus,
+  useDisconnectGoogleCalendar,
+} from "@/hooks/use-google-calendar";
+import { ApiSettings } from "@/components/settings/api-settings";
+import { IntegrationSettings } from "@/components/settings/integration-settings";
+
+type SettingsTab = "general" | "security" | "admin";
+
+const TABS: {
+  value: SettingsTab;
+  label: string;
+  icon: typeof User;
+  adminOnly?: boolean;
+}[] = [
+  { value: "general", label: "General", icon: User },
+  { value: "security", label: "Securite", icon: Shield },
+  // { value: "admin", label: "Administration", icon: Palette, adminOnly: true },
+];
+
+export default function SettingsPage() {
+  const { profile, user, signOut, isAdmin, refreshProfile } = useAuth();
+  const supabase = useSupabase();
+  const queryClient = useQueryClient();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const [fullName, setFullName] = useState(profile?.full_name ?? "");
+  const [phone, setPhone] = useState(profile?.phone ?? "");
+  const [bio, setBio] = useState(profile?.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
+  const [leaderboardAnonymous, setLeaderboardAnonymous] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const googleStatus = useGoogleCalendarStatus();
+  const disconnectGoogle = useDisconnectGoogleCalendar();
+
+  // Tab state
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("general");
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  // Toast on Google Calendar OAuth callback redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const googleParam = params.get("google");
+    if (googleParam === "success") {
+      toast.success("Google Agenda connecte avec succès");
+      window.history.replaceState({}, "", window.location.pathname);
+      googleStatus.refetch();
+    } else if (googleParam === "error") {
+      toast.error("Erreur lors de la connexion a Google Agenda");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  // Sync state when profile loads (useState initial value only runs once)
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setPhone(profile.phone ?? "");
+      setBio(profile.bio ?? "");
+      setAvatarUrl(profile.avatar_url ?? "");
+      setLeaderboardAnonymous(
+        (profile as unknown as Record<string, unknown>)
+          .leaderboard_anonymous === true,
+      );
+    }
+  }, [profile]);
+
+  const initials = fullName ? getInitials(fullName) : "U";
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Reset file input so re-selecting the same file triggers onChange
+    e.target.value = "";
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Seules les images sont acceptees");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("L'image ne doit pas depasser 2 Mo");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const filePath = `avatars/${user.id}/avatar.${ext}`;
+
+      // Upload via API route (handles B2/Supabase fallback + auto-creates bucket)
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", filePath);
+
+      const res = await fetch("/api/storage/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Upload failed");
+      }
+
+      const { url } = await res.json();
+      const separator = url.includes("?") ? "&" : "?";
+      const newUrl = url + separator + "t=" + Date.now();
+
+      // Update profile in DB
+      const { data: updated, error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newUrl } as never)
+        .eq("id", user.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+      if (!updated) throw new Error("Profile update returned no data");
+
+      setAvatarUrl(newUrl);
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      await refreshProfile();
+      toast.success("Photo de profil mise à jour");
+    } catch (err) {
+      console.error("[avatar upload]", err);
+      toast.error("Erreur lors de l'upload de la photo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          phone,
+          bio,
+          leaderboard_anonymous: leaderboardAnonymous,
+        } as never)
+        .eq("id", user.id)
+        .select()
+        .single();
+      if (error || !data) {
+        toast.error("Erreur lors de la sauvegarde");
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        await refreshProfile();
+        toast.success("Profil mis à jour");
+      }
+    } catch {
+      toast.error("Erreur reseau lors de la sauvegarde");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Remplis tous les champs");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error("Le mot de passe doit faire au moins 8 caracteres");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      // Verify current password by re-authenticating
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: profile?.email ?? "",
+        password: currentPassword,
+      });
+      if (signInErr) {
+        toast.error("Mot de passe actuel incorrect");
+        setChangingPassword(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) throw error;
+      toast.success("Mot de passe mis à jour");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast.error("Erreur lors du changement de mot de passe");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!user) return;
+    setExporting(true);
+    try {
+      const res = await fetch("/api/account/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `upscale-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Donnees exportees (RGPD)");
+    } catch {
+      toast.error("Erreur lors de l'export");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      await signOut();
+      toast.success("Compte supprime");
+    } catch {
+      toast.error("Erreur lors de la suppression");
+      setDeleting(false);
+    }
+  };
+
+  const themes = [
+    { value: "light", label: "Clair", icon: Sun },
+    { value: "dark", label: "Sombre", icon: Moon },
+    { value: "system", label: "Systeme", icon: Monitor },
+  ] as const;
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeInUp}
+      transition={defaultTransition}
+      className="space-y-6"
+    >
+      <div>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#c6ff00] via-[#c6ff00] to-[#c6ff00] bg-clip-text text-transparent tracking-tight">
+          Reglages
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Gere ton profil et tes preferences
+        </p>
+      </div>
+
+      {/* Tab bar */}
+      <div className="flex items-center gap-0 border-b border-border">
+        {TABS.filter((tab) => !tab.adminOnly || isAdmin).map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => setSettingsTab(tab.value)}
+              className={cn(
+                "h-10 flex items-center gap-2 px-4 text-sm font-medium transition-all relative",
+                settingsTab === tab.value
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+              {settingsTab === tab.value && (
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-foreground" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── General tab ── */}
+      {settingsTab === "general" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Profile */}
+          <div className="bg-surface rounded-2xl border border-border p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:shadow-zinc-200/50">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="size-7 rounded-lg bg-gradient-to-br from-[#c6ff00] to-[#c6ff00] flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-white" />
+              </div>
+              <h2 className="text-sm font-semibold text-foreground">Profil</h2>
+            </div>
+
+            {/* Avatar with upload */}
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative group">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={fullName}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-[#c6ff00]/10 ring-offset-2"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#c6ff00] to-[#c6ff00] flex items-center justify-center text-xl text-white font-semibold ring-2 ring-[#c6ff00]/10 ring-offset-2">
+                    {initials}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  {uploading ? (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-white" />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {profile?.email}
+                </p>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {profile?.role}
+                </p>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs text-[#c6ff00] hover:text-[#c6ff00] transition-colors mt-1 font-medium"
+                >
+                  Changer la photo
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Nom complet
+                </label>
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full h-10 px-4 bg-muted/50 border-0 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Telephone
+                </label>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+33 6 00 00 00 00"
+                  className="w-full h-10 px-4 bg-muted/50 border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Bio
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={3}
+                placeholder="Quelques mots sur toi..."
+                className="w-full px-4 py-3 bg-muted/50 border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20 resize-none"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#c6ff00] to-[#c6ff00] text-white text-sm font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-sm shadow-[#c6ff00]/20 flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? "Sauvegarde..." : "Sauvegarder"}
+            </button>
+          </div>
+
+          {/* Appearance */}
+          <div className="space-y-6">
+            <div className="bg-surface rounded-2xl border border-border p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:shadow-zinc-200/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="size-7 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                  <Palette className="w-3.5 h-3.5 text-white" />
+                </div>
+                <h2 className="text-sm font-semibold text-foreground">
+                  Apparence
+                </h2>
+              </div>
+
+              <div className="flex gap-3">
+                {themes.map((t) => {
+                  const isActive =
+                    mounted && (theme ?? resolvedTheme) === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => setTheme(t.value)}
+                      className={cn(
+                        "flex-1 h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all",
+                        isActive
+                          ? "border-[#c6ff00] bg-[#c6ff00]/5 shadow-sm shadow-[#c6ff00]/10"
+                          : "border-border hover:border-[#c6ff00]/30 hover:bg-muted/30",
+                      )}
+                    >
+                      <t.icon className="w-5 h-5 text-foreground" />
+                      <span className="text-xs font-medium text-foreground">
+                        {t.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Leaderboard anonymous toggle */}
+            <div className="bg-surface rounded-2xl border border-border p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:shadow-zinc-200/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="size-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                  <Trophy className="w-3.5 h-3.5 text-white" />
+                </div>
+                <h2 className="text-sm font-semibold text-foreground">
+                  Classement
+                </h2>
+              </div>
+              <div className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-muted/50 transition-colors">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Mode anonyme
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Cache ton nom dans le classement public
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={leaderboardAnonymous}
+                  onClick={() => setLeaderboardAnonymous(!leaderboardAnonymous)}
+                  className={cn(
+                    "relative w-10 h-6 rounded-full transition-colors shrink-0 cursor-pointer",
+                    leaderboardAnonymous
+                      ? "bg-[#c6ff00]"
+                      : "bg-muted-foreground/30",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-surface transition-transform shadow-sm",
+                      leaderboardAnonymous && "translate-x-4",
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Google Agenda */}
+            <div className="bg-surface rounded-2xl border border-border p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:shadow-zinc-200/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="size-7 rounded-lg bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center">
+                  <Calendar className="w-3.5 h-3.5 text-white" />
+                </div>
+                <h2 className="text-sm font-semibold text-foreground">
+                  Google Agenda
+                </h2>
+              </div>
+
+              {googleStatus.data?.connected ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                      <Calendar className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        Connecte
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {googleStatus.data.google_email}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => disconnectGoogle.mutate()}
+                    disabled={disconnectGoogle.isPending}
+                    className="h-9 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                  >
+                    {disconnectGoogle.isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Unlink className="w-3.5 h-3.5" />
+                    )}
+                    Deconnecter
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Connecte ton agenda Google pour voir tes événements dans la
+                    page Appels.
+                  </p>
+                  <a
+                    href="/api/google-calendar/connect"
+                    className="h-9 px-4 rounded-xl bg-gradient-to-r from-[#c6ff00] to-[#c6ff00] text-white text-sm font-medium hover:opacity-90 transition-all active:scale-[0.98] shadow-sm shadow-[#c6ff00]/20 flex items-center gap-2 shrink-0"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Connecter
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Security tab ── */}
+      {settingsTab === "security" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Password change */}
+          <div className="bg-surface rounded-2xl border border-border p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:shadow-zinc-200/50">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="size-7 rounded-lg bg-gradient-to-br from-zinc-600 to-zinc-700 flex items-center justify-center">
+                <Lock className="w-3.5 h-3.5 text-white" />
+              </div>
+              <h2 className="text-sm font-semibold text-foreground">
+                Sécurité
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Mot de passe actuel
+                </label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPwd ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full h-10 px-4 pr-10 bg-muted/50 border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showCurrentPwd ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Nouveau mot de passe
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPwd ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min. 8 caracteres"
+                      className="w-full h-10 px-4 pr-10 bg-muted/50 border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPwd(!showNewPwd)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showNewPwd ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Confirmer
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmer le mot de passe"
+                    className="w-full h-10 px-4 bg-muted/50 border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c6ff00]/20"
+                  />
+                </div>
+              </div>
+
+              {newPassword &&
+                confirmPassword &&
+                newPassword !== confirmPassword && (
+                  <p className="text-xs text-error">
+                    Les mots de passe ne correspondent pas
+                  </p>
+                )}
+
+              <button
+                onClick={handleChangePassword}
+                disabled={
+                  changingPassword ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword
+                }
+                className="h-9 px-4 rounded-xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-2"
+              >
+                {changingPassword ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5" />
+                )}
+                {changingPassword
+                  ? "Mise à jour..."
+                  : "Changer le mot de passe"}
+              </button>
+            </div>
+          </div>
+
+          {/* Danger zone */}
+          <div className="bg-surface rounded-2xl border border-border border-l-[3px] border-l-error p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-4 h-4 text-error" />
+              <h2 className="text-sm font-semibold text-error">
+                Zone dangereuse
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Ces actions sont irreversibles. Sois prudent.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExportData}
+                disabled={exporting}
+                className="h-9 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+              >
+                {exporting ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                {exporting ? "Export..." : "Exporter mes donnees"}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="h-9 px-4 rounded-xl border border-error/30 text-sm text-error hover:bg-error/5 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Supprimer mon compte
+              </button>
+            </div>
+
+            {/* Delete confirmation modal */}
+            {showDeleteConfirm && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div className="bg-surface border border-border rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4 shadow-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-error" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">
+                        Supprimer le compte
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Cette action est irreversible
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Toutes tes donnees seront definitivement supprimees. Es-tu
+                    sur ?
+                  </p>
+                  <div className="flex gap-3 justify-end">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="h-9 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      className="h-9 px-4 rounded-xl bg-error text-white text-sm font-medium hover:bg-error/90 transition-colors flex items-center gap-2"
+                    >
+                      {deleting && (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      )}
+                      {deleting ? "Suppression..." : "Confirmer"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Admin tab ── */}
+      {settingsTab === "admin" && isAdmin && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Integrations */}
+          <IntegrationSettings />
+
+          {/* API Settings */}
+          <div className="bg-surface rounded-2xl border border-border p-6">
+            <ApiSettings />
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
